@@ -1,0 +1,12 @@
+#ifndef UIPFRAMEWORK_MODULE_HPP
+#define UIPFRAMEWORK_MODULE_HPP
+
+
+
+
+class Module {
+
+};
+
+
+#endif //UIPFRAMEWORK_MODULE_HPP

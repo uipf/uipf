@@ -6,6 +6,8 @@ include(ExternalProject)
 # project name
 project(UIPFramework)
 
+add_subdirectory(libuipf)
+
 # project version
 set(UIPFramework_VERSION_MAJOR 1)
 set(UIPFramework_VERSION_MINOR 0)

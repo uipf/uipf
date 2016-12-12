@@ -26,6 +26,8 @@ enum Type {
 	BOOL_LIST,
 	MATRIX_LIST,
 
+	CUSTOM,
+
 };
 
 // returns the string representation of a type
@@ -47,6 +49,10 @@ class Data {
 		// returns the data type of this data object
 		// this is a virtual method, which has to be overwritten in the class, which derives of Data
 		virtual Type getType() const = 0;
+
+		// returns the data type of this data object
+		// this is a virtual method, which has to be overwritten in the class, which derives of Data
+		virtual std::string getTypeName() const;
 
 };
 
