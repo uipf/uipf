@@ -84,19 +84,19 @@ void ProcessingChain::load(string filename){
 	}
 	catch(InvalidConfigException& ex)
 	{
-		UIPF_LOG_ERROR(string(ex.what()));
+		UIPF_LOG_ERROR(ex.what());
 	}
 	catch(YAML::BadFile& ex)
 	{
-		UIPF_LOG_ERROR("Error loading '" + filename +"'");
+		UIPF_LOG_ERROR("Error loading '", filename.c_str(), "'");
 	}
 	catch(YAML::TypedBadConversion<std::string>& ex)
 	{
-		UIPF_LOG_ERROR(string(ex.what()));
+		UIPF_LOG_ERROR(ex.what());
 	}
 	catch(YAML::ParserException& ex)
 	{
-		UIPF_LOG_ERROR(string(ex.what()));
+		UIPF_LOG_ERROR(ex.what());
 	}
 	catch(...)
 	{

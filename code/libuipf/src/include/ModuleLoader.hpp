@@ -14,35 +14,35 @@ namespace uipf {
 
 	public:
 		// constructor
-		ModuleLoader() { loaded = false; };
+		ModuleLoader() { loaded_ = false; };
 
 		// destructor
 		~ModuleLoader(void) {};
 
-		void resetSearchPaths();
+		void reset();
 		void addSearchPath(std::string p);
 
 		// returns a list of all loaded modules names
-		std::vector<std::string> getModuleNames() const;
+		std::vector<std::string> getModuleNames();
 
 		// returns a value indicating whether the named module exists
-		bool hasModule(const std::string& name) const;
+		bool hasModule(const std::string& name);
 
 		// returns meta data information for a named module
 		ModuleMetaData getModuleMetaData(const std::string& name);
 
-		Module* getModuleInstance(const std::string& name) const;
+		Module* getModuleInstance(const std::string& name);
 
 	private:
 
 		void load();
 
-		std::vector searchPaths_;
+		std::vector<std::string> searchPaths_;
 
 		// map: module name -> plugin loader instance which can instantiate a module
 		std::map<std::string, QPluginLoader*> plugins_;
 
-		bool loaded = false;
+		bool loaded_ = false;
 	};
 };
 

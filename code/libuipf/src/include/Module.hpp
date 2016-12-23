@@ -1,6 +1,7 @@
 #ifndef LIBUIPF_MODULE_HPP
 #define LIBUIPF_MODULE_HPP
 
+#include <QObject>
 #include <QtPlugin>
 #include "Data.hpp"
 #include "ModuleMetaData.hpp"
@@ -22,25 +23,25 @@ class Module {
 		virtual std::string getId() const = 0;
 		virtual std::string getName() const = 0;
 		virtual std::string getCategory() const = 0;
-		virtual std::string getDescription() const { return ""; };
+//		virtual std::string getDescription() const { return ""; };
 
 		// meta data that contains description of modules inputs, outputs and parameters
-		ModuleMetaData getMetaData() const {
-			ModuleMetaData m(
-				getInputs(),
-				getOutputs(),
-				getParams()
-			);
-		};
-		virtual DataDescriptionMap getInputs() const {
-			return {};
-		};
-		virtual DataDescriptionMap getOutputs() const {
-			return {};
-		};
-		virtual ParamDescriptionMap getParams() const {
-			return {};
-		};
+//		ModuleMetaData getMetaData() const {
+//			ModuleMetaData m(
+//				getInputs(),
+//				getOutputs(),
+//				getParams()
+//			);
+//		};
+//		virtual DataDescriptionMap getInputs() const {
+//			return {};
+//		};
+//		virtual DataDescriptionMap getOutputs() const {
+//			return {};
+//		};
+//		virtual ParamDescriptionMap getParams() const {
+//			return {};
+//		};
 
 //		// context 	is a container providing access to the current environment, allowing to open windows, write to logger etc...
 //		virtual void setContext(Context *) = 0;
@@ -53,8 +54,8 @@ class Module {
 
 
 		// check whether named input data is given
-		bool hasInputData( const std::string& strName) const;
-
+		virtual bool hasInputData( const std::string& strName) const = 0;
+/*
 		// returns a typesafe readonly smartpointer to input data by name if it is available
 		template <typename T>
 		const typename T::ptr getInputData( const std::string& strName) const;
@@ -72,32 +73,25 @@ class Module {
 		template <typename T>
 		T getParam(const std::string& strName, T defaultValue) const;
 
-
-	protected:
-//		Context* context_;
-		std::string name_;
-
-
-	private:
-//		std::map < std::string, Data<Data>::ptr& >& input_;
-//		std::map < std::string, std::string >& params_;
-//		std::map < std::string, Data::ptr >& output_;
+*/
 };
 
 } //namespace
 
 // this is used for dynamic loading of Qt Plugins
 // it allows modules to be loaded dynamically from shared library files
+#define UIPF_MODULE_ID "de.tu-berlin.uipf.Module"
 QT_BEGIN_NAMESPACE
-	Q_DECLARE_INTERFACE(uipf::Module,"de.tu-berlin.uipf.Module")
+Q_DECLARE_INTERFACE(uipf::Module, UIPF_MODULE_ID)
 QT_END_NAMESPACE
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //templates need to be implemented in headers
 
-namespace uipf {
 /*
+namespace uipf {
+
 	template <typename T>
 	const typename T::ptr Module::getInputData( const std::string& strName) const
 	{
@@ -220,21 +214,25 @@ namespace uipf {
 		}
 	}
 
-*/
+
 } //namespace
+*/
 
-
-#define UIPF_MODULE_BEGIN(CLASS, ID) class CLASS : public uipf::Module { \
+#define UIPF_MODULE_BEGIN(CLASS, ID) \
+class CLASS : public uipf::Module { \
+	Q_OBJECT \
+	Q_PLUGIN_METADATA(IID UIPF_MODULE_ID) \
+	Q_INTERFACES(uipf::Module) \
 	public: \
-		std::string getId() const Q_DECL_OVERRIDE { return ID; }; \
+		std::string getId() const Q_DECL_OVERRIDE { return ID; };
 
 #define UIPF_MODULE_NAME(NAME) std::string getName() const Q_DECL_OVERRIDE { return NAME; };
 #define UIPF_MODULE_CATEGORY(CATEGORY) std::string getCategory() const Q_DECL_OVERRIDE { return CATEGORY; };
-#define UIPF_MODULE_DESCRIPTION(DESCRIPTION) std::string getDescription() const Q_DECL_OVERRIDE { return DESCRIPTION; };
+#define UIPF_MODULE_DESCRIPTION(DESCRIPTION) //std::string getDescription() const Q_DECL_OVERRIDE { return DESCRIPTION; };
 
-#define UIPF_MODULE_INPUTS(...) uipf::DataDescriptionMap getInputs() const { return { __VA_ARGS__ }; }
-#define UIPF_MODULE_OUTPUTS(...) uipf::DataDescriptionMap getOutputs() const { return { __VA_ARGS__ }; }
-#define UIPF_MODULE_PARAMS(...) uipf::ParamDescriptionMap getParams() const { return { __VA_ARGS__ }; }
+#define UIPF_MODULE_INPUTS(...) //uipf::DataDescriptionMap getInputs() const Q_DECL_OVERRIDE { return { __VA_ARGS__ }; }
+#define UIPF_MODULE_OUTPUTS(...) //uipf::DataDescriptionMap getOutputs() const Q_DECL_OVERRIDE { return { __VA_ARGS__ }; }
+#define UIPF_MODULE_PARAMS(...) //uipf::ParamDescriptionMap getParams() const Q_DECL_OVERRIDE { return { __VA_ARGS__ }; }
 
 #define UIPF_MODULE_END };
 
