@@ -16,7 +16,7 @@ BOOST_AUTO_TEST_CASE(Data_Int)
 	BOOST_TEST( i2.getContent() == 64 );
 	BOOST_TEST( ival == 64 );
 
-	BOOST_CHECK_EQUAL( i1.getType() , "de.tu-berlin.cvrs.uipf.Int" );
+	BOOST_CHECK_EQUAL( i1.getType() , "de.tu-berlin.uipf.Int" );
 }
 
 // TODO test Bool and String
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_CASE(Data_IntList)
 {
 	using namespace uipf;
 
-	std::list list;
+	std::vector<int> list;
 	list.push_back(1);
 	list.push_back(2);
 	list.push_back(3);
@@ -35,13 +35,13 @@ BOOST_AUTO_TEST_CASE(Data_IntList)
 	IntList l(list);
 	BOOST_TEST( l.getContent().size() == 3 );
 
-	int ival = 64;
-	Int i2(ival);
-	BOOST_TEST( i2.getContent() == ival );
-	BOOST_TEST( i2.getContent() == 64 );
-	BOOST_TEST( ival == 64 );
-
-	BOOST_CHECK_EQUAL( i1.getType() , "de.tu-berlin.cvrs.uipf.Int" );
+//	int ival = 64;
+//	Int i2(ival);
+//	BOOST_TEST( i2.getContent() == ival );
+//	BOOST_TEST( i2.getContent() == 64 );
+//	BOOST_TEST( ival == 64 );
+//
+//	BOOST_CHECK_EQUAL( i1.getType() , "de.tu-berlin.uipf.Int" );
 }
 
 
@@ -67,7 +67,9 @@ BOOST_AUTO_TEST_CASE(Data_opencv_Mat)
 	BOOST_CHECK_EQUAL( content.at<int>(0,1) , 3 );
 	BOOST_CHECK_EQUAL( content.at<int>(1,1) , 4 );
 
-	BOOST_CHECK_EQUAL( mc.getType() , "de.tu-berlin.cvrs.opencv.Mat" );
+	BOOST_CHECK_EQUAL( &content , mp );
+
+	BOOST_CHECK_EQUAL( mc.getType() , "de.tu-berlin.opencv.Mat" );
 
 }
 

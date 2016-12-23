@@ -2,6 +2,7 @@
 #define LIBUIPF_DATA_HPP
 
 #include <string>
+#include <vector>
 #include <memory>
 #if WITH_OPENCV
 #include <opencv2/core/core.hpp>
@@ -12,6 +13,10 @@
  *
  *
  */
+
+// TODO
+// - http://en.cppreference.com/w/cpp/language/copy_constructor
+// - http://doc.qt.io/qt-5/plugins-howto.html
 
 
 // reference counting smart pointer
@@ -56,6 +61,7 @@ namespace uipf {
 		typedef UIPF_SMARTPOINTER <NAME> ptr; \
 		typedef const UIPF_SMARTPOINTER <NAME> c_ptr; \
 		std::string getType() const override { return ID; }; \
+		static std::string id() { return ID; }; \
 		NAME(TYPE d) : data_(d) {};/* TODO constructor should not copy original data */  \
 /*		NAME(const NAME& d) : data_(d.data_) {}; */ \
 		~NAME(void){}; \
@@ -69,19 +75,19 @@ namespace uipf {
 
 	// define default types that ship with UIPF
 
-	UIPF_BEGIN_DATA_TYPE (String, "de.tu-berlin.cvrs.uipf.String", std::string)
+	UIPF_BEGIN_DATA_TYPE (String, "de.tu-berlin.uipf.String", std::string)
 	UIPF_END_DATA_TYPE
 
-	UIPF_BEGIN_DATA_TYPE (Bool, "de.tu-berlin.cvrs.uipf.Bool", bool)
+	UIPF_BEGIN_DATA_TYPE (Bool, "de.tu-berlin.uipf.Bool", bool)
 	UIPF_END_DATA_TYPE
 
-	UIPF_BEGIN_DATA_TYPE (Int, "de.tu-berlin.cvrs.uipf.Int", int)
+	UIPF_BEGIN_DATA_TYPE (Int, "de.tu-berlin.uipf.Int", int)
 	UIPF_END_DATA_TYPE
 
-	UIPF_BEGIN_DATA_TYPE (StringList, "de.tu-berlin.cvrs.uipf.StringList", std::list<std::string>)
+	UIPF_BEGIN_DATA_TYPE (StringList, "de.tu-berlin.uipf.StringList", std::vector<std::string>)
 	UIPF_END_DATA_TYPE
 
-	UIPF_BEGIN_DATA_TYPE (IntList, "de.tu-berlin.cvrs.uipf.StringList", std::list<int>)
+	UIPF_BEGIN_DATA_TYPE (IntList, "de.tu-berlin.uipf.StringList", std::vector<int>)
 	UIPF_END_DATA_TYPE
 
 
@@ -89,7 +95,7 @@ namespace uipf {
 
 	// create types for OpenCV if built with OpenCV support
 
-	UIPF_BEGIN_DATA_TYPE (OpenCVMat, "de.tu-berlin.cvrs.opencv.Mat", cv::Mat)
+	UIPF_BEGIN_DATA_TYPE (OpenCVMat, "de.tu-berlin.opencv.Mat", cv::Mat)
 	UIPF_END_DATA_TYPE
 
 

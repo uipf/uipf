@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 2.8.8)
+
+# load CMake modules
 include(ExternalProject)
 
 project(libuipf)
@@ -27,19 +29,45 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -std=gnu++0x")
 # sanitize memory issues https://gcc.gnu.org/gcc-4.8/changes.html
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
 
+# find requiered packages
+find_package(Qt5Widgets REQUIRED)
+
+# TODO properly find Boost
+# http://cpprocks.com/using-cmake-to-build-a-cross-platform-project-with-a-boost-dependency/
+
+
+
+#
+# external dependencies
+# http://www.cmake.org/cmake/help/v2.8.8/cmake.html#module%3aExternalProject
+#
+
+# yaml-cpp
+ExternalProject_Add(YAML_CPP
+	GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
+	GIT_TAG release-0.5.2
+	TEST_COMMAND ""
+	INSTALL_COMMAND "" # skip install step for yaml-cpp
+)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP/include)
+set(YAML_CPP_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP-build/libyaml-cpp.a)
 
 
 add_library(uipf STATIC
 
 	src/Data.cpp
 	src/Module.cpp
+	src/ModuleMetaData.cpp
+	src/ModuleLoader.cpp
+	src/ProcessingChain.cpp
 )
 if (WITH_OPENCV)
 	target_compile_definitions(uipf PRIVATE WITH_OPENCV)
 	target_link_libraries(uipf opencv_core)
 endif()
-#qt5_use_modules(uipf-framework Core Widgets) # Qt is required for loading modules dynamically
-#add_dependencies(uipf-framework YAML_CPP)
+target_link_libraries(uipf ${YAML_CPP_LIBRARY})
+qt5_use_modules(uipf Core Widgets) # Qt is required for loading modules dynamically
+add_dependencies(uipf YAML_CPP)
 
 #
 # TESTS
@@ -64,7 +92,7 @@ include_directories(/usr/local/include)
 #endif()
 
 add_executable(test-libuipf
-		test/unit/libuipf/data.cpp
+		test/unit/data.cpp
 )
 target_link_libraries(test-libuipf uipf ${Boost_LIBRARIES})
 if (WITH_OPENCV)
@@ -73,5 +101,5 @@ endif()
 add_test(NAME test-libuipf COMMAND test-libuipf)
 
 
-# ref:
-# http://cpprocks.com/using-cmake-to-build-a-cross-platform-project-with-a-boost-dependency/
+add_subdirectory(test/integration/dataflow)
+
