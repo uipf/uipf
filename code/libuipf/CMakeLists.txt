@@ -1,49 +1,64 @@
 cmake_minimum_required(VERSION 2.8.8)
 project(libuipf)
 
-# load CMake modules
-include(ExternalProject)
-
 #
 # FLAGS
 #
 
 # whether to build with OpenCV. This will include types for OpenCV.
-option(WITH_OPENCV YES)
-option(WITH_TESTS YES)
+option(WITH_TESTS "Build test binaries and enable `make test` target" ON)
+option(WITH_OPENCV "Build with openCV, enable openCV types" OFF)
 
 if(WITH_TESTS)
 	enable_testing()
 endif()
 
-# find requiered packages
-find_package(Qt5Widgets REQUIRED)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTOUIC ON)
+message("Build options:")
+message("With Tests: ${WITH_TESTS}")
+message("With OpenCV: ${WITH_OPENCV}")
+
+# load CMake modules
+include(ExternalProject)
+include(FindPkgConfig)
+
 
 # include header files
 include_directories("${PROJECT_SOURCE_DIR}/src/include")
-include_directories("${PROJECT_BINARY_DIR}")
 
-#c++11 support
-#if(UNIX)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Wall -std=gnu++0x")
-#endif()
+if(UNIX)
+	#c++11 support
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
 
-# sanitize memory issues https://gcc.gnu.org/gcc-4.8/changes.html
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+	if(CMAKE_BUILD_TYPE MATCHES Debug)
+		# sanitize memory issues https://gcc.gnu.org/gcc-4.8/changes.html
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
+	else()
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+	endif()
+endif()
 
 
-# TODO properly find Boost
+#
+# find external libraries
+#
+
+# glibmm (c++ wrapper for glib2
+#pkg_search_module (GLIB2  REQUIRED glib-2.0)
+pkg_search_module (GLIBMM REQUIRED glibmm-2.4)
+include_directories(${GLIBMM_INCLUDE_DIRS})
+link_directories(${GLIBMM_LIBRARY_DIRS})
+
+# find Boost
 # http://cpprocks.com/using-cmake-to-build-a-cross-platform-project-with-a-boost-dependency/
-
-#
-# external dependencies
-# http://www.cmake.org/cmake/help/v2.8.8/cmake.html#module%3aExternalProject
-#
+find_package(Boost 1.55 COMPONENTS filesystem unit_test_framework system REQUIRED)
+message(status "** Boost Include: ${Boost_INCLUDE_DIR}")
+message(status "** Boost Libraries: ${Boost_LIBRARY_DIRS}")
+message(status "** Boost Libraries: ${Boost_LIBRARIES}")
+include_directories(${Boost_INCLUDE_DIR})
+link_directories(${Boost_LIBRARY_DIRS})
 
 # yaml-cpp
+# http://www.cmake.org/cmake/help/v2.8.8/cmake.html#module%3aExternalProject
 ExternalProject_Add(YAML_CPP
 	GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
 	GIT_TAG release-0.5.2
@@ -52,6 +67,11 @@ ExternalProject_Add(YAML_CPP
 )
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP/include)
 set(YAML_CPP_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP-build/libyaml-cpp.a)
+
+
+#
+# libraries
+#
 
 # libuipf
 add_library(uipf STATIC
@@ -62,10 +82,8 @@ add_library(uipf STATIC
 	src/Data.cpp
 	src/Module.cpp
 	src/ModuleMetaData.cpp
-
 )
-target_link_libraries(uipf ${YAML_CPP_LIBRARY})
-qt5_use_modules(uipf Core Widgets) # Qt is required for loading modules dynamically
+target_link_libraries(uipf ${YAML_CPP_LIBRARY} ${GLIBMM_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(uipf YAML_CPP)
 if (WITH_OPENCV)
 	target_compile_definitions(uipf PRIVATE WITH_OPENCV)
@@ -79,40 +97,22 @@ add_library(uipf-module STATIC
 	src/Module.cpp
 	src/ModuleMetaData.cpp
 )
-qt5_use_modules(uipf-module Core Gui) # Qt is required for loading modules dynamically
 
 #
 # TESTS
 #
 
-include_directories(/usr/local/include)
+if(WITH_TESTS)
+	add_executable(test-libuipf-data            test/unit/data.cpp)
+	add_executable(test-libuipf-module_loader   test/unit/module_loader.cpp)
+	target_link_libraries(test-libuipf-data             uipf ${Boost_LIBRARIES})
+	target_link_libraries(test-libuipf-module_loader    uipf uipf-module ${Boost_LIBRARIES})
+	if (WITH_OPENCV)
+		target_compile_definitions(test-libuipf-data PRIVATE WITH_OPENCV)
+	endif()
+	add_test(NAME test-libuipf-data          COMMAND test-libuipf-data)
+	add_test(NAME test-libuipf-module_loader COMMAND test-libuipf-module_loader)
 
-# find boost
-# https://cmake.org/cmake/help/v3.0/module/FindBoost.html
-#set(Boost_USE_STATIC_LIBS	ON) # only find static libs
-#set(Boost_NO_BOOST_CMAKE	OFF)
-#find_package(Boost 1.62.0
-#	COMPONENTS system unit_test_framework
-#	PATHS /usr/local
-#	REQUIRED
-#)
-#if(Boost_FOUND)
-#	message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
-#	message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
-#	message(STATUS "Boost_VERSION: ${Boost_VERSION}")
-#	include_directories(${Boost_INCLUDE_DIRS})
-#endif()
 
-add_executable(test-libuipf-data            test/unit/data.cpp)
-add_executable(test-libuipf-module_loader   test/unit/module_loader.cpp)
-target_link_libraries(test-libuipf-data             uipf ${Boost_LIBRARIES})
-target_link_libraries(test-libuipf-module_loader    uipf uipf-module ${Boost_LIBRARIES})
-if (WITH_OPENCV)
-	target_compile_definitions(test-libuipf-data PRIVATE WITH_OPENCV)
+	add_subdirectory(test/integration/dataflow)
 endif()
-add_test(NAME test-libuipf-data          COMMAND test-libuipf-data)
-add_test(NAME test-libuipf-module_loader COMMAND test-libuipf-module_loader)
-
-
-add_subdirectory(test/integration/dataflow)
-

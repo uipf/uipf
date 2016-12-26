@@ -2,6 +2,7 @@
 #define LIBUIPF_LOGGING_HPP
 
 #include <iostream>
+#include <boost/filesystem.hpp>
 
 namespace uipf {
 	namespace log {
@@ -25,6 +26,11 @@ namespace uipf {
 			}
 		}
 
+		std::string tracefilename(const std::string& file) {
+			boost::filesystem::path p(file);
+			return p.filename().string();
+		}
+
 	}
 }
 
@@ -36,6 +42,6 @@ namespace uipf {
 #define UIPF_LOG_INFO(...)    uipf::log::logconcat( "\033[1mInfo: \033[0m", __VA_ARGS__ )
 #define UIPF_LOG_WARNING(...) uipf::log::logconcat( "\033[1;33mWarning: \033[0m", __VA_ARGS__ )
 #define UIPF_LOG_DEBUG(...)   uipf::log::logconcat( "\033[1;36mDebug: \033[0m", __VA_ARGS__ )
-#define UIPF_LOG_TRACE(...)   uipf::log::logconcat( "Trace: ", __VA_ARGS__ , "\n    - ", __FILE__, ":", __LINE__ )
+#define UIPF_LOG_TRACE(...)   uipf::log::logconcat( "\033[1mTrace ", uipf::log::tracefilename(__FILE__), ":", __LINE__, ":\033[0m ", __VA_ARGS__)
 
 #endif // LIBUIPF_LOGGING_HPP

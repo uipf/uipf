@@ -1,9 +1,22 @@
 #include <iostream>
+
+#define UIPF_MODULE_ID "de.tu-berlin.cvrs.uipftest.ConsumerModule"
+#define UIPF_MODULE_NAME "consumer"
+#define UIPF_MODULE_CATEGORY "test"
+#define UIPF_MODULE_CLASS ConsumerModule
+
 #include "Module.hpp"
 
-using namespace uipf;
+void ConsumerModule::run() {
 
-UIPF_MODULE_BEGIN(ConsumerModule, "de.tu-berlin.cvrs.uipftest.ConsumerModule")
+	std::cout << "Hello World ConsumerModule" << std::endl;
+
+}
+
+/*
+
+
+UIPF_MODULE_BEGIN(ConsumerModule, )
 
 	UIPF_MODULE_NAME("consumer")
 	UIPF_MODULE_CATEGORY("test")
@@ -18,11 +31,7 @@ UIPF_MODULE_BEGIN(ConsumerModule, "de.tu-berlin.cvrs.uipftest.ConsumerModule")
 			{"int", uipf::ParamDescription("an int.", true)}
 	)
 
-	void run() {
-
-		std::cout << "Hello World" << std::endl;
-
-	}
 
 UIPF_MODULE_END
 
+*/

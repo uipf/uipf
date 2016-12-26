@@ -1,4 +1,22 @@
 #include <iostream>
+
+#define UIPF_MODULE_ID "de.tu-berlin.cvrs.uipftest.ProducerModule"
+#define UIPF_MODULE_NAME "producer"
+#define UIPF_MODULE_CATEGORY "test"
+#define UIPF_MODULE_CLASS ProducerModule
+
+#include "Module.hpp"
+
+void ProducerModule::run() {
+
+	std::cout << "Hello World ProducerModule" << std::endl;
+
+}
+
+
+
+
+/*#include <iostream>
 #include "Module.hpp"
 
 using namespace uipf;
@@ -26,3 +44,4 @@ UIPF_MODULE_BEGIN(ProducerModule, "de.tu-berlin.cvrs.uipftest.ProducerModule")
 
 UIPF_MODULE_END
 
+*/

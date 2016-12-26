@@ -1,6 +1,6 @@
 #include "Data.hpp"
 
-#define BOOST_TEST_MODULE My Test
+#define BOOST_TEST_MODULE libuipf-data
 #include <boost/test/included/unit_test.hpp>
 #include <opencv2/core/core.hpp>
 

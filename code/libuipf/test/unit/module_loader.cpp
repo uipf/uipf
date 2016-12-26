@@ -7,7 +7,6 @@
 
 #define BOOST_TEST_MODULE libuipf-module_loader
 #include <boost/test/included/unit_test.hpp>
-#include <opencv2/core/core.hpp>
 
 BOOST_AUTO_TEST_CASE(ModuleLoaderLoadModules)
 {
