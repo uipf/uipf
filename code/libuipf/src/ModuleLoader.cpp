@@ -1,5 +1,6 @@
 // C++ way of #include <glib-2.0/gmodule.h>
 #include <glibmm/module.h>
+#include <glib.h>
 // boost filesystem for iterating directories
 #include <boost/filesystem.hpp>
 
@@ -140,14 +141,15 @@ void uipf::ModuleLoader::loadFromPath(const std::string& sPath) {
 
 			directory_iterator end_itr;
 			for (directory_iterator itr( p ); itr != end_itr; ++itr) {
-				// TODO scan different files on windows: .dll
-				if (is_regular_file(itr->path()) && extension(itr->path()) == std::string(".so")) {
+				// try to load library if it is a file ending with system specific name, .so/.dll
+				if (is_regular_file(itr->path()) && extension(itr->path()) == std::string(".").append(G_MODULE_SUFFIX)) {
 					loadLibrary(itr->path().string());
 				}
 			}
 
 		} else if (is_regular_file(p)) {
-			if (extension(p) == std::string(".so")) {
+			// try to load library if it is a file ending with system specific name, .so/.dll
+			if (extension(p) == std::string(".").append(G_MODULE_SUFFIX)) {
 				loadLibrary(p.string());
 			}
 		} else {
