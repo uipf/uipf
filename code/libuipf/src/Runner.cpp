@@ -1,53 +1,19 @@
-#include "ModuleManager.hpp"
-
-
-#include <QApplication>
-#include <QObject>
-#include <QDir>
-#include <QString>
-#include <string>
+#include "Runner.hpp"
 
 #include "yaml-cpp/yaml.h"
 
-#include "Logger.hpp"
-#include "ModuleBase.hpp"
-#include "ModuleInterface.hpp"
-#include "ErrorException.hpp"
-#include "InvalidConfigException.hpp"
-#include "DataManager.hpp"
-#include "GUIEventDispatcher.hpp"
+#include "logging.hpp"
 
-using namespace uipf;
-using namespace std;
+void uipf::Runner::run() {
 
-// loads the configuration and stores in the ModuleManager
-/*
-conf	Configuration file, which has to be executed
-*/
-ModuleManager::ModuleManager()
-{
-	initModules();
-}
-
-ModuleManager::~ModuleManager()
-{
-	// delete all the pluginloaders
-	map<string, QPluginLoader*>::iterator it = plugins_.begin();
-	for (; it!=plugins_.end(); ++it) {
-		delete it->second;
-	}
-}
-
-// executes the Configuration file
-/*
-*/
-void ModuleManager::run(Configuration config){
+	using namespace std;
 
 	//reset StopSignal
-	context_.bStopRequested_ = false;
+// TODO	context_.bStopRequested_ = false;
 	// get processing chain
-	map<string, ProcessingStep> chain = config.getProcessingChain();
+	map<string, ProcessingStep> chain = processingChain_.getProcessingSteps();
 
+	// TODO review starting here
 	map<string, ProcessingStep> chainTmp;
 	chainTmp.insert(chain.begin(), chain.end());
 
@@ -98,27 +64,27 @@ void ModuleManager::run(Configuration config){
 	// contains the outputs of the processing steps
 	map<string, map<string, Data::ptr>* > stepsOutputs;
 
-	LOG_I( "Starting processing chain." );
+	UIPF_LOG_INFO( "Starting processing chain." );
 
-	GUIEventDispatcher::instance()->clearSelectionInGraphView();
+// TODO	GUIEventDispatcher::instance()->clearSelectionInGraphView();
 
 	// iterate over the sortedChain and run the modules in the order given by the chain
 	for (unsigned int i=0; i<sortedChain.size(); i++){
 
 		ProcessingStep proSt = chain[sortedChain[i]];
 
-		GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::CURRENT,false);
+		// TODO	GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::CURRENT,false);
 
 		// load the module
 		ModuleInterface* module;
 		string moduleName = proSt.module;
-		if (hasModule(moduleName)) {
-			module = loadModule(moduleName);
-			context_.processingStepName_ = proSt.name;
-			module->setContext(&context_);
+		if (moduleLoader_.hasModule(moduleName)) {
+			module = moduleLoader_.getModuleInstance(moduleName);
+			// TODO	context_.processingStepName_ = proSt.name;
+			// TODO	module->setContext(&context_);
 
 		} else {
-			LOG_E( "Module '" + moduleName + "' could not be found." );
+			UIPF_LOG_ERROR( "Module '", moduleName, "' could not be found." );
 			break;
 		}
 
@@ -139,40 +105,42 @@ void ModuleManager::run(Configuration config){
 			inputs.insert(pair<string, Data::ptr&>(it->first, pt));
 		}
 
-		LOG_I( "Running step '" + proSt.name + "'..." );
+		UIPF_LOG_INFO( "Running step '", proSt.name, "'..." );
 
 		try {
 
-			DataManager dataMnrg(inputs, proSt.params, *outputs);
-			module->run(dataMnrg);
+// TODO
+//			DataManager dataMnrg(inputs, proSt.params, *outputs);
+//			module->run(dataMnrg);
 
 		} catch (const ErrorException& e) {
-			GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
-			LOG_E( string("Error: ") + e.what() );
+			// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
+			UIPF_LOG_ERROR( string("Error: ") + e.what() );
 			break;
 		} catch (const InvalidConfigException& e) {
-			GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
-			LOG_E( string("Invalid config: ") + e.what() );
+			// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
+			UIPF_LOG_ERROR( string("Invalid config: ") + e.what() );
 			break;
 		} catch (const std::exception& e) {
-			GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
-			LOG_E( string("Error: module threw exception: ") + e.what() );
+			// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
+			UIPF_LOG_ERROR( string("Error: module threw exception: ") + e.what() );
 			break;
 		}
 
 		// update the progress bar in the GUI
-		GUIEventDispatcher::instance()->triggerReportProgress(static_cast<float>(i+1)/static_cast<float>(sortedChain.size())*100.0f);
+		// TODO GUIEventDispatcher::instance()->triggerReportProgress(static_cast<float>(i+1)/static_cast<float>(sortedChain.size())*100.0f);
 
-		LOG_I( "Done with step '" + proSt.name + "'." );
+		UIPF_LOG_INFO( "Done with step '", proSt.name, "'." );
 
-		GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::GOOD,false);
+		// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::GOOD,false);
 
 		// check if stop button was pressed
-		if (context_.bStopRequested_ )
-		{
-			LOG_I("processing stopped");
-			break;
-		}
+// TODO
+//		if (context_.bStopRequested_ )
+//		{
+//			LOG_I("processing stopped");
+//			break;
+//		}
 		// fill the outputs of the current processing step
 		stepsOutputs.insert(pair<string, map<string, Data::ptr>* > (proSt.name, outputs));
 
@@ -202,7 +170,7 @@ void ModuleManager::run(Configuration config){
 				}
 				if (!requested) {
 					// output is not requested in any further step, delete it
-					LOG_I(string("deleted ") + outputStep + string(".") + outputName);
+					UIPF_LOG_INFO("deleted ", outputStep, ".", outputName);
 					oit = osit->second->erase(oit);
 				} else {
 					++oit;
@@ -217,42 +185,11 @@ void ModuleManager::run(Configuration config){
 		delete it->second;
 	}
 
-	LOG_I( "Finished processing chain." );
+	UIPF_LOG_INFO( "Finished processing chain." );
 }
 
-// initialize all modules by creating a map of module names and the plugin loader instance
-// that can be used later to instantiate the module
-void ModuleManager::initModules()
-{
-	vector<std::string> pluginPaths = loadPluginPathConfig();
-
-	for(auto path = pluginPaths.cbegin(); path != pluginPaths.end(); ++path) {
-
-		QDir pluginsDir = QDir(QString(path->c_str()));
-
-		foreach (QString fileName, pluginsDir.entryList(QDir::Files))
-		{
-			if (!fileName.endsWith(".so")) {
-				continue;
-			}
-			QPluginLoader* loader = new QPluginLoader(pluginsDir.absoluteFilePath(fileName));
-			QObject *plugin = loader->instance();
-			if (plugin) {
-				//Logger::instance()->Info("found module: " + fileName.toStdString());
-				ModuleInterface* iModule = qobject_cast<ModuleInterface* >(plugin);
-
-				plugins_.insert( std::pair<std::string, QPluginLoader*>(iModule->name(), loader) );
-				delete iModule;
-			} else {
-				LOG_E(loader->errorString().toStdString());
-			}
-
-		}
-
-	}
-
-}
-
+/*
+ * TODO
 std::vector<std::string> ModuleManager::loadPluginPathConfig()
 {
 	// search path for uipf config files
@@ -295,53 +232,4 @@ std::vector<std::string> ModuleManager::loadPluginPathConfig()
 
 	return pluginPaths;
 }
-
-// returns a list of all loaded modules names
-std::vector<std::string> ModuleManager::listModuleNames(){
-
-	std::vector<std::string> names;
-	for(auto pit = plugins_.cbegin(); pit != plugins_.end(); ++pit) {
-		names.push_back( pit->first );
-	}
-	return names;
-}
-
-// check whether a module exists
-bool ModuleManager::hasModule(const std::string& name){
-	return (plugins_.count(name) > 0);
-}
-
-// creates an instance of a module and returns it
-ModuleInterface* ModuleManager::loadModule(const std::string& name)
-{
-	if (plugins_.count(name) > 0) {
-
-		QPluginLoader* loader = plugins_[name];
-		QObject *plugin = loader->instance();
-		if (plugin) {
-			// Logger::instance()->Info("load module: " + name);
-			return qobject_cast<ModuleInterface* >(plugin);
-		}
-	}
-	return nullptr;
-
-}
-
-// returns the meta data of a module
-MetaData ModuleManager::getModuleMetaData(const std::string& name)
-{
-	ModuleInterface* module = loadModule(name);
-	MetaData metaData = module->getMetaData();
-	delete module;
-	return metaData;
-}
-
-// returns the meta data for all modules indexed by module name
-map<string, MetaData> ModuleManager::getAllModuleMetaData()
-{
-	map<string, MetaData> result;
-	for(auto it = plugins_.cbegin(); it != plugins_.end(); ++it) {
-		result.insert( pair<string, MetaData>( it->first, getModuleMetaData(it->first) ) );
-	}
-	return result;
-}
+*/

@@ -443,7 +443,7 @@ string ProcessingChain::getYAML(){
 }
 
 // return processing chain  name => step
-map<string, ProcessingStep> ProcessingChain::getProcessingChain() const {
+map<string, ProcessingStep> ProcessingChain::getProcessingSteps() const {
 	return chain_;
 }
 

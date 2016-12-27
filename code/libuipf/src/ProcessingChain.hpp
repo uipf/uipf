@@ -50,7 +50,7 @@ namespace uipf{
 		std::pair< std::vector<std::string>, std::vector<std::string> > validate(std::map<std::string, ModuleMetaData>);
 
 		// return processing chain  name => step
-		std::map<std::string, ProcessingStep> getProcessingChain() const;
+		std::map<std::string, ProcessingStep> getProcessingSteps() const;
 
 		// returns the named processing step
 		ProcessingStep getProcessingStep(std::string) const;

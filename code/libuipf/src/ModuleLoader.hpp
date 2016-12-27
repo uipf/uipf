@@ -19,6 +19,7 @@ namespace uipf {
 	 *
 	 * Resources:
 	 * - https://developer.gnome.org/glib/stable/glib-Dynamic-Loading-of-Modules.html
+	 * - https://developer.gnome.org/glibmm/stable/classGlib_1_1Module.html#details
 	 * - http://stackoverflow.com/questions/4803926/boost-plugin-choices
 	 *
 	 */

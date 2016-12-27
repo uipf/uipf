@@ -17,6 +17,14 @@ string ModuleMetaData::getCategory() const {
 	return category_;
 }
 
+string ModuleMetaData::getId() const {
+	return id_;
+}
+
+string ModuleMetaData::getName() const {
+	return name_;
+}
+
 string ModuleMetaData::getDescription() const {
 	return description_;
 }

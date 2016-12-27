@@ -76,6 +76,9 @@ class ModuleMetaData {
 		// destructor
 		virtual ~ModuleMetaData(void){};
 
+		std::string getId() const;
+		std::string getName() const;
+
 		// general verbal description of the module
 		std::string getDescription() const;
 
@@ -101,6 +104,8 @@ class ModuleMetaData {
 
 	private:
 
+		std::string id_;
+		std::string name_;
 		std::string description_;
 		std::string category_;
 		std::map<std::string, DataDescription> inputs_;

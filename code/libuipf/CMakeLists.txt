@@ -73,23 +73,6 @@ set(YAML_CPP_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP-bu
 # libraries
 #
 
-# libuipf
-add_library(uipf STATIC
-
-	src/ModuleLoader.cpp
-	src/ProcessingChain.cpp
-
-	src/Data.cpp
-	src/Module.cpp
-	src/ModuleMetaData.cpp
-)
-target_link_libraries(uipf ${YAML_CPP_LIBRARY} ${GLIBMM_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(uipf YAML_CPP)
-if (WITH_OPENCV)
-	target_compile_definitions(uipf PRIVATE WITH_OPENCV)
-	target_link_libraries(uipf opencv_core)
-endif()
-
 # libuipf-module
 add_library(uipf-module STATIC
 
@@ -97,6 +80,21 @@ add_library(uipf-module STATIC
 	src/Module.cpp
 	src/ModuleMetaData.cpp
 )
+
+# libuipf
+add_library(uipf STATIC
+
+	src/ModuleLoader.cpp
+	src/ProcessingChain.cpp
+	src/Runner.cpp
+)
+target_link_libraries(uipf uipf-module ${YAML_CPP_LIBRARY} ${GLIBMM_LIBRARIES} ${Boost_LIBRARIES})
+add_dependencies(uipf YAML_CPP)
+if (WITH_OPENCV)
+	target_compile_definitions(uipf PRIVATE WITH_OPENCV)
+	target_link_libraries(uipf opencv_core)
+endif()
+
 
 #
 # TESTS
