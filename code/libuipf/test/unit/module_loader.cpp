@@ -11,13 +11,26 @@
 BOOST_AUTO_TEST_CASE(ModuleLoaderLoadModules)
 {
 	using namespace uipf;
+	using namespace std;
 
+	// create module loader
 	ModuleLoader loader;
+
+	// without search
+	BOOST_TEST(!loader.hasModule("consumer"));
+	BOOST_TEST(!loader.hasModule("producer"));
+	BOOST_TEST(!loader.hasModule("other"));
+
 
 	loader.addSearchPath("./test/integration/dataflow");
 
 	// path contains two modules
 	BOOST_CHECK_EQUAL(2, loader.getModuleNames().size());
+	vector<string> expectedNames = {"consumer", "producer"};
+	vector<string> names = loader.getModuleNames();
+	BOOST_CHECK_EQUAL_COLLECTIONS(names.begin(), names.end(), expectedNames.begin(), expectedNames.end());
+
+	// TODO test getModuleCategories
 
 	BOOST_TEST(loader.hasModule("consumer"));
 	BOOST_TEST(loader.hasModule("producer"));

@@ -4,9 +4,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#if WITH_OPENCV
-#include <opencv2/core/core.hpp>
-#endif
 
 /*
  * This file contains the Declaration for the UIPF Type system.
@@ -70,38 +67,5 @@ namespace uipf {
 	private: \
 		TYPE data_;
 #define UIPF_END_DATA_TYPE };
-
-namespace uipf {
-
-	// define default types that ship with UIPF
-
-	UIPF_BEGIN_DATA_TYPE (String, "de.tu-berlin.uipf.String", std::string)
-	UIPF_END_DATA_TYPE
-
-	UIPF_BEGIN_DATA_TYPE (Bool, "de.tu-berlin.uipf.Bool", bool)
-	UIPF_END_DATA_TYPE
-
-	UIPF_BEGIN_DATA_TYPE (Int, "de.tu-berlin.uipf.Int", int)
-	UIPF_END_DATA_TYPE
-
-	UIPF_BEGIN_DATA_TYPE (StringList, "de.tu-berlin.uipf.StringList", std::vector<std::string>)
-	UIPF_END_DATA_TYPE
-
-	UIPF_BEGIN_DATA_TYPE (IntList, "de.tu-berlin.uipf.StringList", std::vector<int>)
-	UIPF_END_DATA_TYPE
-
-
-#ifdef WITH_OPENCV
-
-	// create types for OpenCV if built with OpenCV support
-
-	UIPF_BEGIN_DATA_TYPE (OpenCVMat, "de.tu-berlin.opencv.Mat", cv::Mat)
-	UIPF_END_DATA_TYPE
-
-
-#endif
-
-};
-
 
 #endif //LIBUIPF_DATA_HPP

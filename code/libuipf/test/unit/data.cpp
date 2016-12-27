@@ -1,12 +1,17 @@
-#include "Data.hpp"
-
 #define BOOST_TEST_MODULE libuipf-data
 #include <boost/test/included/unit_test.hpp>
+
+#ifdef WITH_OPENCV
 #include <opencv2/core/core.hpp>
+#include "data/opencv.hpp"
+#endif
+
+#include "data/std.hpp"
+
 
 BOOST_AUTO_TEST_CASE(Data_Int)
 {
-	using namespace uipf;
+	using namespace uipf::data;
 	Int i1(42);
 	BOOST_TEST( i1.getContent() == 42 );
 
@@ -25,7 +30,7 @@ BOOST_AUTO_TEST_CASE(Data_Int)
 
 BOOST_AUTO_TEST_CASE(Data_IntList)
 {
-	using namespace uipf;
+	using namespace uipf::data;
 
 	std::vector<int> list;
 	list.push_back(1);
@@ -49,7 +54,7 @@ BOOST_AUTO_TEST_CASE(Data_IntList)
 
 BOOST_AUTO_TEST_CASE(Data_opencv_Mat)
 {
-	using namespace uipf;
+	using namespace uipf::data;
 	cv::Mat m(2, 2, CV_32S);
 	m.at<int>(0,0) = 1;
 	m.at<int>(1,0) = 2;

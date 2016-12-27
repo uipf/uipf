@@ -31,16 +31,41 @@ namespace uipf {
 		// destructor
 		~ModuleLoader(void) { reset(); };
 
+		/**
+		 * Reset the module loader.
+		 *
+		 * Unloads all loaded modules and clears the search paths.
+		 */
 		void reset();
+
+		/**
+		 * Add a search path to search for module library files.
+		 * @param p the relative or absolute path of a directory to search for
+		 * module libraries. This may also be a file name pointing to a module
+		 * library file directly.
+		 */
 		void addSearchPath(std::string p);
 
-		// returns a list of all loaded modules names
+		/**
+		 * @return a list of all loaded modules' names.
+		 */
 		std::vector<std::string> getModuleNames();
 
-		// returns a value indicating whether the named module exists
+		/**
+		 * @return a map of all loaded modules' categories to a list of module names.
+		 */
+		std::map< std::string, std::vector<std::string> > getModuleCategories();
+
+		/**
+		 * @param name the name of a module to look for.
+		 * @return a value indicating whether the named module exists.
+		 */
 		bool hasModule(const std::string& name);
 
-		// returns meta data information for a named module
+		/**
+		 * @param name the name of a module to look for.
+		 * @return meta data information for a named module.
+		 */
 		ModuleMetaData getModuleMetaData(const std::string& name);
 
 		ModuleInterface* getModuleInstance(const std::string& name);
@@ -52,7 +77,8 @@ namespace uipf {
 			std::string name;
 			std::string category;
 			std::string description;
-			void* instance;
+			void* module;
+			void* instance_f;
 		};
 		// map: module name -> plugin loader instance which can instantiate a module
 		std::map<std::string, Plugin> plugins_;

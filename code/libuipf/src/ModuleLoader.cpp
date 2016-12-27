@@ -1,11 +1,11 @@
+// C++ way of #include <glib-2.0/gmodule.h>
+#include <glibmm/module.h>
+// boost filesystem for iterating directories
+#include <boost/filesystem.hpp>
+
 #include "ModuleLoader.hpp"
 #include "util.hpp"
-#include <logging.hpp>
-//#include <glib-2.0/gmodule.h>
-#include <glibmm/module.h>
-
-
-#include <boost/filesystem.hpp>
+#include "logging.hpp"
 
 
 void uipf::ModuleLoader::reset() {
@@ -13,22 +13,25 @@ void uipf::ModuleLoader::reset() {
 	searchPaths_.clear();
 	// delete all the pluginloaders
 	for (auto it = plugins_.begin(); it!=plugins_.end(); ++it) {
-		Glib::Module* p = (Glib::Module*) it->second.instance;
+		Glib::Module* p = (Glib::Module*) it->second.module;
 		delete p;
 	}
 	plugins_.clear();
 	loaded_ = false;
 }
 
+
 void uipf::ModuleLoader::addSearchPath(std::string p) {
 	UIPF_LOG_DEBUG("Added module search dir: ", p);
 	searchPaths_.push_back(p);
+	loaded_ = false;
 }
+
 
 std::vector<std::string> uipf::ModuleLoader::getModuleNames() {
 	using namespace std;
 
-	if (!loaded_) load();
+	load();
 
 	vector<string> names;
 
@@ -40,10 +43,34 @@ std::vector<std::string> uipf::ModuleLoader::getModuleNames() {
 	return names;
 }
 
+
+std::map< std::string, std::vector<std::string> > uipf::ModuleLoader::getModuleCategories() {
+	using namespace std;
+
+	load();
+
+	map< string, vector<string> > categories;
+
+	// foreach metadata extract name
+	uipf_foreach(p, plugins_) {
+
+		auto cat = categories.find(p->second.category);
+		if (cat == categories.end()) {
+			vector<string> newcat = {p->second.name};
+			categories.insert(pair< string, vector<string> >(p->second.category, newcat));
+		} else {
+			cat->second.push_back(p->second.name);
+		}
+	}
+
+	return categories;
+}
+
+
 bool uipf::ModuleLoader::hasModule(const std::string &name) {
 	using namespace std;
 
-	if (!loaded_) load();
+	load();
 
 	// foreach metadata extract name
 	uipf_foreach(p, plugins_) {
@@ -55,30 +82,38 @@ bool uipf::ModuleLoader::hasModule(const std::string &name) {
 	return false;
 }
 
+
 uipf::ModuleMetaData uipf::ModuleLoader::getModuleMetaData(const std::string &name) {
 	using namespace std;
 
-	if (!loaded_) load();
+	load();
 
 	// TODO foreach metadata extract name
 
 	return uipf::ModuleMetaData();
 }
 
+
 uipf::ModuleInterface *uipf::ModuleLoader::getModuleInstance(const std::string &name) {
 	using namespace std;
 
-	if (!loaded_) load();
-
+	load();
 
 	UIPF_LOG_TRACE("Instantiate module: ", name);
 	return nullptr;
 }
 
 
-
 void uipf::ModuleLoader::load() {
+	if (loaded_) {
+		return;
+	}
 	UIPF_LOG_TRACE("Loading modules...");
+
+	if (!Glib::Module::get_supported()) {
+		UIPF_LOG_ERROR("Loading dynamic libraries is not supported on your platform.");
+		return;
+	}
 
 	for(const std::string& sPath : searchPaths_) {
 		loadFromPath(sPath);
@@ -87,20 +122,20 @@ void uipf::ModuleLoader::load() {
 	UIPF_LOG_DEBUG("Loaded ", plugins_.size(), " modules.");
 }
 
+
 void uipf::ModuleLoader::loadFromPath(const std::string& sPath) {
 	using namespace boost::filesystem;
 
 	UIPF_LOG_TRACE("Looking for modules in ", sPath);
 
-	std::string s(sPath);
-	path p(s.c_str());
+	path p(sPath);
 	if (p.is_relative()) {
 		p = system_complete(p);
 	}
 
 	try {
 		if (!exists(p)) {
-			UIPF_LOG_WARNING("Module search path does not exist: ", sPath);
+			UIPF_LOG_WARNING("Module search path does not exist: ", p);
 		} else if (is_directory(p)) {
 
 			directory_iterator end_itr;
@@ -116,7 +151,7 @@ void uipf::ModuleLoader::loadFromPath(const std::string& sPath) {
 				loadLibrary(p.string());
 			}
 		} else {
-			UIPF_LOG_WARNING("Module search path is not a regular file or directory: ", sPath);
+			UIPF_LOG_WARNING("Module search path is not a regular file or directory: ", p);
 		}
 	}
 	catch (const filesystem_error& ex) {
@@ -124,14 +159,10 @@ void uipf::ModuleLoader::loadFromPath(const std::string& sPath) {
 	}
 }
 
+
 void uipf::ModuleLoader::loadLibrary(const std::string& file) {
 
 	UIPF_LOG_TRACE("Trying file: ", file);
-
-	if (!Glib::Module::get_supported()) {
-		UIPF_LOG_ERROR("Loading dynamic libraries is not supported on your platform.");
-		return;
-	}
 
 	Glib::Module* libModule = new Glib::Module(file);
 	UIPF_LOG_TRACE("Found Module: ", libModule->get_name());
@@ -163,7 +194,8 @@ void uipf::ModuleLoader::loadLibrary(const std::string& file) {
 		p.name = instance->getName();
 		p.description = instance->getDescription();
 		p.category = instance->getCategory();
-		p.instance = (void*) libModule;
+		p.module = (void*) libModule;
+		p.instance_f = (void*) fun_instance;
 		plugins_.insert(std::pair<std::string, Plugin>(moduleId, p));
 
 		delete instance;

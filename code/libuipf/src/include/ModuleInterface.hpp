@@ -1,7 +1,7 @@
 #ifndef LIBUIPF_MODULEINTERFACE_HPP
 #define LIBUIPF_MODULEINTERFACE_HPP
 
-#include "Data.hpp"
+#include "data.hpp"
 #include "ModuleMetaData.hpp"
 
 namespace uipf {
