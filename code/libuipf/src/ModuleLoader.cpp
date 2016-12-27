@@ -184,19 +184,24 @@ void uipf::ModuleLoader::loadLibrary(const std::string& file) {
 		uipf_module_f* fun_instance = (uipf_module_f *) uipf_module_p;
 		ModuleInterface* instance = fun_instance();
 
-		UIPF_LOG_TRACE("loaded module id: ", instance->getId());
-		UIPF_LOG_TRACE("module name: ", instance->getName());
-		UIPF_LOG_TRACE("module descr: ", instance->getDescription());
-		UIPF_LOG_TRACE("module category: ", instance->getCategory());
+		if (plugins_.find(moduleId) == plugins_.end()) {
 
-		Plugin p;
-		p.id = moduleId;
-		p.name = instance->getName();
-		p.description = instance->getDescription();
-		p.category = instance->getCategory();
-		p.module = (void*) libModule;
-		p.instance_f = (void*) fun_instance;
-		plugins_.insert(std::pair<std::string, Plugin>(moduleId, p));
+			UIPF_LOG_TRACE("loaded module id: ", instance->getId());
+			UIPF_LOG_TRACE("module name: ", instance->getName());
+			UIPF_LOG_TRACE("module descr: ", instance->getDescription());
+			UIPF_LOG_TRACE("module category: ", instance->getCategory());
+
+			Plugin p;
+			p.id = moduleId;
+			p.name = instance->getName();
+			p.description = instance->getDescription();
+			p.category = instance->getCategory();
+			p.module = (void *) libModule;
+			p.instance_f = (void *) fun_instance;
+			plugins_.insert(std::pair<std::string, Plugin>(moduleId, p));
+		} else {
+			UIPF_LOG_TRACE("module '", instance->getId(), "' is already loaded, skipping.");
+		}
 
 		delete instance;
 	} else {

@@ -35,6 +35,42 @@ BOOST_AUTO_TEST_CASE(ModuleLoaderLoadModules)
 	BOOST_TEST(loader.hasModule("consumer"));
 	BOOST_TEST(loader.hasModule("producer"));
 	BOOST_TEST(!loader.hasModule("other"));
+	BOOST_TEST(!loader.hasModule("other"));
 
+	loader.addSearchPath("./test/integration/compiler-gcc");
+
+	// should have loaded one additional module
+	BOOST_CHECK_EQUAL(3, loader.getModuleNames().size());
+	vector<string> names2 = loader.getModuleNames();
+	if (std::find(names2.begin(), names2.end(), "GccModule") == names2.end()
+	 ||	std::find(names2.begin(), names2.end(), "producer") == names2.end()
+	 ||	std::find(names2.begin(), names2.end(), "consumer") == names2.end()
+	) {
+		BOOST_TEST_FAIL("Module names list is incomplete.");
+	}
+
+	BOOST_TEST(loader.hasModule("consumer"));
+	BOOST_TEST(loader.hasModule("producer"));
+	BOOST_TEST(loader.hasModule("GccModule"));
+	BOOST_TEST(!loader.hasModule("other"));
+
+	loader.addSearchPath("./test/integration/compiler-clang/libClangModule.so");
+
+	// should have loaded one additional module
+	BOOST_CHECK_EQUAL(4, loader.getModuleNames().size());
+	vector<string> names3 = loader.getModuleNames();
+	if (std::find(names3.begin(), names3.end(), "GccModule") == names3.end()
+	    ||	std::find(names3.begin(), names3.end(), "ClangModule") == names3.end()
+	    ||	std::find(names3.begin(), names3.end(), "producer") == names3.end()
+	    ||	std::find(names3.begin(), names3.end(), "consumer") == names3.end()
+			) {
+		BOOST_TEST_FAIL("Module names list is incomplete.");
+	}
+
+	BOOST_TEST(loader.hasModule("consumer"));
+	BOOST_TEST(loader.hasModule("producer"));
+	BOOST_TEST(loader.hasModule("GccModule"));
+	BOOST_TEST(loader.hasModule("ClangModule"));
+	BOOST_TEST(!loader.hasModule("other"));
 
 }

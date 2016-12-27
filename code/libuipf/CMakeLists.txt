@@ -113,6 +113,24 @@ if(WITH_TESTS)
 	add_test(NAME test-libuipf-data          COMMAND test-libuipf-data)
 	add_test(NAME test-libuipf-module_loader COMMAND test-libuipf-module_loader)
 
-
 	add_subdirectory(test/integration/dataflow)
+
+	if(UNIX)
+		# run make for custom module using GCC
+		configure_file("${libuipf_SOURCE_DIR}/test/integration/compiler-gcc/Makefile"       "${libuipf_BINARY_DIR}/test/integration/compiler-gcc/Makefile")
+		configure_file("${libuipf_SOURCE_DIR}/test/integration/compiler-gcc/GccModule.cpp"  "${libuipf_BINARY_DIR}/test/integration/compiler-gcc/GccModule.cpp")
+		add_custom_target(test-compiler-gcc-build ALL make
+				DEPENDS uipf "${libuipf_BINARY_DIR}/test/integration/compiler-gcc/GccModule.cpp" "${libuipf_BINARY_DIR}/test/integration/compiler-gcc/Makefile"
+				WORKING_DIRECTORY ${libuipf_BINARY_DIR}/test/integration/compiler-gcc
+				VERBATIM
+		)
+		# run make for custom module using Clang
+		configure_file("${libuipf_SOURCE_DIR}/test/integration/compiler-clang/Makefile"       "${libuipf_BINARY_DIR}/test/integration/compiler-clang/Makefile")
+		configure_file("${libuipf_SOURCE_DIR}/test/integration/compiler-clang/ClangModule.cpp"  "${libuipf_BINARY_DIR}/test/integration/compiler-clang/ClangModule.cpp")
+		add_custom_target(test-compiler-clang-build ALL make
+				DEPENDS uipf "${libuipf_BINARY_DIR}/test/integration/compiler-clang/ClangModule.cpp" "${libuipf_BINARY_DIR}/test/integration/compiler-clang/Makefile"
+				WORKING_DIRECTORY ${libuipf_BINARY_DIR}/test/integration/compiler-clang
+				VERBATIM
+		)
+	endif()
 endif()

@@ -18,22 +18,26 @@
 class UIPF_MODULE_CLASS : public uipf::ModuleInterface {
 public:
 	std::string getId() const override { return UIPF_MODULE_ID; };
+
 #ifdef UIPF_MODULE_NAME
 	std::string getName() const override { return UIPF_MODULE_NAME; };
 #else
-
-	std::string getName() const override { return #UIPF_MODULE_CLASS; };
+	// convert macro value to string
+	// http://stackoverflow.com/questions/195975/how-to-make-a-char-string-from-a-c-macros-value#196018
+	#define _UIPF_STR_VALUE1(arg) #arg
+	#define _UIPF_STR_VALUE2(arg) _UIPF_STR_VALUE1(arg)
+	std::string getName() const override { return _UIPF_STR_VALUE2(UIPF_MODULE_CLASS); };
 #endif
+
 #ifdef UIPF_MODULE_CATEGORY
 	std::string getCategory() const override { return UIPF_MODULE_CATEGORY; };
 #else
-
 	std::string getCategory() const override { return "other"; };
 #endif
+
 #ifdef UIPF_MODULE_DESCRIPTION
 	std::string getDescription() const override { return UIPF_MODULE_DESCRIPTION; };
 #else
-
 	std::string getDescription() const override { return ""; };
 #endif
 
