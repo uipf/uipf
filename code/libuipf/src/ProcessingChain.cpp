@@ -10,7 +10,8 @@ using namespace uipf;
 /*
 filename	the path to the .yaml file
 */
-void ProcessingChain::load(string filename){
+void ProcessingChain::load(std::string filename){
+
 
 	//basic requirement checks
 	bool bHasModule = false;
@@ -23,64 +24,90 @@ void ProcessingChain::load(string filename){
 		// load yaml file
 		YAML::Node config = YAML::LoadFile(filename);
 
-		// yaml file must be a map of step-name => configuration
-		if (!config.IsMap())
+		// yaml file must be a map of name => value pairs
+		if (!config.IsMap()) {
 			throw InvalidConfigException("check if you provided at least one step.");
+		}
 
+		bool foundChain = false;
+		// loading root elements of the YAML file, at least "chain" must be present, ignore others
+		YAML::const_iterator configIt = config.begin();
+		for ( ; configIt != config.end(); ++configIt) {
 
-		// create a ProcessingStep object from each config element
-		YAML::const_iterator it = config.begin();
-		for ( ; it != config.end(); ++it) {
+			string baseName = configIt->first.as<string>();
+			if (baseName == "chain") {
+				foundChain = true;
+				const YAML::Node chain = configIt->second;
 
-			ProcessingStep step;
-
-			step.name = it->first.as<string>();
-
-			// iterate over step config, which is a map too
-			if (!it->second.IsMap())
-				throw InvalidConfigException("check if you provided valid value(s) in your yaml for step '" + it->first.as<string>() + "'");
-
-			YAML::const_iterator confIt = it->second.begin();
-
-			for( ; confIt != it->second.end(); ++confIt) {
-				string key = confIt->first.as<string>();
-				if (key == "module")
-				{
-					bHasModule = true;
-					step.module = confIt->second.as<string>();
+				// chain must be a map of step-name => configuration
+				if (!chain.IsMap()) {
+					throw InvalidConfigException("'chain' is not a map, check if you provided at least one step.");
 				}
-				else if (key == "input")
-				{
-					// input is a map of input dependencies
-					if (!confIt->second.IsMap())
-						throw InvalidConfigException("check if you provided valid keys and a values for 'input'");
 
-					YAML::const_iterator inputIt = confIt->second.begin();
-					for(; inputIt != confIt->second.end(); ++inputIt) {
-						string inputName = inputIt->first.as<string>();
-						string dependsOnS = inputIt->second.as<string>();
+				// create a ProcessingStep object from each config element
+				YAML::const_iterator it = chain.begin();
+				for ( ; it != chain.end(); ++it) {
 
-						// split dependsOn by first . to separate step name and output name
-						size_t dotPos = dependsOnS.find(".");
-						pair<string, string> dependsOn( dependsOnS.substr( 0, dotPos ), dependsOnS.substr( dotPos + 1 ));
+					ProcessingStep step;
 
-						step.inputs.insert( pair<string, pair<string, string> >(inputName, dependsOn) );
+					step.name = it->first.as<string>();
+
+					// iterate over step config, which is a map too
+					if (!it->second.IsMap())
+						throw InvalidConfigException("check if you provided valid value(s) in your yaml for step '" + it->first.as<string>() + "'");
+
+					YAML::const_iterator confIt = it->second.begin();
+
+					for( ; confIt != it->second.end(); ++confIt) {
+						string key = confIt->first.as<string>();
+						if (key == "module")
+						{
+							bHasModule = true;
+							step.module = confIt->second.as<string>();
+						}
+						else if (key == "input")
+						{
+							// input is a map of input dependencies
+							if (!confIt->second.IsMap())
+								throw InvalidConfigException("check if you provided valid keys and a values for 'input'");
+
+							YAML::const_iterator inputIt = confIt->second.begin();
+							for(; inputIt != confIt->second.end(); ++inputIt) {
+								string inputName = inputIt->first.as<string>();
+								string dependsOnS = inputIt->second.as<string>();
+
+								// split dependsOn by first . to separate step name and output name
+								size_t dotPos = dependsOnS.find(".");
+								pair<string, string> dependsOn( dependsOnS.substr( 0, dotPos ), dependsOnS.substr( dotPos + 1 ));
+
+								step.inputs.insert( pair<string, pair<string, string> >(inputName, dependsOn) );
+							}
+						} else {
+							// otherwise it is a parameter of the module
+							try
+							{
+								step.params.insert( pair<string,string>(key, confIt->second.as<string>()) );
+							}
+							catch(YAML::TypedBadConversion<std::string>& ex)
+							{
+								throw InvalidConfigException("check if you provided a valid key and value for '"+ key + "'");
+							}
+						}
 					}
-				} else {
-					// otherwise it is a parameter of the module
-					try
-					{
-						step.params.insert( pair<string,string>(key, confIt->second.as<string>()) );
-					}
-					catch(YAML::TypedBadConversion<std::string>& ex)
-					{
-						throw InvalidConfigException("check if you provided a valid key and value for '"+ key + "'");
-					}
+
+					chain_.insert( pair<string, ProcessingStep>(step.name, step) );
 				}
+
+
+
 			}
 
-			chain_.insert( pair<string, ProcessingStep>(step.name, step) );
 		}
+
+		if (!foundChain) {
+			throw InvalidConfigException("No 'chain' found in YAML config.");
+		}
+
 	}
 	catch(InvalidConfigException& ex)
 	{
@@ -108,6 +135,8 @@ void ProcessingChain::load(string filename){
 	}
 
 }
+
+
 
 // validate this config against a set of available modules returns a list of error message and a list of affected steps
 /*
@@ -406,6 +435,10 @@ string ProcessingChain::getYAML(){
 	// create YAML emitter
 	YAML::Emitter out;
 
+	out << YAML::BeginMap;
+	out << YAML::Key << "chain";
+	out << YAML::Value;
+
 	// the YAML document consists of a map of processing steps
 	out << YAML::BeginMap;
 	map<string, ProcessingStep>::iterator it = chain_.begin();
@@ -437,6 +470,8 @@ string ProcessingChain::getYAML(){
 			}
 		out << YAML::EndMap;
 	}
+	out << YAML::EndMap;
+
 	out << YAML::EndMap;
 
 	return string(out.c_str());

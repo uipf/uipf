@@ -21,6 +21,8 @@ namespace uipf {
 	 * - https://developer.gnome.org/glib/stable/glib-Dynamic-Loading-of-Modules.html
 	 * - https://developer.gnome.org/glibmm/stable/classGlib_1_1Module.html#details
 	 * - http://stackoverflow.com/questions/4803926/boost-plugin-choices
+	 * - http://www.cplusplus.com/articles/48TbqMoL/
+	 * - http://sourcey.com/building-a-simple-cpp-cross-platform-plugin-system/
 	 *
 	 */
 	class ModuleLoader {

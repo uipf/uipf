@@ -1,14 +1,16 @@
-#ifndef LIBUIPF_PROCESSIN_CHAIN_HPP
-#define LIBUIPF_PROCESSIN_CHAIN_HPP
-
+#ifndef LIBUIPF_PROCESSING_CHAIN_HPP
+#define LIBUIPF_PROCESSING_CHAIN_HPP
 
 #include <string>
 #include <map>
 #include <vector>
+
 #include "ModuleMetaData.hpp"
 #include "exceptions.hpp"
 
 namespace uipf{
+
+
 
 	class ProcessingStep{
 
@@ -17,7 +19,7 @@ namespace uipf{
 		// name of this processing step in this configuration e.g. output
 		std::string name;
 
-		// name of the module that is used in this step e.g. storeImage
+		// id of the module that is used in this step e.g. de.tu-berlin.uipf.storeImage
 		std::string module;
 
 		// a map of parameters configured for this module e.g. filename => image.png
@@ -93,4 +95,4 @@ namespace uipf{
 
 } // namespace
 
-#endif // LIBUIPF_PROCESSIN_CHAIN_HPP
+#endif // LIBUIPF_PROCESSING_CHAIN_HPP

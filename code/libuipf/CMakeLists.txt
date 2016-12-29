@@ -23,7 +23,8 @@ include(FindPkgConfig)
 
 
 # include header files
-include_directories("${PROJECT_SOURCE_DIR}/src/include")
+include_directories("${libuipf_SOURCE_DIR}/src/include")
+include_directories("${libuipf_SOURCE_DIR}/src")
 
 if(UNIX)
 	#c++11 support
@@ -81,12 +82,13 @@ add_library(uipf-module STATIC
 	src/ModuleMetaData.cpp
 )
 
+# TODO name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html
 # libuipf
 add_library(uipf STATIC
 
 	src/ModuleLoader.cpp
 	src/ProcessingChain.cpp
-	src/Runner.cpp
+#	src/Runner.cpp
 )
 target_link_libraries(uipf uipf-module ${YAML_CPP_LIBRARY} ${GLIBMM_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(uipf YAML_CPP)
@@ -101,15 +103,18 @@ endif()
 #
 
 if(WITH_TESTS)
-	add_executable(test-libuipf-data            test/unit/data.cpp)
-	add_executable(test-libuipf-module_loader   test/unit/module_loader.cpp)
-	target_link_libraries(test-libuipf-data             uipf ${Boost_LIBRARIES})
-	target_link_libraries(test-libuipf-module_loader    uipf uipf-module ${Boost_LIBRARIES})
+	add_executable(test-libuipf-data             test/unit/data.cpp)
 	if (WITH_OPENCV)
 		target_compile_definitions(test-libuipf-data PRIVATE WITH_OPENCV)
 	endif()
-	add_test(NAME test-libuipf-data          COMMAND test-libuipf-data)
-	add_test(NAME test-libuipf-module_loader COMMAND test-libuipf-module_loader)
+	add_executable(test-libuipf-module_loader    test/unit/module_loader.cpp)
+	add_executable(test-libuipf-processing_chain test/unit/processing_chain.cpp)
+	target_link_libraries(test-libuipf-data             uipf ${Boost_LIBRARIES})
+	target_link_libraries(test-libuipf-module_loader    uipf uipf-module ${Boost_LIBRARIES})
+	target_link_libraries(test-libuipf-processing_chain uipf ${Boost_LIBRARIES})
+	add_test(NAME test-libuipf-data             COMMAND test-libuipf-data)
+	add_test(NAME test-libuipf-module_loader    COMMAND test-libuipf-module_loader)
+	add_test(NAME test-libuipf-processing_chain COMMAND test-libuipf-processing_chain)
 
 	add_subdirectory(test/integration/dataflow)
 
@@ -123,8 +128,8 @@ if(WITH_TESTS)
 				VERBATIM
 		)
 		# run make for custom module using Clang
-		configure_file("${libuipf_SOURCE_DIR}/test/integration/compiler-clang/Makefile"       "${libuipf_BINARY_DIR}/test/integration/compiler-clang/Makefile")
-		configure_file("${libuipf_SOURCE_DIR}/test/integration/compiler-clang/ClangModule.cpp"  "${libuipf_BINARY_DIR}/test/integration/compiler-clang/ClangModule.cpp")
+		configure_file("${libuipf_SOURCE_DIR}/test/integration/compiler-clang/Makefile"        "${libuipf_BINARY_DIR}/test/integration/compiler-clang/Makefile")
+		configure_file("${libuipf_SOURCE_DIR}/test/integration/compiler-clang/ClangModule.cpp" "${libuipf_BINARY_DIR}/test/integration/compiler-clang/ClangModule.cpp")
 		add_custom_target(test-compiler-clang-build ALL make
 				DEPENDS uipf "${libuipf_BINARY_DIR}/test/integration/compiler-clang/ClangModule.cpp" "${libuipf_BINARY_DIR}/test/integration/compiler-clang/Makefile"
 				WORKING_DIRECTORY ${libuipf_BINARY_DIR}/test/integration/compiler-clang
