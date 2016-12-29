@@ -26,18 +26,6 @@ include(FindPkgConfig)
 include_directories("${libuipf_SOURCE_DIR}/src/include")
 include_directories("${libuipf_SOURCE_DIR}/src")
 
-if(UNIX)
-	#c++11 support
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
-
-	if(CMAKE_BUILD_TYPE MATCHES Debug)
-		# sanitize memory issues https://gcc.gnu.org/gcc-4.8/changes.html
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
-	else()
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
-	endif()
-endif()
-
 
 #
 # find external libraries
@@ -63,6 +51,7 @@ link_directories(${Boost_LIBRARY_DIRS})
 ExternalProject_Add(YAML_CPP
 	GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
 	GIT_TAG release-0.5.2
+	CMAKE_ARGS -DYAML_CPP_BUILD_TOOLS=OFF -DYAML_CPP_BUILD_CONTRIB=OFF
 	TEST_COMMAND ""
 	INSTALL_COMMAND "" # skip install step for yaml-cpp
 )
@@ -82,19 +71,21 @@ add_library(uipf-module STATIC
 	src/ModuleMetaData.cpp
 )
 
-# TODO name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html
 # libuipf
-add_library(uipf STATIC
+add_library(libuipf STATIC
 
 	src/ModuleLoader.cpp
 	src/ProcessingChain.cpp
 #	src/Runner.cpp
+	src/util.cpp
 )
-target_link_libraries(uipf uipf-module ${YAML_CPP_LIBRARY} ${GLIBMM_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(uipf YAML_CPP)
+# name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html
+set_target_properties(libuipf PROPERTIES OUTPUT_NAME uipf)
+target_link_libraries(libuipf uipf-module ${YAML_CPP_LIBRARY} ${GLIBMM_LIBRARIES} ${Boost_LIBRARIES})
+add_dependencies(libuipf YAML_CPP)
 if (WITH_OPENCV)
-	target_compile_definitions(uipf PRIVATE WITH_OPENCV)
-	target_link_libraries(uipf opencv_core)
+	target_compile_definitions(libuipf PRIVATE WITH_OPENCV)
+	target_link_libraries(libuipf opencv_core)
 endif()
 
 
@@ -109,9 +100,9 @@ if(WITH_TESTS)
 	endif()
 	add_executable(test-libuipf-module_loader    test/unit/module_loader.cpp)
 	add_executable(test-libuipf-processing_chain test/unit/processing_chain.cpp)
-	target_link_libraries(test-libuipf-data             uipf ${Boost_LIBRARIES})
-	target_link_libraries(test-libuipf-module_loader    uipf uipf-module ${Boost_LIBRARIES})
-	target_link_libraries(test-libuipf-processing_chain uipf ${Boost_LIBRARIES})
+	target_link_libraries(test-libuipf-data             libuipf ${Boost_LIBRARIES})
+	target_link_libraries(test-libuipf-module_loader    libuipf uipf-module ${Boost_LIBRARIES})
+	target_link_libraries(test-libuipf-processing_chain libuipf ${Boost_LIBRARIES})
 	add_test(NAME test-libuipf-data             COMMAND test-libuipf-data)
 	add_test(NAME test-libuipf-module_loader    COMMAND test-libuipf-module_loader)
 	add_test(NAME test-libuipf-processing_chain COMMAND test-libuipf-processing_chain)

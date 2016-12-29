@@ -100,6 +100,8 @@ uipf::ModuleInterface *uipf::ModuleLoader::getModuleInstance(const std::string &
 
 	load();
 
+	// TODO implement
+
 	UIPF_LOG_TRACE("Instantiate module: ", name);
 	return nullptr;
 }

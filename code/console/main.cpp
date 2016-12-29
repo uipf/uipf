@@ -1,18 +1,18 @@
 #include <iostream>
 #include <string>
 #include <libgen.h>
-#include <QCoreApplication>
 
-#include "framework/ModuleManager.hpp"
-#include "framework/Configuration.hpp"
-#include "framework/Utils.hpp"
-#include "framework/Logger.hpp"
-#include "framework/uipf.hpp"
-
-// foor Boost:
+// for Boost:
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
+
+#include "uipf.hpp"
+#include "ModuleLoader.hpp"
+#include "ProcessingChain.hpp"
+#include "include/logging.hpp"
+#include "util.hpp"
+
 
 namespace po = boost::program_options;
 
@@ -76,11 +76,8 @@ int main(int argc, char** argv){
 		return 1;
 	}
 
-	// used by the module manager to access Qt components, TODO maybe move to module manager?
-	QCoreApplication app (argc,argv);
-
-	ModuleManager mm;
-	Configuration conf;
+	ModuleLoader ml;
+	ProcessingChain chain;
 
 	if (vm.count("configuration")){
 	// run a processing chain from a config file.
@@ -88,7 +85,7 @@ int main(int argc, char** argv){
 
 		// loads the configFile and create a Configuration
 		string configFileName = argv[2];
-		conf.load(configFileName);
+		chain.load(configFileName);
 
 		// set current working directory to directory of the .yaml file to make relative paths work
 		char bFileName[configFileName.length() + 1];
@@ -100,7 +97,7 @@ int main(int argc, char** argv){
 	// list all available modules
 	// ./uipf --list
 
-		std::vector<std::string> modules = mm.listModuleNames();
+		std::vector<std::string> modules = ml.getModuleNames();
 		for(auto mit = modules.begin(); mit != modules.end(); ++mit) {
 			cout << *mit << endl;
 		}
@@ -136,11 +133,11 @@ int main(int argc, char** argv){
 		}
 
 		string modName = vm["modulename"].as<string>();
-		if (!mm.hasModule(modName)) {
-			LOG_E("Module " + modName + " does not exist!");
+		if (!ml.hasModule(modName)) {
+			UIPF_LOG_ERROR("Module ", modName, " does not exist!");
 			return 1;
 		}
-		MetaData md = mm.getModuleMetaData(modName);
+		ModuleMetaData md = ml.getModuleMetaData(modName);
 
 		ProcessingStep processModule;
 		processModule.name = "processModule";
@@ -154,11 +151,11 @@ int main(int argc, char** argv){
 				loadModule.name = "loadModule" + to_string(i);
 				loadModule.module = "loadImage";
 
-				string source = utils::secondPart(inputs[i]);
+				string source = util::secondPart(inputs[i]);
 
 				loadModule.params.insert (pair<string,string>("filename",source) );
 
-				conf.addProcessingStep(loadModule);
+				chain.addProcessingStep(loadModule);
 
 				// the input params of the module are set
 				map<string, DataDescription> in = md.getInputs();
@@ -168,7 +165,7 @@ int main(int argc, char** argv){
 					auto it = in.cbegin();
 					name = it->first;
 				} else {
-					name = utils::firstPart(inputs[i]);
+					name = util::firstPart(inputs[i]);
 				}
 				pair<string,string> loadWithValue(loadModule.name, "image");
 
@@ -194,10 +191,10 @@ int main(int argc, char** argv){
 					storeModule.inputs.insert (pair<string, pair<string, string> >("image", storeSource));
 
 					// where should it be stored
-					string newName = utils::rename(utils::secondPart(inputs[0]));
+					string newName = util::rename(util::secondPart(inputs[0]));
 					storeModule.params.insert (pair<string,string>("filename", newName));
 
-					conf.addProcessingStep(storeModule);
+					chain.addProcessingStep(storeModule);
 				}
 			}
 
@@ -218,7 +215,7 @@ int main(int argc, char** argv){
 					auto it = out.cbegin();
 					outName = it->first;
 				} else {
-					outName = utils::firstPart(outputs[i]);
+					outName = util::firstPart(outputs[i]);
 				}
 
 				pair<string, string> storeSource(processModule.name, outName);
@@ -230,10 +227,10 @@ int main(int argc, char** argv){
 				// where does the image come from
 				storeModule.inputs.insert (pair<string, pair<string, string> >("image",storeSource) );
 				// where should it be stored
-				string storeName = utils::secondPart(outputs[i]);
+				string storeName = util::secondPart(outputs[i]);
 				storeModule.params.insert (pair<string,string>("filename",storeName) );
 
-				conf.addProcessingStep(storeModule);
+				chain.addProcessingStep(storeModule);
 
 			}
 		}
@@ -245,30 +242,32 @@ int main(int argc, char** argv){
 			// this step is repeated as often, as the number of params is inserted
 			for (unsigned int i=0; i<params.size(); i++){
 
-				processModule.params.insert (pair<string,string>(utils::firstPart(params[i]), utils::secondPart(params[i])));
+				processModule.params.insert (pair<string,string>(util::firstPart(params[i]), util::secondPart(params[i])));
 
 			}
 		}
 
-		conf.addProcessingStep(processModule);
+		chain.addProcessingStep(processModule);
 	}
 
 	// print the loaded config
-	LOG_I("Here is the loaded configuration:");
-	conf.print();
+	UIPF_LOG_INFO("Here is the loaded configuration:");
+	chain.print();
 
 	// validate configuration and show errors
-	pair< vector<string>, vector<string> > errors = conf.validate(mm.getAllModuleMetaData());
+	// TODO
+/*	pair< vector<string>, vector<string> > errors = chain.validate(ml.getAllModuleMetaData());
 	if (!errors.first.empty()) {
 		LOG_E("There are configuration errors!");
 		for(unsigned int i = 0; i < errors.first.size(); ++i) {
 			LOG_E(errors.first[i]);
 		}
 		return 1;
-	}
+	}*/
 
 	// run the current configuration
-	mm.run(conf);
+	// TODO runner
+	//ml.run(chain);
 
 	return 0;
 }
