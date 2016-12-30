@@ -1,5 +1,5 @@
 chain:
   producer:
-    module: producer
+    module: de.tu-berlin.cvrs.uipftest.ProducerModule
   consumer:
-    module: consumer
+    module: de.tu-berlin.cvrs.uipftest.ConsumerModule

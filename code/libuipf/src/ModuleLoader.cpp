@@ -61,16 +61,32 @@ void uipf::ModuleLoader::addSearchPathsFromConfig(const std::string& configFile)
 }
 
 
-std::vector<std::string> uipf::ModuleLoader::getModuleNames() {
+std::vector<std::string> uipf::ModuleLoader::getModuleIds() {
 	using namespace std;
 
 	load();
 
-	vector<string> names;
+	vector<string> ids;
 
 	// foreach metadata extract name
 	uipf_foreach(p, plugins_) {
-		names.push_back(p->second.name);
+		ids.push_back(p->second.id);
+	}
+
+	return ids;
+}
+
+
+std::map<std::string, std::string> uipf::ModuleLoader::getModuleNames() {
+	using namespace std;
+
+	load();
+
+	map<string, string> names;
+
+	// foreach metadata extract name
+	uipf_foreach(p, plugins_) {
+		names.insert(pair<string, string>(p->second.id, p->second.name));
 	}
 
 	return names;
@@ -100,14 +116,14 @@ std::map< std::string, std::vector<std::string> > uipf::ModuleLoader::getModuleC
 }
 
 
-bool uipf::ModuleLoader::hasModule(const std::string &name) {
+bool uipf::ModuleLoader::hasModule(const std::string &id) {
 	using namespace std;
 
 	load();
 
 	// foreach metadata extract name
 	uipf_foreach(p, plugins_) {
-		if (p->second.name == name) {
+		if (p->second.id == id) {
 			return true;
 		}
 	}
@@ -116,7 +132,7 @@ bool uipf::ModuleLoader::hasModule(const std::string &name) {
 }
 
 
-uipf::ModuleMetaData uipf::ModuleLoader::getModuleMetaData(const std::string &name) {
+uipf::ModuleMetaData uipf::ModuleLoader::getModuleMetaData(const std::string &id) {
 	using namespace std;
 
 	load();
@@ -127,20 +143,20 @@ uipf::ModuleMetaData uipf::ModuleLoader::getModuleMetaData(const std::string &na
 }
 
 
-uipf::ModuleInterface *uipf::ModuleLoader::getModuleInstance(const std::string &name) {
+uipf::ModuleInterface *uipf::ModuleLoader::getModuleInstance(const std::string &id) {
 	using namespace std;
 
 	load();
 
-	UIPF_LOG_TRACE("Instantiate module: ", name);
+	UIPF_LOG_TRACE("Instantiate module: ", id);
 
-	if (!hasModule(name)) {
+	if (!hasModule(id)) {
 		// TODO better throw exception
 		return nullptr;
 	}
 
 	typedef ModuleInterface* uipf_module_f();
-	uipf_module_f* fun = (uipf_module_f*) plugins_.at(name).instance_f;
+	uipf_module_f* fun = (uipf_module_f*) plugins_.at(id).instance_f;
 
 	return fun();
 }

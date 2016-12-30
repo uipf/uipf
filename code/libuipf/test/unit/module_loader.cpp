@@ -4,9 +4,22 @@
 // - TODO load module, check if loading works,
 // - TODO load module, check meta data
 
+#include <vector>
+#include <string>
+#include <map>
+#include "util.hpp"
+
 
 #define BOOST_TEST_MODULE libuipf-module_loader
 #include <boost/test/included/unit_test.hpp>
+
+inline std::vector<std::string> to_vector(std::map<std::string,std::string> m) {
+	std::vector<std::string> v;
+	uipf_foreach(e, m) {
+		v.push_back(e->second);
+	}
+	return v;
+}
 
 BOOST_AUTO_TEST_CASE(ModuleLoaderLoadModules)
 {
@@ -27,7 +40,8 @@ BOOST_AUTO_TEST_CASE(ModuleLoaderLoadModules)
 	// path contains two modules
 	BOOST_CHECK_EQUAL(2, loader.getModuleNames().size());
 	vector<string> expectedNames = {"consumer", "producer"};
-	vector<string> names = loader.getModuleNames();
+	// TODO test ids
+	vector<string> names = to_vector(loader.getModuleNames());
 	BOOST_CHECK_EQUAL_COLLECTIONS(names.begin(), names.end(), expectedNames.begin(), expectedNames.end());
 
 	// TODO test getModuleCategories
@@ -41,7 +55,7 @@ BOOST_AUTO_TEST_CASE(ModuleLoaderLoadModules)
 
 	// should have loaded one additional module
 	BOOST_CHECK_EQUAL(3, loader.getModuleNames().size());
-	vector<string> names2 = loader.getModuleNames();
+	vector<string> names2 = to_vector(loader.getModuleNames());
 	if (std::find(names2.begin(), names2.end(), "GccModule") == names2.end()
 	 ||	std::find(names2.begin(), names2.end(), "producer") == names2.end()
 	 ||	std::find(names2.begin(), names2.end(), "consumer") == names2.end()
@@ -58,7 +72,7 @@ BOOST_AUTO_TEST_CASE(ModuleLoaderLoadModules)
 
 	// should have loaded one additional module
 	BOOST_CHECK_EQUAL(4, loader.getModuleNames().size());
-	vector<string> names3 = loader.getModuleNames();
+	vector<string> names3 = to_vector(loader.getModuleNames());
 	if (std::find(names3.begin(), names3.end(), "GccModule") == names3.end()
 	    ||	std::find(names3.begin(), names3.end(), "ClangModule") == names3.end()
 	    ||	std::find(names3.begin(), names3.end(), "producer") == names3.end()

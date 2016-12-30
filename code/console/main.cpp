@@ -124,7 +124,7 @@ int main(int argc, char** argv){
 	// list all available modules
 	// ./uipf --list
 
-		std::vector<std::string> modules = ml.getModuleNames();
+		std::vector<std::string> modules = ml.getModuleIds();
 		for(auto mit = modules.begin(); mit != modules.end(); ++mit) {
 			cout << *mit << endl;
 		}

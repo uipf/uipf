@@ -54,7 +54,12 @@ namespace uipf {
 		/**
 		 * @return a list of all loaded modules' names.
 		 */
-		std::vector<std::string> getModuleNames();
+		std::vector<std::string> getModuleIds();
+
+		/**
+		 * @return a list of all loaded modules' names.
+		 */
+		std::map<std::string, std::string> getModuleNames();
 
 		/**
 		 * @return a map of all loaded modules' categories to a list of module names.
@@ -62,18 +67,18 @@ namespace uipf {
 		std::map< std::string, std::vector<std::string> > getModuleCategories();
 
 		/**
-		 * @param name the name of a module to look for.
+		 * @param name the id of a module to look for.
 		 * @return a value indicating whether the named module exists.
 		 */
-		bool hasModule(const std::string& name);
+		bool hasModule(const std::string& id);
 
 		/**
 		 * @param name the name of a module to look for.
 		 * @return meta data information for a named module.
 		 */
-		ModuleMetaData getModuleMetaData(const std::string& name);
+		ModuleMetaData getModuleMetaData(const std::string& id);
 
-		ModuleInterface* getModuleInstance(const std::string& name);
+		ModuleInterface* getModuleInstance(const std::string& id);
 
 	private:
 
