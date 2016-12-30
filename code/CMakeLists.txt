@@ -1,6 +1,23 @@
 cmake_minimum_required(VERSION 2.8.8)
 project(UIPFramework)
 
+#
+# FLAGS
+#
+
+option(WITH_TESTS "Build test binaries and enable `make test` target" ON)
+option(WITH_OPENCV "Build with openCV, enable openCV types" OFF)
+
+message("Build options:")
+message("With Tests: ${WITH_TESTS}")
+message("With OpenCV: ${WITH_OPENCV}")
+
+set(LIBUIPF_WITH_TESTS ${WITH_TESTS})
+set(LIBUIPF_WITH_OPENCV ${WITH_OPENCV})
+
+if(WITH_TESTS)
+	enable_testing()
+endif()
 
 if(UNIX)
 	#c++11 support

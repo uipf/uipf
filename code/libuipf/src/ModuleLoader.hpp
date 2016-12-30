@@ -47,7 +47,9 @@ namespace uipf {
 		 * module libraries. This may also be a file name pointing to a module
 		 * library file directly.
 		 */
-		void addSearchPath(std::string p);
+		void addSearchPath(const std::string& p);
+		void addSearchPathsFromConfig(const std::string& configFile);
+
 
 		/**
 		 * @return a list of all loaded modules' names.

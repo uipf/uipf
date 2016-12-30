@@ -10,8 +10,13 @@
 #include "uipf.hpp"
 #include "ModuleLoader.hpp"
 #include "ProcessingChain.hpp"
-#include "include/logging.hpp"
 #include "util.hpp"
+
+// TODO setting this level does not seem to work
+volatile int uipf_console_log_level = 3;
+#define UIPF_LOG_LEVEL uipf_console_log_level
+#include "include/logging.hpp"
+
 
 
 namespace po = boost::program_options;
@@ -26,8 +31,11 @@ int main(int argc, char** argv){
 	// Declare a group of options that will be allowed only on command line
 	po::options_description generic("Generic options");
 	generic.add_options()
-		("version,v", "print version string")
+		("version,V", "print version string")
 		("help,h", "produce help message")
+		("verbose,v", "more verbose output, i.e. print debug information")
+		("trace", "even more verbose output than --verbose, i.e. print trace information")
+		("quiet", "suppress log output. This will not prevent other output generated for example by modules.")
 		;
 
 	po::options_description config("Program options");
@@ -36,7 +44,7 @@ int main(int argc, char** argv){
 		("input,i", po::value< vector<string> >()->composing(), "defines an input, can be used multiple times format: inputName:fileName inputName is optional if there is only one input")
 		("output,o",	po::value< vector<string> >()->composing(), "defines an output, can be used multiple times, format: outputName:fileName. outputName is optional, if there is only one input. Output is optional, if there is only one input and one output, the output filename will be chosen from the input name in this case.")
 		("param,p",	po::value< vector<string> >()->composing(),	"defines a parameter, format:  name:value")
-		("list", "list all available modules.")
+		("list,l", "list all available modules.")
 		;
 
 	// Hidden options, will be allowed command line, but will not be shown to the user.
@@ -76,8 +84,26 @@ int main(int argc, char** argv){
 		return 1;
 	}
 
-	ModuleLoader ml;
 	ProcessingChain chain;
+
+	// set log level
+	if (vm.count("trace")) {
+		uipf_console_log_level = 5;
+	} else if (vm.count("verbose")) {
+		uipf_console_log_level = 4;
+	} else if (vm.count("quiet")) {
+		uipf_console_log_level = 0;
+	}
+
+	ModuleLoader ml;
+	// add default search paths for modules
+	ml.addSearchPath(".");
+	ml.addSearchPath("/usr/lib/uipf2");
+	ml.addSearchPath("/usr/local/lib/uipf2");
+	// add user configured module search paths
+	ml.addSearchPathsFromConfig("./modules.yaml");
+	ml.addSearchPathsFromConfig("~/.uipf-modules.yaml");
+//	ml.addSearchPathsFromConfig("/etc/uipf/modules.yaml");
 
 	if (vm.count("configuration")){
 	// run a processing chain from a config file.

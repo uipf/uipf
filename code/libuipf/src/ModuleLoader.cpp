@@ -4,6 +4,8 @@
 // boost filesystem for iterating directories
 #include <boost/filesystem.hpp>
 
+#include "yaml-cpp/yaml.h"
+
 #include "ModuleLoader.hpp"
 #include "util.hpp"
 #include "logging.hpp"
@@ -22,10 +24,40 @@ void uipf::ModuleLoader::reset() {
 }
 
 
-void uipf::ModuleLoader::addSearchPath(std::string p) {
-	UIPF_LOG_DEBUG("Added module search dir: ", p);
+void uipf::ModuleLoader::addSearchPath(const std::string& p) {
+	UIPF_LOG_TRACE("Added module search dir: ", p);
 	searchPaths_.push_back(p);
 	loaded_ = false;
+}
+
+void uipf::ModuleLoader::addSearchPathsFromConfig(const std::string& configFile) {
+
+	std::ifstream f(configFile.c_str());
+	if (!f.good()) {
+		return;
+	}
+
+	try
+	{
+		// try to load yaml file
+		YAML::Node config = YAML::LoadFile(configFile);
+
+		// yaml file must be a sequence of module paths to search for
+		if (!config.IsSequence()) {
+			UIPF_LOG_WARNING("Invalid config file '", configFile, "' does not contain a YAML list.");
+			return;
+		}
+
+		// create a ProcessingStep object from each config element
+		YAML::const_iterator it = config.begin();
+		for ( ; it != config.end(); ++it) {
+			addSearchPath(it->as<std::string>());
+		}
+	}
+	catch(...)
+	{
+		UIPF_LOG_WARNING("Failed to parse config file '", configFile, "'.");
+	}
 }
 
 
@@ -138,7 +170,7 @@ void uipf::ModuleLoader::loadFromPath(const std::string& sPath) {
 
 	try {
 		if (!exists(p)) {
-			UIPF_LOG_WARNING("Module search path does not exist: ", p);
+			UIPF_LOG_DEBUG("Module search path does not exist: ", p);
 		} else if (is_directory(p)) {
 
 			directory_iterator end_itr;
@@ -169,7 +201,7 @@ void uipf::ModuleLoader::loadLibrary(const std::string& file) {
 	UIPF_LOG_TRACE("Trying file: ", file);
 
 	Glib::Module* libModule = new Glib::Module(file);
-	UIPF_LOG_TRACE("Found Module: ", libModule->get_name());
+	//UIPF_LOG_TRACE("Found Module: ", libModule->get_name());
 
 	// a module defines the following functions, cmp. Module.hpp
 	typedef char* uipf_module_id_f();
@@ -209,7 +241,7 @@ void uipf::ModuleLoader::loadLibrary(const std::string& file) {
 
 		delete instance;
 	} else {
-		UIPF_LOG_ERROR("Failed to load module: ", libModule->get_last_error());
+		UIPF_LOG_ERROR("Failed to load module: ", file, " - ", Glib::Module::get_last_error());
 		delete libModule;
 	}
 }

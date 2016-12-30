@@ -14,6 +14,9 @@
 // TODO
 // - http://en.cppreference.com/w/cpp/language/copy_constructor
 // - http://doc.qt.io/qt-5/plugins-howto.html
+// // noncopyable
+// Module(const Module&);
+// Module& operator=(const Module&);
 
 
 // reference counting smart pointer

@@ -5,17 +5,16 @@ project(libuipf)
 # FLAGS
 #
 
-# whether to build with OpenCV. This will include types for OpenCV.
-option(WITH_TESTS "Build test binaries and enable `make test` target" ON)
-option(WITH_OPENCV "Build with openCV, enable openCV types" OFF)
+option(LIBUIPF_WITH_TESTS "Build test binaries and enable `make test` target" ON)
+option(LIBUIPF_WITH_OPENCV "Build with openCV, enable openCV types" OFF)
 
-if(WITH_TESTS)
+if(LIBUIPF_WITH_TESTS)
 	enable_testing()
 endif()
 
-message("Build options:")
-message("With Tests: ${WITH_TESTS}")
-message("With OpenCV: ${WITH_OPENCV}")
+message("libuipf Build options:")
+message("With Tests: ${LIBUIPF_WITH_TESTS}")
+message("With OpenCV: ${LIBUIPF_WITH_OPENCV}")
 
 # load CMake modules
 include(ExternalProject)
@@ -66,8 +65,6 @@ set(YAML_CPP_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP-bu
 # libuipf-module
 add_library(uipf-module STATIC
 
-	src/Data.cpp
-	src/Module.cpp
 	src/ModuleMetaData.cpp
 )
 
@@ -83,8 +80,8 @@ add_library(libuipf STATIC
 set_target_properties(libuipf PROPERTIES OUTPUT_NAME uipf)
 target_link_libraries(libuipf uipf-module ${YAML_CPP_LIBRARY} ${GLIBMM_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(libuipf YAML_CPP)
-if (WITH_OPENCV)
-	target_compile_definitions(libuipf PRIVATE WITH_OPENCV)
+if (LIBUIPF_WITH_OPENCV)
+	target_compile_definitions(libuipf PRIVATE LIBUIPF_WITH_OPENCV)
 	target_link_libraries(libuipf opencv_core)
 endif()
 
@@ -93,10 +90,10 @@ endif()
 # TESTS
 #
 
-if(WITH_TESTS)
+if(LIBUIPF_WITH_TESTS)
 	add_executable(test-libuipf-data             test/unit/data.cpp)
-	if (WITH_OPENCV)
-		target_compile_definitions(test-libuipf-data PRIVATE WITH_OPENCV)
+	if (LIBUIPF_WITH_OPENCV)
+		target_compile_definitions(test-libuipf-data PRIVATE LIBUIPF_WITH_OPENCV)
 	endif()
 	add_executable(test-libuipf-module_loader    test/unit/module_loader.cpp)
 	add_executable(test-libuipf-processing_chain test/unit/processing_chain.cpp)

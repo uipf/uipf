@@ -2,6 +2,7 @@
 #define LIBUIPF_LOGGING_HPP
 
 #include <iostream>
+// TODO skip this external dependency introduce logging.cpp
 #include <boost/filesystem.hpp>
 
 namespace uipf {
@@ -35,14 +36,19 @@ namespace uipf {
 	}
 }
 
+// you may define UIPF_LOG_LEVEL in your code to an expression that is used to determine the logging level
+#ifndef UIPF_LOG_LEVEL
+#define UIPF_LOG_LEVEL 3
+#endif
+
 // shortcuts to log
 // can be used like UIPF_LOG_ERROR("something bad happened!")
 // https://gcc.gnu.org/onlinedocs/cpp/Variadic-Macros.html#Variadic-Macros
 // output colors using ANSI codes http://en.wikipedia.org/wiki/ANSI_escape_code
-#define UIPF_LOG_ERROR(...)   uipf::log::logconcat( "\033[1;31mError: \033[0m", __VA_ARGS__ )
-#define UIPF_LOG_INFO(...)    uipf::log::logconcat( "\033[1mInfo: \033[0m", __VA_ARGS__ )
-#define UIPF_LOG_WARNING(...) uipf::log::logconcat( "\033[1;33mWarning: \033[0m", __VA_ARGS__ )
-#define UIPF_LOG_DEBUG(...)   uipf::log::logconcat( "\033[1;36mDebug: \033[0m", __VA_ARGS__ )
-#define UIPF_LOG_TRACE(...)   uipf::log::logconcat( "\033[1mTrace ", uipf::log::tracefilename<std::string>(__FILE__), ":", __LINE__, ":\033[0m ", __VA_ARGS__)
+#define UIPF_LOG_ERROR(...)   if (UIPF_LOG_LEVEL >= 1) { uipf::log::logconcat( "\033[1;31mError: \033[0m", __VA_ARGS__ ); }
+#define UIPF_LOG_WARNING(...) if (UIPF_LOG_LEVEL >= 2) { uipf::log::logconcat( "\033[1;33mWarning: \033[0m", __VA_ARGS__ ); }
+#define UIPF_LOG_INFO(...)    if (UIPF_LOG_LEVEL >= 3) { uipf::log::logconcat( "\033[1mInfo: \033[0m", __VA_ARGS__ ); }
+#define UIPF_LOG_DEBUG(...)   if (UIPF_LOG_LEVEL >= 4) { uipf::log::logconcat( "\033[1;36mDebug: \033[0m", __VA_ARGS__ ); }
+#define UIPF_LOG_TRACE(...)   if (UIPF_LOG_LEVEL >= 5) { uipf::log::logconcat( "\033[1mTrace ", uipf::log::tracefilename<std::string>(__FILE__), ":", __LINE__, ":\033[0m ", __VA_ARGS__); }
 
 #endif // LIBUIPF_LOGGING_HPP

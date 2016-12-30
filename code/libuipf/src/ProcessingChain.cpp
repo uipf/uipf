@@ -1,7 +1,9 @@
 #include <fstream>
+
+#include "yaml-cpp/yaml.h"
+
 #include "ProcessingChain.hpp"
 #include "logging.hpp"
-#include "yaml-cpp/yaml.h"
 
 using namespace std;
 using namespace uipf;
