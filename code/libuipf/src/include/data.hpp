@@ -25,7 +25,7 @@
 
 namespace uipf {
 
-	template <typename T>
+	//template <typename T>
 	class Data {
 
 	public:
@@ -44,7 +44,7 @@ namespace uipf {
 		virtual std::string getType() const = 0;
 
 		// returns the value of the integer
-		virtual T getContent() const = 0;
+//		virtual T getContent() const = 0;
 
 		// TODO serialization
 //		virtual std::string serialize() const = 0;
@@ -56,7 +56,7 @@ namespace uipf {
 	};
 }
 
-#define UIPF_BEGIN_DATA_TYPE(NAME, ID, TYPE) class NAME : public uipf::Data<TYPE> { \
+#define UIPF_BEGIN_DATA_TYPE(NAME, ID, TYPE) class NAME : public uipf::Data { \
 	public: \
 		typedef UIPF_SMARTPOINTER <NAME> ptr; \
 		typedef const UIPF_SMARTPOINTER <NAME> c_ptr; \

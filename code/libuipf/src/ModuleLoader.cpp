@@ -132,10 +132,17 @@ uipf::ModuleInterface *uipf::ModuleLoader::getModuleInstance(const std::string &
 
 	load();
 
-	// TODO implement
-
 	UIPF_LOG_TRACE("Instantiate module: ", name);
-	return nullptr;
+
+	if (!hasModule(name)) {
+		// TODO better throw exception
+		return nullptr;
+	}
+
+	typedef ModuleInterface* uipf_module_f();
+	uipf_module_f* fun = (uipf_module_f*) plugins_.at(name).instance_f;
+
+	return fun();
 }
 
 

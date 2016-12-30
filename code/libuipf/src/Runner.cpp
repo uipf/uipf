@@ -1,5 +1,6 @@
 #include "Runner.hpp"
 
+#include "data.hpp"
 #include "yaml-cpp/yaml.h"
 
 #include "logging.hpp"
@@ -112,7 +113,7 @@ void uipf::Runner::run() {
 
 // TODO
 //			DataManager dataMnrg(inputs, proSt.params, *outputs);
-//			module->run(dataMnrg);
+		module->run();
 
 		} catch (const ErrorException& e) {
 			// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
@@ -188,49 +189,3 @@ void uipf::Runner::run() {
 
 	UIPF_LOG_INFO( "Finished processing chain." );
 }
-
-/*
- * TODO
-std::vector<std::string> ModuleManager::loadPluginPathConfig()
-{
-	// search path for uipf config files
-	vector<std::string> configPath;
-	// search in current working directory
-	configPath.push_back("./modules.yaml");
-	// search in /etc
-	configPath.push_back("/etc/uipf/modules.yaml");
-	// search in home directory of the user
-	configPath.push_back("~/.uipf-modules.yaml");
-
-	vector<std::string> pluginPaths;
-	// also add two default search paths
-	pluginPaths.push_back("/usr/lib/uipf");
-	pluginPaths.push_back("/usr/local/lib/uipf");
-
-	// search for module path configuration files
-	for(auto cp = configPath.cbegin(); cp != configPath.end(); ++cp) {
-
-		try
-		{
-			// try to load yaml file
-			YAML::Node config = YAML::LoadFile(*cp);
-
-			// yaml file must be a sequence of module paths to search for
-			if (!config.IsSequence())
-				continue;
-
-			// create a ProcessingStep object from each config element
-			YAML::const_iterator it = config.begin();
-			for ( ; it != config.end(); ++it) {
-				pluginPaths.push_back(it->as<string>());
-			}
-		}
-		catch(...)
-		{
-		}
-
-	}
-
-	return pluginPaths;
-}
-*/

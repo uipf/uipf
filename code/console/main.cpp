@@ -6,6 +6,7 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <Runner.hpp>
 
 #include "uipf.hpp"
 #include "ModuleLoader.hpp"
@@ -293,7 +294,8 @@ int main(int argc, char** argv){
 
 	// run the current configuration
 	// TODO runner
-	//ml.run(chain);
+	Runner runner(chain, ml);
+	runner.run();
 
 	return 0;
 }

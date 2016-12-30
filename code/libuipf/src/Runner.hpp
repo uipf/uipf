@@ -16,7 +16,7 @@ class Runner{
 			moduleLoader_(ml) {};
 
 		// destructor
-		~Runner(void);
+		~Runner(void) {};
 
 		/**
 		 * Runs the processing chain by invoking the modules

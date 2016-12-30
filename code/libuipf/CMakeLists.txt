@@ -73,7 +73,7 @@ add_library(libuipf STATIC
 
 	src/ModuleLoader.cpp
 	src/ProcessingChain.cpp
-#	src/Runner.cpp
+	src/Runner.cpp
 	src/util.cpp
 )
 # name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html
