@@ -5,13 +5,22 @@
 using namespace uipf;
 using namespace std;
 
-ModuleMetaData::ModuleMetaData(map<string, DataDescription> inputs, map<string, DataDescription> outputs, map<string, ParamDescription> params)
-{
+ModuleMetaData::ModuleMetaData(
+		std::string id,
+		std::string name,
+		std::string category,
+		std::string description,
+		DataDescriptionMap inputs,
+		DataDescriptionMap outputs,
+		ParamDescriptionMap params
+) {
+	id_ = id;
+	name_ = name;
+	category_ = category;
+	description_ = description;
 	inputs_ = inputs;
 	outputs_ = outputs;
 	params_ = params;
-//	description_ = description;
-//	category_ = category;
 }
 
 string ModuleMetaData::getCategory() const {

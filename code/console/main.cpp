@@ -282,15 +282,14 @@ int main(int argc, char** argv){
 	chain.print();
 
 	// validate configuration and show errors
-	// TODO
-/*	pair< vector<string>, vector<string> > errors = chain.validate(ml.getAllModuleMetaData());
+	pair< vector<string>, vector<string> > errors = chain.validate(ml.getAllMetaData());
 	if (!errors.first.empty()) {
-		LOG_E("There are configuration errors!");
+		UIPF_LOG_ERROR("There are configuration errors!");
 		for(unsigned int i = 0; i < errors.first.size(); ++i) {
-			LOG_E(errors.first[i]);
+			UIPF_LOG_ERROR(errors.first[i]);
 		}
 		return 1;
-	}*/
+	}
 
 	// run the current configuration
 	// TODO runner

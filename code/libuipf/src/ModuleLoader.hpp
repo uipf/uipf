@@ -77,6 +77,7 @@ namespace uipf {
 		 * @return meta data information for a named module.
 		 */
 		ModuleMetaData getModuleMetaData(const std::string& id);
+		std::map<std::string, ModuleMetaData> getAllMetaData();
 
 		ModuleInterface* getModuleInstance(const std::string& id);
 
@@ -87,6 +88,11 @@ namespace uipf {
 			std::string name;
 			std::string category;
 			std::string description;
+
+			DataDescriptionMap inputs;
+			DataDescriptionMap outputs;
+			ParamDescriptionMap params;
+
 			void* module;
 			void* instance_f;
 		};

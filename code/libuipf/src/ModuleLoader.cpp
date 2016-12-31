@@ -137,9 +137,45 @@ uipf::ModuleMetaData uipf::ModuleLoader::getModuleMetaData(const std::string &id
 
 	load();
 
-	// TODO foreach metadata extract name
+	if (!hasModule(id)) {
+		// TODO better throw exception
+		return ModuleMetaData();
+	}
 
-	return uipf::ModuleMetaData();
+	Plugin &p = plugins_.at(id);
+	ModuleMetaData m(
+		p.id,
+		p.name,
+		p.category,
+		p.description,
+		p.inputs,
+		p.outputs,
+		p.params
+	);
+
+	return m;
+}
+
+
+std::map<std::string, uipf::ModuleMetaData> uipf::ModuleLoader::getAllMetaData() {
+
+	load();
+
+	std::map<std::string, uipf::ModuleMetaData> metaData;
+
+	uipf_foreach(p, plugins_) {
+		metaData.insert(std::pair<std::string, uipf::ModuleMetaData>(p->second.id, ModuleMetaData(
+				p->second.id,
+				p->second.name,
+				p->second.category,
+				p->second.description,
+				p->second.inputs,
+				p->second.outputs,
+				p->second.params
+		)));
+	}
+
+	return metaData;
 }
 
 
@@ -255,6 +291,9 @@ void uipf::ModuleLoader::loadLibrary(const std::string& file) {
 			p.name = instance->getName();
 			p.description = instance->getDescription();
 			p.category = instance->getCategory();
+			p.inputs = instance->getInputs();
+			p.outputs = instance->getOutputs();
+			p.params = instance->getParams();
 			p.module = (void *) libModule;
 			p.instance_f = (void *) fun_instance;
 			plugins_.insert(std::pair<std::string, Plugin>(moduleId, p));

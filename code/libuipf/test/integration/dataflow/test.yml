@@ -3,3 +3,5 @@ chain:
     module: de.tu-berlin.cvrs.uipftest.ProducerModule
   consumer:
     module: de.tu-berlin.cvrs.uipftest.ConsumerModule
+    input:
+      'string': producer.string

@@ -3,7 +3,7 @@
 #endif
 #define LIBUIPF_MODULE_HPP
 
-
+// TODO make Ids shorter, reserve a prefix for native uipf
 #ifndef UIPF_MODULE_ID
 #error "UIPF_MODULE_ID is not defined!"
 #endif
@@ -43,9 +43,15 @@ public:
 
 	void run() override;
 
-//#define UIPF_MODULE_INPUTS(...) //uipf::DataDescriptionMap getInputs() const override { return { __VA_ARGS__ }; }
-//#define UIPF_MODULE_OUTPUTS(...) //uipf::DataDescriptionMap getOutputs() const override { return { __VA_ARGS__ }; }
-//#define UIPF_MODULE_PARAMS(...) //uipf::ParamDescriptionMap getParams() const override { return { __VA_ARGS__ }; }
+#ifdef UIPF_MODULE_INPUTS
+	uipf::DataDescriptionMap getInputs() const override { return { UIPF_MODULE_INPUTS }; };
+#endif
+#ifdef UIPF_MODULE_OUTPUTS
+	uipf::DataDescriptionMap getOutputs() const override { return { UIPF_MODULE_OUTPUTS }; };
+#endif
+#ifdef UIPF_MODULE_PARAMS
+	uipf::ParamDescriptionMap getParams() const override { return { UIPF_MODULE_PARAMS }; };
+#endif
 
 };
 

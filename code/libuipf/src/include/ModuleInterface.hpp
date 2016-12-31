@@ -23,23 +23,15 @@ class ModuleInterface {
 		virtual std::string getCategory() const = 0;
 		virtual std::string getDescription() const { return ""; };
 
-		// meta data that contains description of modules inputs, outputs and parameters
-//		ModuleMetaData getMetaData() const {
-//			ModuleMetaData m(
-//				getInputs(),
-//				getOutputs(),
-//				getParams()
-//			);
-//		};
-//		virtual DataDescriptionMap getInputs() const {
-//			return {};
-//		};
-//		virtual DataDescriptionMap getOutputs() const {
-//			return {};
-//		};
-//		virtual ParamDescriptionMap getParams() const {
-//			return {};
-//		};
+		virtual DataDescriptionMap getInputs() const {
+			return {};
+		};
+		virtual DataDescriptionMap getOutputs() const {
+			return {};
+		};
+		virtual ParamDescriptionMap getParams() const {
+			return {};
+		};
 
 //		// context 	is a container providing access to the current environment, allowing to open windows, write to logger etc...
 //		virtual void setContext(Context *) = 0;

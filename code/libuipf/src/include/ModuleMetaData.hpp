@@ -67,6 +67,10 @@ class ModuleMetaData {
 	public:
 		// constructor
 		ModuleMetaData(
+			std::string, // id
+			std::string, // name
+			std::string, // category
+			std::string, // description
 			DataDescriptionMap, // input
 			DataDescriptionMap, // output
 			ParamDescriptionMap // params
