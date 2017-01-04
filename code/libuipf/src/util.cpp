@@ -7,7 +7,7 @@
 /*
 s	old name, which has to be renamed
 */
-std::string uipf::util::rename(std::string s){
+std::string uipf::util::rename(const std::string& s){
 
 	std::istringstream iss(s);
 
@@ -17,14 +17,21 @@ std::string uipf::util::rename(std::string s){
 	while (getline(iss, token, '.')) {
 		tokens.push_back(token);
 	}
-
-	std::string end = tokens[tokens.size()-1];
-	tokens.pop_back();
-	std::string beforeEnd = tokens[tokens.size()-1];
-	tokens.pop_back();
-	beforeEnd = beforeEnd +"_result";
-	tokens.push_back(beforeEnd);
-	tokens.push_back(end);
+	if (tokens.size() < 1) {
+		return "";
+	} else if (tokens.size() == 1) {
+		std::string end = tokens[0];
+		tokens.pop_back();
+		tokens.push_back(end + "_result");
+	} else {
+		std::string end = tokens[tokens.size() - 1];
+		tokens.pop_back();
+		std::string beforeEnd = tokens[tokens.size() - 1];
+		tokens.pop_back();
+		beforeEnd = beforeEnd + "_result";
+		tokens.push_back(beforeEnd);
+		tokens.push_back(end);
+	}
 
 	std::string newName;
 
@@ -40,7 +47,7 @@ std::string uipf::util::rename(std::string s){
 /*
 s	complete string, or only the second part
 */
-std::string uipf::util::secondPart(std::string s){
+std::string uipf::util::secondPart(const std::string& s){
 
 	std::istringstream iss(s);
 
@@ -63,7 +70,7 @@ std::string uipf::util::secondPart(std::string s){
 /*
 s	complete string
 */
-std::string uipf::util::firstPart(std::string s){
+std::string uipf::util::firstPart(const std::string& s){
 
 	std::istringstream iss(s);
 

@@ -15,12 +15,12 @@ namespace uipf {
 
 		// TODO refactor these to "split()"
 		// gets the first part of the string, which is divided by : , e.g. source:../ball.png -> source
-		std::string firstPart(std::string s);
+		std::string firstPart(const std::string& s);
 		// gets the second part of the string, which is divided by : , e.g. source:../ball.png -> ../ball.png
-		std::string secondPart(std::string s);
+		std::string secondPart(const std::string& s);
 
 		// renames a filename by adding _result before the end, eg. ball.png -> ball_result.png
-		std::string rename(std::string s);
+		std::string rename(const std::string& s);
 
 	}
 }
