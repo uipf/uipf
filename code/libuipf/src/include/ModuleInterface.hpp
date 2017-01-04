@@ -1,8 +1,13 @@
 #ifndef LIBUIPF_MODULEINTERFACE_HPP
 #define LIBUIPF_MODULEINTERFACE_HPP
 
+#include <algorithm>
+#include <string>
+#include <sstream>
+
 #include "data.hpp"
 #include "ModuleMetaData.hpp"
+#include "exceptions.hpp"
 
 namespace uipf {
 
@@ -44,49 +49,46 @@ class ModuleInterface {
 
 
 		// check whether named input data is given
-/*		virtual bool hasInputData( const std::string& strName) const = 0;
+		bool hasInputData( const std::string& strName) const {
+			return input_.find(strName) != input_.end();
+		};
 
 		// returns a typesafe readonly smartpointer to input data by name if it is available
 		template <typename T>
 		const typename T::ptr getInputData( const std::string& strName) const;
 
-		// returns a typesafe smartpointer to output data by name if it is available
-		template <typename T>
-		typename T::ptr getOutputData( const std::string& strName) const;
+//		// returns a typesafe smartpointer to output data by name if it is available
+//		template <typename T>
+//		typename T::ptr getOutputData( const std::string& strName) const;
 
 		// sets a typesafe smartpointer for output data by name
 		template <typename T>
 		void setOutputData( const std::string& strName, T*);
 
-
 		// returns a typesafe parameter by name if it is available. otherwise a defaultValue is used.
 		template <typename T>
 		T getParam(const std::string& strName, T defaultValue) const;
 
-*/
-};
+	private:
 
-} //namespace
+		std::map < std::string, Data::ptr > input_; // TODO const!
+		std::map < std::string, Data::ptr > output_;
+		std::map < std::string, std::string > params_;
 
-// this is used for dynamic loading of Qt Plugins
-// it allows modules to be loaded dynamically from shared library files
-//#define UIPF_MODULE_ID "de.tu-berlin.uipf.Module"
+	};
 
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//templates need to be implemented in headers
-
-/*
-namespace uipf {
+	/*
+	 * templates need to be implemented in headers
+	 */
 
 	template <typename T>
-	const typename T::ptr Module::getInputData( const std::string& strName) const
+	const typename T::ptr ModuleInterface::getInputData( const std::string& strName) const
 	{
 		auto it = input_.find(strName);
 		if (it != input_.end())
 		{
 			//do downcasting..
-			Data::ptr& ptr = it->second;
+			Data::ptr ptr = it->second;
 			return std::dynamic_pointer_cast<T>(ptr);
 		}
 		else
@@ -96,115 +98,104 @@ namespace uipf {
 	}
 
 
-	template <typename T>
-	typename T::ptr Module::getOutputData( const std::string& strName) const
-	{
-		auto it = output_.find(strName);
-		if (it != output_.end())
-		{
-			//do downcasting..
-			Data::ptr& ptr = it->second;
-			return std::dynamic_pointer_cast<T>(ptr);
-		}
-		else
-		{
-			throw InvalidConfigException(std::string("output data '") + strName + std::string("' not found!"));
-		}
-	}
+//	template <typename T>
+//	typename T::ptr ModuleInterface::getOutputData( const std::string& strName) const
+//	{
+//		auto it = output_.find(strName);
+//		if (it != output_.end())
+//		{
+//			//do downcasting..
+//			Data::ptr& ptr = it->second;
+//			return std::dynamic_pointer_cast<T>(ptr);
+//		}
+//		else
+//		{
+//			throw InvalidConfigException(std::string("output data '") + strName + std::string("' not found!"));
+//		}
+//	}
 
 	template <typename T>
-	void Module::setOutputData( const std::string& strName, T* outputData)
+	void ModuleInterface::setOutputData( const std::string& strName, T* outputData)
 	{
 		output_.insert (std::pair < std::string, Data::ptr >(strName, typename T::ptr(outputData)));
 	}
 
 
 	template <typename T>
-	T Module::getParam( const std::string& strName, T defaultValue) const
+	T ModuleInterface::getParam( const std::string& strName, T defaultValue) const
 	{
-		if (params_.find(strName) != params_.end())
-		{
-			return static_cast<T>(params_[strName]);
-		}
-		else
-		{
+		auto it = params_.find(strName);
+		if (it != params_.end()) {
+			return static_cast<T>(it->second);
+		} else {
 			return defaultValue;
 		}
 	}
 
 	template <>
-	inline int Module::getParam( const std::string& strName, int defaultValue) const
+	inline int ModuleInterface::getParam( const std::string& strName, int defaultValue) const
 	{
-		if (params_.find(strName) != params_.end() && !params_[strName].empty())
-		{
-			return std::stoi(params_[strName]);
-		}
-		else
-		{
+		auto it = params_.find(strName);
+		if (it != params_.end() && !it->second.empty()) {
+			return std::stoi(it->second);
+		} else {
 			return defaultValue;
 		}
 	}
 
 	template <>
-	inline float Module::getParam(const std::string& strName, float defaultValue) const
+	inline float ModuleInterface::getParam(const std::string& strName, float defaultValue) const
 	{
-		if (params_.find(strName) != params_.end() && !params_[strName].empty())
-		{
+		auto it = params_.find(strName);
+		if (it != params_.end() && !it->second.empty()) {
 			// std::stof() is locale aware, meaning params are not portable between platforms
 			// the following is a locale independend stof():
 			float value = defaultValue;
-			std::istringstream istr(params_[strName]);
+			std::istringstream istr(it->second);
 			istr.imbue(std::locale("C"));
 			istr >> value;
 			return value;
-		}
-		else
-		{
+		} else {
 			return defaultValue;
 		}
 	}
 
 	template <>
-	inline double Module::getParam( const std::string& strName, double defaultValue) const
+	inline double ModuleInterface::getParam( const std::string& strName, double defaultValue) const
 	{
-		if (params_.find(strName) != params_.end() && !params_[strName].empty())
-		{
+		auto it = params_.find(strName);
+		if (it != params_.end() && !it->second.empty()) {
 			// std::stod() is locale aware, meaning params are not portable between platforms
 			// the following is a locale independend stod():
 			double value = defaultValue;
-			std::istringstream istr(params_[strName]);
+			std::istringstream istr(it->second);
 			istr.imbue(std::locale("C"));
 			istr >> value;
 			return value;
-		}
-		else
-		{
+		} else {
 			return defaultValue;
 		}
 	}
 
 	template <>
-	inline bool Module::getParam( const std::string& strName, bool defaultValue) const
+	inline bool ModuleInterface::getParam( const std::string& strName, bool defaultValue) const
 	{
-		if (params_.find(strName) != params_.end() && !params_[strName].empty())
-		{
-			std::string lower = utils::toLower(params_[strName]);
+		auto it = params_.find(strName);
+		if (it != params_.end() && !it->second.empty()) {
+			std::string lower = it->second;
+			std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 			return lower.compare("true") == 0
 			       || lower.compare("yes") == 0
 			       || lower.compare("y") == 0
 			       || lower.compare("t") == 0
 			       || lower.compare("1") == 0;
-		}
-		else
-		{
+		} else {
 			return defaultValue;
 		}
 	}
 
 
 } //namespace
-*/
-
 
 
 #endif //LIBUIPF_MODULEINTERFACE_HPP

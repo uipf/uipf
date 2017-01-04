@@ -12,6 +12,8 @@
 #error "UIPF_MODULE_CLASS is not defined!"
 #endif
 
+#include <string>
+#include <map>
 #include "ModuleInterface.hpp"
 
 
