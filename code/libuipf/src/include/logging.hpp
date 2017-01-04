@@ -2,8 +2,7 @@
 #define LIBUIPF_LOGGING_HPP
 
 #include <iostream>
-// TODO skip this external dependency introduce logging.cpp
-#include <boost/filesystem.hpp>
+
 
 namespace uipf {
 	namespace log {
@@ -27,11 +26,11 @@ namespace uipf {
 			}
 		}
 
-		template<typename T>
+/*		template<typename T>
 		std::string tracefilename(const std::string& file) {
 			boost::filesystem::path p(file);
 			return p.filename().string();
-		}
+		}*/
 
 	}
 }
@@ -49,6 +48,6 @@ namespace uipf {
 #define UIPF_LOG_WARNING(...) if (UIPF_LOG_LEVEL >= 2) { uipf::log::logconcat( "\033[1;33mWarning: \033[0m", __VA_ARGS__ ); }
 #define UIPF_LOG_INFO(...)    if (UIPF_LOG_LEVEL >= 3) { uipf::log::logconcat( "\033[1mInfo: \033[0m", __VA_ARGS__ ); }
 #define UIPF_LOG_DEBUG(...)   if (UIPF_LOG_LEVEL >= 4) { uipf::log::logconcat( "\033[1;36mDebug: \033[0m", __VA_ARGS__ ); }
-#define UIPF_LOG_TRACE(...)   if (UIPF_LOG_LEVEL >= 5) { uipf::log::logconcat( "\033[1mTrace ", uipf::log::tracefilename<std::string>(__FILE__), ":", __LINE__, ":\033[0m ", __VA_ARGS__); }
+#define UIPF_LOG_TRACE(...)   if (UIPF_LOG_LEVEL >= 5) { uipf::log::logconcat( "\033[1mTrace ", /*uipf::log::tracefilename<std::string>(*/__FILE__, ":", __LINE__, ":\033[0m ", __VA_ARGS__); }
 
 #endif // LIBUIPF_LOGGING_HPP
