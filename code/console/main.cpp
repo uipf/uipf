@@ -46,6 +46,7 @@ int main(int argc, char** argv){
 		("output,o",	po::value< vector<string> >()->composing(), "defines an output, can be used multiple times, format: outputName:fileName. outputName is optional, if there is only one input. Output is optional, if there is only one input and one output, the output filename will be chosen from the input name in this case.")
 		("param,p",	po::value< vector<string> >()->composing(),	"defines a parameter, format:  name:value")
 		("list,l", "list all available modules.")
+		("info", "print information and description about a module.")
 		;
 
 	// Hidden options, will be allowed command line, but will not be shown to the user.
@@ -127,6 +128,67 @@ int main(int argc, char** argv){
 		std::vector<std::string> modules = ml.getModuleIds();
 		for(auto mit = modules.begin(); mit != modules.end(); ++mit) {
 			cout << *mit << endl;
+		}
+
+		return 0;
+	} else if (vm.count("info")){
+	// list information about a specific module
+	// ./uipf --info moduleId
+
+		if (!vm.count("modulename")){
+			// TODO help
+			return 1;
+		}
+		string moduleId = vm["modulename"].as<string>();
+		//string moduleId = vm["info"].as< string >();
+		if (!ml.hasModule(moduleId)) {
+			UIPF_LOG_ERROR("Module '", moduleId, "' does not exist.")
+			return 1;
+		}
+
+		ModuleMetaData meta = ml.getModuleMetaData(moduleId);
+		cout << "Module ID:   " << meta.getId() << endl;
+		cout << "Name:        " << meta.getName() << endl;
+		cout << "Category:    " << meta.getCategory() << endl;
+		cout << "Description: " << meta.getDescription() << endl;
+		DataDescriptionMap inputs = meta.getInputs();
+		if (inputs.empty()) {
+			cout << "Inputs:      (none)" << endl;
+		} else {
+			cout << "Inputs:" << endl;
+			uipf_foreach(it, inputs) {
+				cout << " - " << it->first;
+				if (it->second.getIsOptional()) {
+					cout << " (optional)";
+				}
+				cout << ": " << it->second.getType() << " : " << it->second.getDescription() << endl;
+			}
+		}
+		DataDescriptionMap outputs = meta.getOutputs();
+		if (outputs.empty()) {
+			cout << "Outputs:     (none)" << endl;
+		} else {
+			cout << "Outputs:" << endl;
+			uipf_foreach(it, outputs) {
+				cout << " - " << it->first;
+//				if (it->second.getIsOptional()) {
+//					cout << " (optional)";
+//				}
+				cout << ": " << it->second.getType() << " : " << it->second.getDescription() << endl;
+			}
+		}
+		ParamDescriptionMap params = meta.getParams();
+		if (params.empty()) {
+			cout << "Params:      (none)" << endl;
+		} else {
+			cout << "Params:" << endl;
+			uipf_foreach(it, params) {
+				cout << " - " << it->first;
+				if (it->second.getIsOptional()) {
+					cout << " (optional)";
+				}
+				cout << ": " << it->second.getDescription() << endl;
+			}
 		}
 
 		return 0;

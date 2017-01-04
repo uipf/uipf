@@ -37,7 +37,7 @@ class DataDescription : public Description {
 		// destructor
 		virtual ~DataDescription(void){};
 
-		std::string getType() { return type_; };
+		std::string getType() const { return type_; };
 
 	private:
 		// the type of the input/output data
