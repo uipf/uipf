@@ -232,7 +232,7 @@ int main(int argc, char** argv){
 		processModule.name = "processModule";
 		processModule.module = modName;
 
-		if (vm.count("input")) {
+		if (vm.count("input")) { // TODO implement this based on serialization and type inference
 			vector<string> inputs = vm["input"].as< vector<string> >();
 			// this step is repeated as often, as the number of load modules is created
 			for (unsigned int i=0; i<inputs.size(); i++){

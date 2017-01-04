@@ -10,8 +10,8 @@ namespace uipf {
 
 		// create types for OpenCV if built with OpenCV support
 
-		UIPF_BEGIN_DATA_TYPE (OpenCVMat, "de.tu-berlin.opencv.Mat", cv::Mat)
-		UIPF_END_DATA_TYPE
+		UIPF_DATA_TYPE_BEGIN (OpenCVMat, "de.tu-berlin.opencv.Mat", cv::Mat)
+		UIPF_DATA_TYPE_END
 
 	};
 };

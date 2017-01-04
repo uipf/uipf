@@ -2,8 +2,12 @@
 #define LIBUIPF_DATA_HPP
 
 #include <string>
+#include <istream>
+#include <ostream>
 #include <vector>
 #include <memory>
+
+#include "exceptions.hpp"
 
 /*
  * This file contains the Declaration for the UIPF Type system.
@@ -46,9 +50,11 @@ namespace uipf {
 		// returns the value of the integer
 //		virtual T getContent() const = 0;
 
-		// TODO serialization
-//		virtual std::string serialize() const = 0;
-//		virtual ptr unserialize(std::string) const = 0;
+		// serialization, allow reading from files and writing to files
+		// or other string transport
+		virtual void serialize(std::ostream&) const { throw uipf::ErrorException("Data Type is not serializable."); };
+		// unserialize constructor
+		Data(std::istream&) { throw uipf::ErrorException("Data Type is not serializable."); };
 
 		// TODO partitioning
 
@@ -56,7 +62,7 @@ namespace uipf {
 	};
 }
 
-#define UIPF_BEGIN_DATA_TYPE(NAME, ID, TYPE) class NAME : public uipf::Data { \
+#define UIPF_DATA_TYPE_BEGIN(NAME, ID, TYPE) class NAME : public uipf::Data { \
 	public: \
 		typedef UIPF_SMARTPOINTER <NAME> ptr; \
 		typedef const UIPF_SMARTPOINTER <NAME> c_ptr; \
@@ -69,6 +75,6 @@ namespace uipf {
 		void setContent(TYPE d) { data_ = d; }; \
 	private: \
 		TYPE data_;
-#define UIPF_END_DATA_TYPE };
+#define UIPF_DATA_TYPE_END };
 
 #endif //LIBUIPF_DATA_HPP
