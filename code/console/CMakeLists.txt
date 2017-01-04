@@ -24,3 +24,7 @@ add_executable(uipf
 	main.cpp
 )
 target_link_libraries(uipf libuipf boost_program_options)
+
+
+# installation targets
+install(TARGETS uipf RUNTIME DESTINATION bin)

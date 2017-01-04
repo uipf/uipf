@@ -45,6 +45,7 @@ configure_file (
 
 add_subdirectory(libuipf)
 
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 add_subdirectory(console)
 #add_subdirectory(gui)
 

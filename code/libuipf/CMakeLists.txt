@@ -125,3 +125,14 @@ if(LIBUIPF_WITH_TESTS)
 		)
 	endif()
 endif()
+
+
+# installation targets
+install(TARGETS libuipf uipf-module
+        LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib
+)
+install(DIRECTORY ${libuipf_SOURCE_DIR}/src/include/
+		DESTINATION include/uipf
+		FILES_MATCHING PATTERN "*.hpp"
+)
