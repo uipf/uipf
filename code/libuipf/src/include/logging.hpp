@@ -37,7 +37,7 @@ namespace uipf {
 
 // you may define UIPF_LOG_LEVEL in your code to an expression that is used to determine the logging level
 #ifndef UIPF_LOG_LEVEL
-#define UIPF_LOG_LEVEL 3
+#define UIPF_LOG_LEVEL 4
 #endif
 
 // shortcuts to log

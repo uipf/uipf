@@ -64,6 +64,8 @@ class ModuleInterface {
 		// sets a typesafe smartpointer for output data by name
 		template <typename T>
 		void setOutputData( const std::string& strName, T*);
+		template <typename T>
+		void setOutputData( const std::string& strName, typename T::ptr);
 
 		// returns a typesafe parameter by name if it is available. otherwise a defaultValue is used.
 		template <typename T>
@@ -75,6 +77,8 @@ class ModuleInterface {
 		std::map < std::string, Data::ptr > output_;
 		std::map < std::string, std::string > params_;
 
+		// Make the Runner class a friend of Module, to allow populating data
+		friend class Runner;
 	};
 
 	/*
@@ -117,7 +121,21 @@ class ModuleInterface {
 	template <typename T>
 	void ModuleInterface::setOutputData( const std::string& strName, T* outputData)
 	{
-		output_.insert (std::pair < std::string, Data::ptr >(strName, typename T::ptr(outputData)));
+		if (outputData != nullptr) {
+			output_.insert (std::pair < std::string, Data::ptr >(strName, typename T::ptr(outputData)));
+		} else {
+			throw ErrorException("Can not use an uninitialized pointer as output data.");
+		}
+	}
+
+	template <typename T>
+	void ModuleInterface::setOutputData( const std::string& strName, typename T::ptr outputData)
+	{
+		if (outputData != nullptr) {
+			output_.insert (std::pair < std::string, Data::ptr >(strName, outputData));
+		} else {
+			throw ErrorException("Can not use an uninitialized pointer as output data.");
+		}
 	}
 
 

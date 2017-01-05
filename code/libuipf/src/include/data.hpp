@@ -68,10 +68,12 @@ namespace uipf {
 		typedef const UIPF_SMARTPOINTER <NAME> c_ptr; \
 		std::string getType() const override { return ID; }; \
 		static std::string id() { return ID; }; \
+		NAME() {}; \
 		NAME(TYPE d) : data_(d) {};/* TODO constructor should not copy original data */  \
 /*		NAME(const NAME& d) : data_(d.data_) {}; */ \
 		~NAME(void){}; \
-		TYPE getContent() const { return data_; }; \
+		TYPE& getContent() { return data_; }; \
+		const TYPE& getContent() const { return data_; }; \
 		void setContent(TYPE d) { data_ = d; }; \
 	private: \
 		TYPE data_;

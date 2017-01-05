@@ -5,7 +5,8 @@
 #include <sstream>
 
 // a macro to simply simple for loops
-#define uipf_foreach(i, set) for(auto i = set.cbegin(); i != set.end(); ++i)
+#define uipf_cforeach(i, set) for(auto i = set.cbegin(); i != set.end(); ++i)
+#define uipf_foreach(i, set) for(auto i = set.begin(); i != set.end(); ++i)
 
 
 // This is a collection of help-methods

@@ -69,7 +69,7 @@ std::vector<std::string> uipf::ModuleLoader::getModuleIds() {
 	vector<string> ids;
 
 	// foreach metadata extract name
-	uipf_foreach(p, plugins_) {
+	uipf_cforeach(p, plugins_) {
 		ids.push_back(p->second.id);
 	}
 
@@ -85,7 +85,7 @@ std::map<std::string, std::string> uipf::ModuleLoader::getModuleNames() {
 	map<string, string> names;
 
 	// foreach metadata extract name
-	uipf_foreach(p, plugins_) {
+	uipf_cforeach(p, plugins_) {
 		names.insert(pair<string, string>(p->second.id, p->second.name));
 	}
 
@@ -101,7 +101,7 @@ std::map< std::string, std::vector<std::string> > uipf::ModuleLoader::getModuleC
 	map< string, vector<string> > categories;
 
 	// foreach metadata extract name
-	uipf_foreach(p, plugins_) {
+	uipf_cforeach(p, plugins_) {
 
 		auto cat = categories.find(p->second.category);
 		if (cat == categories.end()) {
@@ -122,7 +122,7 @@ bool uipf::ModuleLoader::hasModule(const std::string &id) {
 	load();
 
 	// foreach metadata extract name
-	uipf_foreach(p, plugins_) {
+	uipf_cforeach(p, plugins_) {
 		if (p->second.id == id) {
 			return true;
 		}
@@ -163,7 +163,7 @@ std::map<std::string, uipf::ModuleMetaData> uipf::ModuleLoader::getAllMetaData()
 
 	std::map<std::string, uipf::ModuleMetaData> metaData;
 
-	uipf_foreach(p, plugins_) {
+	uipf_cforeach(p, plugins_) {
 		metaData.insert(std::pair<std::string, uipf::ModuleMetaData>(p->second.id, ModuleMetaData(
 				p->second.id,
 				p->second.name,

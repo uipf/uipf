@@ -4,6 +4,7 @@
 #include "yaml-cpp/yaml.h"
 
 #include "logging.hpp"
+#include "util.hpp"
 
 
 void uipf::Runner::run() {
@@ -64,7 +65,7 @@ void uipf::Runner::run() {
 
 
 	// contains the outputs of the processing steps
-	map<string, map<string, Data::ptr>* > stepsOutputs;
+	map<string, map<string, Data::ptr> > stepsOutputs;
 
 	UIPF_LOG_INFO( "Starting processing chain." );
 
@@ -90,30 +91,40 @@ void uipf::Runner::run() {
 			break;
 		}
 
-		// prepare an empty map of outputs that will be filled by the module
-		map<string, Data::ptr >* outputs = new map<string, Data::ptr>();
-		// inputs are references to the data pointer to allow sending one output to multiple steps
-		map<string, Data::ptr& > inputs;
-
-		// fill the inputs of the current processing step by taking it from the stored outputs
-		map<string, pair<string, string> >::iterator it = proSt.inputs.begin();
-		for (; it!=proSt.inputs.end(); ++it) {
-			// skip empty references (unset optional input)
-			if (it->second.first.empty()) {
-				continue;
-			}
-			map<string, Data::ptr>* out = stepsOutputs[it->second.first];
-			Data::ptr& pt = out->find(it->second.second)->second;
-			inputs.insert(pair<string, Data::ptr&>(it->first, pt));
-		}
-
-		UIPF_LOG_INFO( "Running step '", proSt.name, "'..." );
 
 		try {
 
-// TODO
-//			DataManager dataMnrg(inputs, proSt.params, *outputs);
-		module->run();
+	//		// prepare an empty map of outputs that will be filled by the module
+	//		map<string, Data::ptr >* outputs = new map<string, Data::ptr>();
+	//		// inputs are references to the data pointer to allow sending one output to multiple steps
+	//		map<string, Data::ptr& > inputs;
+
+			// fill the inputs of the current processing step by taking it from the stored outputs
+			uipf_foreach(input, proSt.inputs) {
+				// skip empty references (unset optional input)
+				if (input->second.first.empty()) {
+					continue;
+				}
+				map<string, Data::ptr> moduleOutputs = stepsOutputs[input->second.first];
+				uipf_cforeach(debug, moduleOutputs) {
+					UIPF_LOG_WARNING(debug->first, ": ", debug->second.use_count());
+				}
+				auto outputElement = moduleOutputs.find(input->second.second);
+				if (outputElement == moduleOutputs.end()) {
+					throw ErrorException(string("Output '") + input->second.second + string("' requested by step '") + proSt.name + string("' for input '") + input->second.first + string("' does not exist."));
+				}
+				UIPF_LOG_WARNING(outputElement->second. use_count());
+				module->input_.insert(pair<string, Data::ptr>(input->first, outputElement->second));
+			}
+
+			// set module params
+			module->params_ = proSt.params;
+
+			UIPF_LOG_INFO( "Running step '", proSt.name, "'..." );
+
+			module->run();
+
+			UIPF_LOG_INFO( "Done with step '", proSt.name, "'." );
 
 		} catch (const ErrorException& e) {
 			// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
@@ -132,8 +143,6 @@ void uipf::Runner::run() {
 		// update the progress bar in the GUI
 		// TODO GUIEventDispatcher::instance()->triggerReportProgress(static_cast<float>(i+1)/static_cast<float>(sortedChain.size())*100.0f);
 
-		UIPF_LOG_INFO( "Done with step '", proSt.name, "'." );
-
 		// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::GOOD,false);
 
 		// check if stop button was pressed
@@ -144,17 +153,16 @@ void uipf::Runner::run() {
 //			break;
 //		}
 		// fill the outputs of the current processing step
-		stepsOutputs.insert(pair<string, map<string, Data::ptr>* > (proSt.name, outputs));
+		stepsOutputs.insert(pair<string, map<string, Data::ptr> > (proSt.name, module->output_));
 
 		// TODO delete module, check for side effects with the data pointers first
 
 		// free some outputs that are not needed anymore
-		map<string, map<string, Data::ptr>* >::iterator osit = stepsOutputs.begin();
-		for (; osit!=stepsOutputs.end(); ++osit) {
+		uipf_foreach(osit, stepsOutputs) {
 
 			string outputStep = osit->first;
 
-			for (auto oit = osit->second->begin(); oit!=osit->second->end(); ) {
+			for (auto oit = osit->second.begin(); oit!=osit->second.end(); /* no ++ here */) {
 
 				string outputName = oit->first;
 
@@ -163,9 +171,10 @@ void uipf::Runner::run() {
 				for (unsigned int s = i + 1; s<sortedChain.size() && !requested; s++){
 
 					ProcessingStep fstep = chain[sortedChain[s]];
-					for (auto iit=fstep.inputs.cbegin(); iit != fstep.inputs.end(); ++iit) {
+					uipf_cforeach(iit, fstep.inputs) {
 						if (outputStep.compare(iit->second.first) == 0 && outputName.compare(iit->second.second) == 0) {
 							requested = true;
+							UIPF_LOG_DEBUG(outputStep, ".", outputName, " is requested.");
 							break;
 						}
 					}
@@ -173,7 +182,7 @@ void uipf::Runner::run() {
 				if (!requested) {
 					// output is not requested in any further step, delete it
 					UIPF_LOG_INFO("deleted ", outputStep, ".", outputName);
-					oit = osit->second->erase(oit);
+					oit = osit->second.erase(oit);
 				} else {
 					++oit;
 				}
@@ -182,10 +191,9 @@ void uipf::Runner::run() {
 	}
 
 	// delete the ouput map
-	map<string, map<string, Data::ptr>* >::iterator it = stepsOutputs.begin();
-	for (; it!=stepsOutputs.end(); ++it) {
-		delete it->second;
-	}
+//	uipf_foreach(it, stepsOutputs) {
+//		delete it->second;
+//	}
 
 	UIPF_LOG_INFO( "Finished processing chain." );
 }

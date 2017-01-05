@@ -97,15 +97,10 @@ int main(int argc, char** argv){
 		uipf_console_log_level = 0;
 	}
 
-	ModuleLoader ml;
+	//ModuleLoader ml;
 	// add default search paths for modules
-	ml.addSearchPath(".");
-	ml.addSearchPath("/usr/lib/uipf2");
-	ml.addSearchPath("/usr/local/lib/uipf2");
 	// add user configured module search paths
-	ml.addSearchPathsFromConfig("./modules.yaml");
-	ml.addSearchPathsFromConfig("~/.uipf-modules.yaml");
-//	ml.addSearchPathsFromConfig("/etc/uipf/modules.yaml");
+	#include "paths.cpp"
 
 	if (vm.count("configuration")){
 	// run a processing chain from a config file.
@@ -156,7 +151,7 @@ int main(int argc, char** argv){
 			cout << "Inputs:      (none)" << endl;
 		} else {
 			cout << "Inputs:" << endl;
-			uipf_foreach(it, inputs) {
+			uipf_cforeach(it, inputs) {
 				cout << " - " << it->first;
 				if (it->second.getIsOptional()) {
 					cout << " (optional)";
@@ -169,7 +164,7 @@ int main(int argc, char** argv){
 			cout << "Outputs:     (none)" << endl;
 		} else {
 			cout << "Outputs:" << endl;
-			uipf_foreach(it, outputs) {
+			uipf_cforeach(it, outputs) {
 				cout << " - " << it->first;
 //				if (it->second.getIsOptional()) {
 //					cout << " (optional)";
@@ -182,7 +177,7 @@ int main(int argc, char** argv){
 			cout << "Params:      (none)" << endl;
 		} else {
 			cout << "Params:" << endl;
-			uipf_foreach(it, params) {
+			uipf_cforeach(it, params) {
 				cout << " - " << it->first;
 				if (it->second.getIsOptional()) {
 					cout << " (optional)";
@@ -238,7 +233,7 @@ int main(int argc, char** argv){
 			for (unsigned int i=0; i<inputs.size(); i++){
 				ProcessingStep loadModule;
 				loadModule.name = "loadModule" + to_string(i);
-				loadModule.module = "loadImage";
+				loadModule.module = "uipf.opencv.load";
 
 				string source = util::secondPart(inputs[i]);
 
@@ -342,6 +337,7 @@ int main(int argc, char** argv){
 	// print the loaded config
 	UIPF_LOG_INFO("Here is the loaded configuration:");
 	chain.print();
+	std::cout << "--" << std::endl;
 
 	// validate configuration and show errors
 	pair< vector<string>, vector<string> > errors = chain.validate(ml.getAllMetaData());

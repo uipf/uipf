@@ -45,6 +45,8 @@ configure_file (
 
 add_subdirectory(libuipf)
 
+add_subdirectory(modules)
+
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 add_subdirectory(console)
 #add_subdirectory(gui)
@@ -94,3 +96,4 @@ add_subdirectory(console)
 #	${CMAKE_CURRENT_SOURCE_DIR}/uipf.desktop
 #	DESTINATION /usr/share/applications
 #)
+
