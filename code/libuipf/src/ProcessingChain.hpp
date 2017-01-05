@@ -11,6 +11,22 @@
 namespace uipf{
 
 
+	class StepInput {
+
+	public:
+
+		std::string sourceStep;
+		std::string outputName;
+		bool map = false;
+
+		std::string toString() const {
+			if (sourceStep.empty()) {
+				return "";
+			}
+			return sourceStep + "." + outputName + (map ? ".map()" : "");
+		}
+	};
+
 
 	class ProcessingStep{
 
@@ -26,7 +42,7 @@ namespace uipf{
 		std::map<std::string, std::string> params;
 
 		// inputs from other modules <inputName> => <nameOfOtherModule, outputOfOtherModule>
-		std::map<std::string, std::pair<std::string, std::string> > inputs;
+		std::map<std::string, StepInput > inputs;
 
 	};
 
@@ -79,7 +95,7 @@ namespace uipf{
 		void setProcessingStepParams(std::string, std::map<std::string, std::string>);
 
 		// sets the inputs for a named processing step
-		void setProcessingStepInputs(std::string, std::map<std::string, std::pair<std::string, std::string> >);
+		void setProcessingStepInputs(std::string, std::map<std::string, StepInput >);
 
 	private:
 		// chain of ProcessingSteps name => step

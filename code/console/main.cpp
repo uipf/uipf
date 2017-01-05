@@ -251,9 +251,11 @@ int main(int argc, char** argv){
 				} else {
 					name = util::firstPart(inputs[i]);
 				}
-				pair<string,string> loadWithValue(loadModule.name, "image");
+				StepInput loadWithValue;
+				loadWithValue.sourceStep = loadModule.name;
+				loadWithValue.outputName = "image";
 
-				processModule.inputs.insert(pair<string, pair<string, string> >(name, loadWithValue));
+				processModule.inputs.insert(pair<string, StepInput >(name, loadWithValue));
 			}
 
 			// if only one input, create an output automatically, if none is given explicitly
@@ -265,14 +267,16 @@ int main(int argc, char** argv){
 					auto it = out.cbegin();
 					string outName = it->first;
 
-					pair<string, string> storeSource(processModule.name,outName);
+					StepInput storeSource;
+					storeSource.sourceStep = processModule.name;
+					storeSource.outputName = outName;
 
 					ProcessingStep storeModule;
 					storeModule.name = "storeModule";
 					storeModule.module = "storeImage";
 
 					// where does the image come from
-					storeModule.inputs.insert (pair<string, pair<string, string> >("image", storeSource));
+					storeModule.inputs.insert (pair<string, StepInput >("image", storeSource));
 
 					// where should it be stored
 					string newName = util::rename(util::secondPart(inputs[0]));
@@ -302,14 +306,16 @@ int main(int argc, char** argv){
 					outName = util::firstPart(outputs[i]);
 				}
 
-				pair<string, string> storeSource(processModule.name, outName);
+				StepInput storeSource;
+				storeSource.sourceStep = processModule.name;
+				storeSource.outputName = outName;
 
 				ProcessingStep storeModule;
 				storeModule.name = "storeModule" + to_string(i);
 				storeModule.module = "storeImage";
 
 				// where does the image come from
-				storeModule.inputs.insert (pair<string, pair<string, string> >("image",storeSource) );
+				storeModule.inputs.insert (pair<string, StepInput >("image",storeSource) );
 				// where should it be stored
 				string storeName = util::secondPart(outputs[i]);
 				storeModule.params.insert (pair<string,string>("filename",storeName) );

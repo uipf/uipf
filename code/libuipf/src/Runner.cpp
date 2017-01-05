@@ -1,6 +1,7 @@
 #include "Runner.hpp"
 
 #include "data.hpp"
+#include "data/list.hpp"
 #include "yaml-cpp/yaml.h"
 
 #include "logging.hpp"
@@ -36,15 +37,15 @@ void uipf::Runner::run() {
 			} else {
 				// go through dependencies, and add only the modules, where module
 				// on which they depend have already been added
-				map<string, pair<string,string> >::iterator it = itProSt->second.inputs.begin();
+				map<string, StepInput >::iterator it = itProSt->second.inputs.begin();
 
 				int i = 1;
 				for (; it!=itProSt->second.inputs.end(); ++it) {
 					// skip empty references (unset optional input)
-					if (it->second.first.empty()) {
+					if (it->second.sourceStep.empty()) {
 						continue;
 					}
-					if (find(sortedChain.begin(), sortedChain.end(), it->second.first) != sortedChain.end()){
+					if (find(sortedChain.begin(), sortedChain.end(), it->second.sourceStep) != sortedChain.end()){
 						i *=1;
 					} else{
 						i *=0;
@@ -99,32 +100,82 @@ void uipf::Runner::run() {
 	//		// inputs are references to the data pointer to allow sending one output to multiple steps
 	//		map<string, Data::ptr& > inputs;
 
+			std::string mapInput;
+			data::List::ptr mapData;
+
 			// fill the inputs of the current processing step by taking it from the stored outputs
 			uipf_foreach(input, proSt.inputs) {
 				// skip empty references (unset optional input)
-				if (input->second.first.empty()) {
+				if (input->second.sourceStep.empty()) {
 					continue;
 				}
-				map<string, Data::ptr> moduleOutputs = stepsOutputs[input->second.first];
+
+				map<string, Data::ptr> moduleOutputs = stepsOutputs[input->second.sourceStep];
 				uipf_cforeach(debug, moduleOutputs) {
 					UIPF_LOG_WARNING(debug->first, ": ", debug->second.use_count());
 				}
-				auto outputElement = moduleOutputs.find(input->second.second);
+				auto outputElement = moduleOutputs.find(input->second.outputName);
 				if (outputElement == moduleOutputs.end()) {
-					throw ErrorException(string("Output '") + input->second.second + string("' requested by step '") + proSt.name + string("' for input '") + input->second.first + string("' does not exist."));
+					throw ErrorException(string("Output '") + input->second.outputName + string("' requested by step '") + proSt.name + string("' for input '") + input->second.sourceStep + string("' does not exist."));
 				}
-				UIPF_LOG_WARNING(outputElement->second. use_count());
-				module->input_.insert(pair<string, Data::ptr>(input->first, outputElement->second));
+
+				if (input->second.map) {
+					if (!mapInput.empty()) {
+						throw InvalidConfigException("Multiple map() calls in one step detected, this is currently not supported.");
+					}
+					// map() input gets special handling
+					mapInput = input->first;
+					mapData = std::dynamic_pointer_cast<data::List>(outputElement->second);
+				} else {
+					module->input_.insert(pair<string, Data::ptr>(input->first, outputElement->second));
+				}
 			}
 
 			// set module params
 			module->params_ = proSt.params;
 
-			UIPF_LOG_INFO( "Running step '", proSt.name, "'..." );
+			if (mapInput.empty()) {
 
-			module->run();
+				UIPF_LOG_INFO("Running step '", proSt.name, "'...");
+				module->run();
+				UIPF_LOG_INFO("Done with step '", proSt.name, "'.");
 
-			UIPF_LOG_INFO( "Done with step '", proSt.name, "'." );
+				// fill the outputs of the current processing step
+				stepsOutputs.insert(pair<string, map<string, Data::ptr> > (proSt.name, module->output_));
+
+			} else {
+
+				map< string, data::List::ptr > mapOutputs;
+
+				UIPF_LOG_INFO("Running step '", proSt.name, "' in map() mode on ", mapData->getContent().size(), " items...");
+				uipf_cforeach(mapItem, mapData->getContent()) {
+
+					module->input_.insert(pair<string, Data::ptr>(mapInput, *mapItem));
+					module->run();
+					module->input_.erase(mapInput);
+
+					uipf_foreach(mapOutput, module->output_) {
+
+						auto pos = mapOutputs.find(mapOutput->first);
+						if (pos == mapOutputs.end()) {
+							auto ins = mapOutputs.insert(pair<string, data::List::ptr>(mapOutput->first, data::List::ptr(new data::List())));
+							pos = ins.first;
+						}
+
+						pos->second->getContent().push_back(mapOutput->second);
+					}
+
+				}
+				UIPF_LOG_INFO("Done with step '", proSt.name, "'.");
+
+				// fill the outputs of the current processing step
+//				stepsOutputs.insert(pair<string, map<string, data::List::ptr> > (proSt.name, mapOutputs));
+				stepsOutputs.insert(pair<string, map<string, Data::ptr> > (proSt.name, map<string, Data::ptr>()));
+				uipf_foreach(output, mapOutputs) {
+					stepsOutputs[proSt.name].insert(pair<string, Data::ptr>( output->first, output->second ));
+				}
+
+			}
 
 		} catch (const ErrorException& e) {
 			// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
@@ -152,8 +203,6 @@ void uipf::Runner::run() {
 //			LOG_I("processing stopped");
 //			break;
 //		}
-		// fill the outputs of the current processing step
-		stepsOutputs.insert(pair<string, map<string, Data::ptr> > (proSt.name, module->output_));
 
 		// TODO delete module, check for side effects with the data pointers first
 
@@ -172,7 +221,7 @@ void uipf::Runner::run() {
 
 					ProcessingStep fstep = chain[sortedChain[s]];
 					uipf_cforeach(iit, fstep.inputs) {
-						if (outputStep.compare(iit->second.first) == 0 && outputName.compare(iit->second.second) == 0) {
+						if (outputStep.compare(iit->second.sourceStep) == 0 && outputName.compare(iit->second.outputName) == 0) {
 							requested = true;
 							UIPF_LOG_DEBUG(outputStep, ".", outputName, " is requested.");
 							break;

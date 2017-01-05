@@ -80,9 +80,15 @@ void ProcessingChain::load(std::string filename){
 
 								// split dependsOn by first . to separate step name and output name
 								size_t dotPos = dependsOnS.find(".");
-								pair<string, string> dependsOn( dependsOnS.substr( 0, dotPos ), dependsOnS.substr( dotPos + 1 ));
+								StepInput dependsOn;
+								dependsOn.sourceStep = dependsOnS.substr( 0, dotPos );
+								dependsOn.outputName = dependsOnS.substr( dotPos + 1 );
+								dependsOn.map = dependsOn.outputName.compare(dependsOn.outputName.length()-6, 6, ".map()") == 0;
+								if (dependsOn.map) {
+									dependsOn.outputName = dependsOn.outputName.substr(0, dependsOn.outputName.length()-6);
+								}
 
-								step.inputs.insert( pair<string, pair<string, string> >(inputName, dependsOn) );
+								step.inputs.insert( pair<string, StepInput >(inputName, dependsOn) );
 							}
 						} else {
 							// otherwise it is a parameter of the module
@@ -173,7 +179,7 @@ pair< vector<string>, vector<string> > ProcessingChain::validate(map<string, Mod
 				continue;
 			}
 			// check if input is set when not optional
-			if (inputIt->second.first.empty()) {
+			if (inputIt->second.sourceStep.empty()) {
 				if (!module.getInputs()[inputIt->first].getIsOptional()) {
 					errors.push_back( inStep + string("Input '") + inputIt->first + string("' is not optional and not defined.") );
 					affectedSteps.push_back(step.name);
@@ -181,25 +187,25 @@ pair< vector<string>, vector<string> > ProcessingChain::validate(map<string, Mod
 				continue;
 			}
 			// check if dependencies refer to existing steps
-			if (chain_.count(inputIt->second.first) == 0) {
-				errors.push_back( inStep + string("Input '") + inputIt->first + string("' refers to non-existing step '") + inputIt->second.first + string("'.") );
+			if (chain_.count(inputIt->second.sourceStep) == 0) {
+				errors.push_back( inStep + string("Input '") + inputIt->first + string("' refers to non-existing step '") + inputIt->second.sourceStep + string("'.") );
 				affectedSteps.push_back(step.name);
-			} else if (modules.count(chain_[inputIt->second.first].module) > 0) {
+			} else if (modules.count(chain_[inputIt->second.sourceStep].module) > 0) {
 				// check if the referenced output exists
-				ModuleMetaData refModule = modules[chain_[inputIt->second.first].module];
-				if (refModule.getOutputs().count(inputIt->second.second) == 0) {
+				ModuleMetaData refModule = modules[chain_[inputIt->second.sourceStep].module];
+				if (refModule.getOutputs().count(inputIt->second.outputName) == 0) {
 					errors.push_back( inStep + string("Input '") + inputIt->first
-						+ string("' refers to non-existing output '") + inputIt->second.second
-						+ string("' on module '") + chain_[inputIt->second.first].module + string("'.")
+						+ string("' refers to non-existing output '") + inputIt->second.outputName
+						+ string("' on module '") + chain_[inputIt->second.sourceStep].module + string("'.")
 					);
 					affectedSteps.push_back(step.name);
 				} else {
 					// check if the type of output and input matches
-					DataDescription output = refModule.getOutputs()[inputIt->second.second];
+					DataDescription output = refModule.getOutputs()[inputIt->second.outputName];
 					if (output.getType() != module.getInputs()[inputIt->first].getType()) {
 						errors.push_back( inStep + string("Type of input '") + inputIt->first + string("' ( ")
 							+ module.getInputs()[inputIt->first].getType()
-							+ string(" ) does not match the type of the referenced output '") + inputIt->second.first + string(".") + inputIt->second.second + string("'")
+							+ string(" ) does not match the type of the referenced output '") + inputIt->second.sourceStep + string(".") + inputIt->second.outputName + string("'")
 							+ string(" which is of type ")
 							+ output.getType() + string(".")
 						);
@@ -310,14 +316,14 @@ vector<string> ProcessingChain::detectCircularDependencies() {
 			} else {
 				// go through dependencies, and add only the modules, where module
 				// on which they depend have already been added
-				map<string, pair<string,string> >::iterator it = itProSt->second.inputs.begin();
+				auto it = itProSt->second.inputs.begin();
 				int i = 1;
 				for (; it!=itProSt->second.inputs.end(); ++it) {
 					// skip empty references (unset optional input)
-					if (it->second.first.empty()) {
+					if (it->second.sourceStep.empty()) {
 						continue;
 					}
-					if (find(sortedChain.begin(), sortedChain.end(), it->second.first) != sortedChain.end()){
+					if (find(sortedChain.begin(), sortedChain.end(), it->second.sourceStep) != sortedChain.end()){
 						i *=1;
 					} else{
 						i *=0;
@@ -358,14 +364,14 @@ vector<string> ProcessingChain::detectCircularDependencies() {
 				map<string, ProcessingStep>::iterator itProSt = chainCircle.begin();
 				for(;itProSt!=chainCircle.end();++itProSt) {
 					// Input-Map of current Step in the circle chain
-					map<string, pair<string, string> > tempInp = itProSt->second.inputs;
-					map<string, pair<string, string> >::iterator itInp = tempInp.begin();
+					map<string, StepInput > tempInp = itProSt->second.inputs;
+					map<string, StepInput >::iterator itInp = tempInp.begin();
 					for(;itInp!=tempInp.end();++itInp) {
 						// skip empty references (unset optional input)
-						if (itInp->second.first.empty()) {
+						if (itInp->second.sourceStep.empty()) {
 							continue;
 						}
-						modulesProvideOutput.push_front(itInp->second.first);
+						modulesProvideOutput.push_front(itInp->second.sourceStep);
 					}
 				}
 				modulesProvideOutput.sort();
@@ -456,10 +462,10 @@ string ProcessingChain::getYAML(){
 			if (! it->second.inputs.empty()) {
 				out << YAML::Key << "input";
 				out << YAML::Value << YAML::BeginMap;
-				map<string, pair<string, string> >::iterator inputIt = it->second.inputs.begin();
+				map<string, StepInput >::iterator inputIt = it->second.inputs.begin();
 				for (; inputIt!=it->second.inputs.end(); ++inputIt) {
 					out << YAML::Key << inputIt->first;
-					out << YAML::Value << (inputIt->second.first + string(".") + inputIt->second.second);
+					out << YAML::Value << inputIt->second.toString();
 				}
 				out << YAML::EndMap;
 			}
@@ -542,8 +548,8 @@ bool ProcessingChain::renameProcessingStep(string oldName, string newName){
 			for(auto inputIt = step.inputs.begin(); inputIt != step.inputs.end(); ++inputIt) {
 
 				// if this input refers to the old step, rename it
-				if (oldName.compare(inputIt->second.first) == 0) {
-					step.inputs[inputIt->first].first = newName;
+				if (oldName.compare(inputIt->second.sourceStep) == 0) {
+					step.inputs[inputIt->first].sourceStep = newName;
 				}
 			}
 		}
@@ -577,14 +583,14 @@ void ProcessingChain::setProcessingStepModule(string name, string module, Module
 		chain_[name].params = newParams;
 
 		// update inputs
-		map<string, pair<string, string> > newInputs;
+		map<string, StepInput > newInputs;
 		map<string, DataDescription> inputsMeta = metaData.getInputs();
 		for(auto it = inputsMeta.begin(); it != inputsMeta.end(); ++it) {
 			// add param to new list if it existed already, otherwise add default value i.e. ""
 			if (chain_[name].inputs.count(it->first)) {
-				newInputs.insert( pair<string, pair<string, string> >(it->first, chain_[name].inputs[it->first]) );
+				newInputs.insert( pair<string, StepInput >(it->first, chain_[name].inputs[it->first]) );
 			} else {
-				newInputs.insert( pair<string, pair<string, string> >(it->first, pair<string, string>(string(""), string("")) ) );
+				newInputs.insert( pair<string, StepInput >(it->first, StepInput() ) );
 			}
 		}
 		chain_[name].inputs = newInputs;
@@ -597,6 +603,6 @@ void ProcessingChain::setProcessingStepParams(string name, map<string, string> p
 }
 
 // sets the inputs for a named processing step
-void ProcessingChain::setProcessingStepInputs(string name, map<string, pair<string, string> > inputs){
+void ProcessingChain::setProcessingStepInputs(string name, map<string, StepInput > inputs){
 	chain_[name].inputs = inputs;
 }
