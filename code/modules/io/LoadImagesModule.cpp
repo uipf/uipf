@@ -57,9 +57,9 @@ void LoadImages::run() {
 	UIPF_LOG_TRACE("Looking for images in ", sPath);
 
 	path p(sPath);
-	if (p.is_relative()) {
-		p = system_complete(p);
-	}
+//	if (p.is_relative()) {
+//		p = system_complete(p);
+//	}
 
 	try {
 		if (!exists(p)) {
@@ -70,17 +70,21 @@ void LoadImages::run() {
 			for (directory_iterator itr( p ); itr != end_itr; ++itr) {
 				// try to load library if it is a file ending with system specific name, .so/.dll
 				if (is_regular_file(itr->path())) {
-					Mat image = loadimage(itr->path().string(), mode);
-					if (image.data) {
-						list->getContent().push_back(OpenCVMat::ptr(new OpenCVMat(image)));
+					Mat mat = loadimage(itr->path().string(), mode);
+					if (mat.data) {
+						OpenCVMat::ptr image(new OpenCVMat(mat));
+						image->filename = itr->path().string();
+						list->getContent().push_back(image);
 					}
 				}
 			}
 
 		} else if (is_regular_file(p)) {
-			Mat image = loadimage(p.string(), mode);
-			if (image.data) {
-				list->getContent().push_back(OpenCVMat::ptr(new OpenCVMat(image)));
+			Mat mat = loadimage(p.string(), mode);
+			if (mat.data) {
+				OpenCVMat::ptr image(new OpenCVMat(mat));
+				image->filename = p.string();
+				list->getContent().push_back(image);
 			}
 		} else {
 			throw ErrorException(std::string("Image search path is not a regular file or directory: ") + p.string());
@@ -89,6 +93,8 @@ void LoadImages::run() {
 	catch (const filesystem_error& ex) {
 		throw ErrorException(std::string("Failed to read image search path: ") + p.string() + std::string(" : ") + ex.what());
 	}
+
+	UIPF_LOG_INFO("loaded ", list->getContent().size(), " images from ", p.string());
 
 	setOutputData<List>("imageset", list);
 }

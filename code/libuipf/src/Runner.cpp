@@ -154,7 +154,7 @@ void uipf::Runner::run() {
 					module->run();
 					module->input_.erase(mapInput);
 
-					uipf_foreach(mapOutput, module->output_) {
+					for(auto mapOutput = module->output_.begin(); mapOutput != module->output_.end(); /*no ++ here*/) {
 
 						auto pos = mapOutputs.find(mapOutput->first);
 						if (pos == mapOutputs.end()) {
@@ -163,6 +163,7 @@ void uipf::Runner::run() {
 						}
 
 						pos->second->getContent().push_back(mapOutput->second);
+						mapOutput = module->output_.erase(mapOutput);
 					}
 
 				}

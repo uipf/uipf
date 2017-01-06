@@ -39,6 +39,8 @@ void LoadImage::run() {
 	if (!image.data) { // Check for invalid input
 		throw ErrorException(string("Could not open or find the image: ") + strFilename);
 	}
-
-	setOutputData("image", new OpenCVMat(image));
+	OpenCVMat::ptr mat(new OpenCVMat(image));
+	mat->filename = strFilename;
+	setOutputData<OpenCVMat>("image", mat);
+	UIPF_LOG_INFO("loaded image" + mat->filename);
 }
