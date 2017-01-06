@@ -21,10 +21,10 @@ include_directories("${libuipf_SOURCE_DIR}/src/include")
 #
 
 add_library(LoadImageModule SHARED io/LoadImageModule.cpp)
-target_link_libraries(LoadImageModule uipf-module opencv_core opencv_highgui)
+target_link_libraries(LoadImageModule libuipf-module opencv_core opencv_highgui)
 
 add_library(LoadImagesModule SHARED io/LoadImagesModule.cpp)
-target_link_libraries(LoadImagesModule uipf-module opencv_core opencv_highgui ${Boost_LIBRARIES})
+target_link_libraries(LoadImagesModule libuipf-module opencv_core opencv_highgui ${Boost_LIBRARIES})
 
 # installation targets
 install(TARGETS

@@ -63,9 +63,15 @@ set(YAML_CPP_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP-bu
 #
 
 # libuipf-module
-add_library(uipf-module STATIC
+add_library(libuipf-module STATIC
 
 	src/ModuleMetaData.cpp
+)
+set_target_properties(libuipf-module PROPERTIES
+	# name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html
+	OUTPUT_NAME uipf-module
+	SOVERSION ${UIPFramework_VERSION_MAJOR}.${UIPFramework_VERSION_MINOR}
+	VERSION ${UIPFramework_VERSION}
 )
 
 # libuipf
@@ -76,9 +82,13 @@ add_library(libuipf STATIC
 	src/Runner.cpp
 	src/util.cpp
 )
-# name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html
-set_target_properties(libuipf PROPERTIES OUTPUT_NAME uipf)
-target_link_libraries(libuipf uipf-module ${YAML_CPP_LIBRARY} ${GLIBMM_LIBRARIES} ${Boost_LIBRARIES})
+set_target_properties(libuipf PROPERTIES
+	# name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html
+	OUTPUT_NAME uipf
+	SOVERSION ${UIPFramework_VERSION_MAJOR}.${UIPFramework_VERSION_MINOR}
+	VERSION ${UIPFramework_VERSION}
+)
+target_link_libraries(libuipf libuipf-module ${YAML_CPP_LIBRARY} ${GLIBMM_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(libuipf YAML_CPP)
 if (LIBUIPF_WITH_OPENCV)
 	target_compile_definitions(libuipf PRIVATE LIBUIPF_WITH_OPENCV)
@@ -98,7 +108,7 @@ if(LIBUIPF_WITH_TESTS)
 	add_executable(test-libuipf-module_loader    test/unit/module_loader.cpp)
 	add_executable(test-libuipf-processing_chain test/unit/processing_chain.cpp)
 	target_link_libraries(test-libuipf-data             libuipf ${Boost_LIBRARIES})
-	target_link_libraries(test-libuipf-module_loader    libuipf uipf-module ${Boost_LIBRARIES})
+	target_link_libraries(test-libuipf-module_loader    libuipf libuipf-module ${Boost_LIBRARIES})
 	target_link_libraries(test-libuipf-processing_chain libuipf ${Boost_LIBRARIES})
 	add_test(NAME test-libuipf-data             COMMAND test-libuipf-data)
 	add_test(NAME test-libuipf-module_loader    COMMAND test-libuipf-module_loader)
@@ -128,7 +138,7 @@ endif()
 
 
 # installation targets
-install(TARGETS libuipf uipf-module
+install(TARGETS libuipf libuipf-module
         LIBRARY DESTINATION lib
 		ARCHIVE DESTINATION lib
 )
