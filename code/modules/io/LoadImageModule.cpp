@@ -27,20 +27,16 @@ void LoadImage::run() {
 	using namespace uipf;
 	using namespace uipf::data;
 
-	Mat image;
 	std::string strFilename = getParam<std::string>("filename","");
+
+	OpenCVMat::ptr mat;
+
 	// check whether to load the image in grayscale mode, defaults to color
 	if (getParam<std::string>("mode", "color").compare("grayscale") == 0) {
-		image = imread (strFilename.c_str(), CV_LOAD_IMAGE_GRAYSCALE);
+		mat = load_image_greyscale(strFilename.c_str());
 	} else {
-		image = imread (strFilename.c_str(), CV_LOAD_IMAGE_COLOR);
+		mat = load_image_color(strFilename.c_str());
 	}
-
-	if (!image.data) { // Check for invalid input
-		throw ErrorException(string("Could not open or find the image: ") + strFilename);
-	}
-	OpenCVMat::ptr mat(new OpenCVMat(image));
-	mat->filename = strFilename;
 	setOutputData<OpenCVMat>("image", mat);
 	UIPF_LOG_INFO("loaded image" + mat->filename);
 }

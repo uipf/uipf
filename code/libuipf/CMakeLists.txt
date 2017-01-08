@@ -63,9 +63,10 @@ set(YAML_CPP_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP-bu
 #
 
 # libuipf-module
-add_library(libuipf-module STATIC
+add_library(libuipf-module SHARED
 
 	src/ModuleMetaData.cpp
+	src/data/opencv.cpp
 )
 set_target_properties(libuipf-module PROPERTIES
 	# name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html
@@ -73,6 +74,12 @@ set_target_properties(libuipf-module PROPERTIES
 	SOVERSION ${UIPFramework_VERSION_MAJOR}.${UIPFramework_VERSION_MINOR}
 	VERSION ${UIPFramework_VERSION}
 )
+if (LIBUIPF_WITH_OPENCV)
+	target_compile_definitions(libuipf-module PRIVATE WITH_OPENCV)
+	target_link_libraries(libuipf-module opencv_core opencv_highgui)
+	# boost filesystem is also only needed if compiled with opencv
+	target_link_libraries(libuipf-module ${Boost_LIBRARY_DIRS}/libboost_filesystem.so)
+endif()
 
 # libuipf
 add_library(libuipf STATIC
@@ -90,10 +97,6 @@ set_target_properties(libuipf PROPERTIES
 )
 target_link_libraries(libuipf libuipf-module ${YAML_CPP_LIBRARY} ${GLIBMM_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(libuipf YAML_CPP)
-if (LIBUIPF_WITH_OPENCV)
-	target_compile_definitions(libuipf PRIVATE LIBUIPF_WITH_OPENCV)
-	target_link_libraries(libuipf opencv_core)
-endif()
 
 
 #
@@ -142,7 +145,15 @@ install(TARGETS libuipf libuipf-module
         LIBRARY DESTINATION lib
 		ARCHIVE DESTINATION lib
 )
-install(DIRECTORY ${libuipf_SOURCE_DIR}/src/include/
-		DESTINATION include/uipf
-		FILES_MATCHING PATTERN "*.hpp"
-)
+if(LIBUIPF_WITH_OPENCV)
+	install(DIRECTORY ${libuipf_SOURCE_DIR}/src/include/
+			DESTINATION include/uipf
+			FILES_MATCHING PATTERN "*.hpp"
+	)
+else()
+	install(DIRECTORY ${libuipf_SOURCE_DIR}/src/include/
+			DESTINATION include/uipf
+			FILES_MATCHING PATTERN "*.hpp"
+			PATTERN opencv.hpp EXCLUDE
+	)
+endif()

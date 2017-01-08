@@ -49,6 +49,8 @@ void LoadImages::run() {
 
 	using namespace boost::filesystem;
 
+	// TODO refactor
+
 	List::ptr list(new List());
 
 	std::string sPath = getParam<std::string>("dirname","./images");
