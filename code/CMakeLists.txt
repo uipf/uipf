@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 3.0.0)
 project(UIPFramework)
 
 #
@@ -19,9 +19,16 @@ if(WITH_TESTS)
 	enable_testing()
 endif()
 
+#c++11 support
+if(${CMAKE_VERSION} VERSION_LESS 3.1.0)
+	set(CMAKE_CXX_STANDARD 11)
+else()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
+endif()
+
 if(UNIX)
 	#c++11 support
-	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=gnu++0x")
+	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 	if(CMAKE_BUILD_TYPE MATCHES Debug)
 		# sanitize memory issues https://gcc.gnu.org/gcc-4.8/changes.html

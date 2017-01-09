@@ -70,6 +70,17 @@ If something goes wrong you may run `make VERBOSE=1` for more detailed output.
 For a fast build you can run `make -j 4` where 4 is the number of parallel executions to use. Be careful though, as
 this may take a lot of RAM and make the system unstable.
 
+#### Troubleshooting
+
+##### error while loading shared libraries
+
+When running the uipf binary after compiling you may see the following error:
+    
+    $ uipf
+    uipf: error while loading shared libraries: libuipf-module.so.2.0: cannot open shared object file: No such file or directory
+
+Solution: run `sudo ldconfig` to make the linker aware of the newly installed library.
+
 ### Building with CMake on Windows
 
 TBD.
