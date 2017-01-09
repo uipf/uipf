@@ -3,6 +3,7 @@
 #include <glib.h>
 // boost filesystem for iterating directories
 #include <boost/filesystem.hpp>
+#include <fstream>
 
 #include "yaml-cpp/yaml.h"
 
