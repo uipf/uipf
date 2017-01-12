@@ -38,6 +38,7 @@ if(UNIX)
 	endif()
 endif()
 
+message("CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
 # project version
 set(UIPFramework_VERSION_MAJOR 2)
