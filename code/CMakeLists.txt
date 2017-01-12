@@ -34,7 +34,7 @@ if(UNIX)
 		# sanitize memory issues https://gcc.gnu.org/gcc-4.8/changes.html
 		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
 	else()
-		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
+		SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 	endif()
 endif()
 
