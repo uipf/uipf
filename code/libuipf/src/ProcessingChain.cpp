@@ -83,7 +83,11 @@ void ProcessingChain::load(std::string filename){
 								StepInput dependsOn;
 								dependsOn.sourceStep = dependsOnS.substr( 0, dotPos );
 								dependsOn.outputName = dependsOnS.substr( dotPos + 1 );
-								dependsOn.map = dependsOn.outputName.compare(dependsOn.outputName.length()-6, 6, ".map()") == 0;
+								if (dependsOn.outputName.length() >= 6) {
+									dependsOn.map = dependsOn.outputName.compare(dependsOn.outputName.length() - 6, 6, ".map()") == 0;
+								} else {
+									dependsOn.map = false;
+								}
 								if (dependsOn.map) {
 									dependsOn.outputName = dependsOn.outputName.substr(0, dependsOn.outputName.length()-6);
 								}
