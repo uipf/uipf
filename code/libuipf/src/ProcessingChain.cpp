@@ -133,6 +133,10 @@ void ProcessingChain::load(std::string filename){
 	{
 		UIPF_LOG_ERROR(ex.what());
 	}
+	catch(std::exception& ex)
+	{
+		UIPF_LOG_ERROR(ex.what());
+	}
 	catch(...)
 	{
 		if (bHasModule) {
