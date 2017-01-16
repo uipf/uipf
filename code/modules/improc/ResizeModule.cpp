@@ -90,7 +90,9 @@ void ResizeImage::run() {
 		// do resize using opencv
 		resize(m, m, Size(width, height));
 		// set the result (image) on the datamanager
-		setOutputData<OpenCVMat>("image", new OpenCVMat(m));
+		OpenCVMat::ptr newImage(new OpenCVMat(m));
+		newImage->filename = image->filename;
+		setOutputData<OpenCVMat>("image", newImage);
 	} else {
 		UIPF_LOG_DEBUG("not resizing image to");
 		setOutputData<OpenCVMat>("image", image);

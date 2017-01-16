@@ -44,6 +44,7 @@ void StoreImage::run() {
 
 	// set image name based on processing step if not given
 	if (filename.empty()) {
+		UIPF_LOG_DEBUG("filename is empty, generating new name for ", image->filename);
 		if (image->filename.empty()) {
 			filename = getProcessingStepName() + string(".png");
 		} else if (basePath.empty()) {
@@ -55,7 +56,10 @@ void StoreImage::run() {
 			string name = f.stem().string();
 			fs::path path = f.parent_path();
 			filename = (path / fs::path(name + string("_") + getProcessingStepName() + ext)).string();
+		} else {
+			filename = image->filename;
 		}
+		UIPF_LOG_DEBUG("new image filename: ", filename);
 	}
 	if (!basePath.empty()) {
 		fs::path f(filename);
@@ -65,6 +69,7 @@ void StoreImage::run() {
 			// TODO error check and reporting
 			fs::create_directories(bp);
 		}
+		UIPF_LOG_DEBUG("adjusted base path to: ", filename);
 	}
 
 	std::vector<int> params;
