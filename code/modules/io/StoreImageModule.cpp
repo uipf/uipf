@@ -16,6 +16,9 @@
 #define UIPF_MODULE_INPUTS \
 		{"image", uipf::DataDescription(uipf::data::OpenCVMat::id(), "the image.")}
 
+#define UIPF_MODULE_OUTPUTS \
+		{"image", uipf::DataDescription(uipf::data::OpenCVMat::id(), "the stored image, optional, can be used for further processing.")}
+
 #define UIPF_MODULE_PARAMS \
 		{"filename", uipf::ParamDescription("file name of the file to save to. imageformat is derived by fileending automatically. Defaults to '<step name>.png'.", true) }, \
 		{"quality", uipf::ParamDescription("compression quality (optional)", true) }
@@ -61,4 +64,6 @@ void StoreImage::run() {
 
 	image->store(filename, params);
 	UIPF_LOG_INFO("stored image ", image->filename);
+
+	setOutputData<OpenCVMat>("image", image);
 }

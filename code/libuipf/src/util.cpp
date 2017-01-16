@@ -99,13 +99,13 @@ bool uipf::util::str_ends_with(const std::string& s, const std::string& with) {
 	return false;
 }
 
-std::string str_to_upper(const std::string& st) {
+std::string uipf::util::str_to_upper(const std::string& st) {
 	std::string s(st);
 	std::transform(s.begin(), s.end(), s.begin(), ::toupper);
 	return s;
 }
 
-std::string str_to_lower(const std::string& st) {
+std::string uipf::util::str_to_lower(const std::string& st) {
 	std::string s(st);
 	std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 	return s;
