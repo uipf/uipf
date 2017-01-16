@@ -64,17 +64,18 @@ void ResizeImage::run() {
 
 		width = image->getContent().cols;
 		height = image->getContent().rows;
+		UIPF_LOG_DEBUG("current image dimensions: ", width, "x", height);
 
 		if (max_width > 0 && width > max_width) {
-			height = max_width / width * height;
+			height = (int) (((double) max_width / (double) width) * height);
 			width = max_width;
 			do_resize = true;
 		}
 		if (max_height > 0 && height > max_height) {
-			width = max_height / height * width;
+			width = (int) (((double) max_height / (double) height) * width);
 			height = max_height;
 			if (max_width > 0 && width > max_width) {
-				height = max_width / width * height;
+				height = (int) (((double) max_width / (double) width) * height);
 				width = max_width;
 			}
 			do_resize = true;
@@ -82,6 +83,8 @@ void ResizeImage::run() {
 	}
 
 	if (do_resize) {
+		UIPF_LOG_DEBUG("resizing image to: ", width, "x", height);
+
 		// get the actual opencv matrix of the input data
 		Mat m = image->getContent();
 		// do resize using opencv
@@ -89,6 +92,7 @@ void ResizeImage::run() {
 		// set the result (image) on the datamanager
 		setOutputData<OpenCVMat>("image", new OpenCVMat(m));
 	} else {
+		UIPF_LOG_DEBUG("not resizing image to");
 		setOutputData<OpenCVMat>("image", image);
 	}
 }

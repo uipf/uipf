@@ -22,7 +22,7 @@ class Runner{
 		 * Runs the processing chain by invoking the modules
 		 * with given parameters.
 		 */
-		void run();
+		bool run();
 
 		/**
 		 * if set modules should finish their work

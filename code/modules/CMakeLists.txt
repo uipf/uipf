@@ -46,4 +46,16 @@ if(WITH_OPENCV)
 		LIBRARY DESTINATION lib/uipf
 		ARCHIVE DESTINATION lib/uipf
 	)
+
+
+	# module tests
+	file(COPY tests DESTINATION ${uipf-modules_BINARY_DIR}
+		USE_SOURCE_PERMISSIONS
+		FILES_MATCHING REGEX ".*\\.(yml|jpg)"
+	)
+	configure_file(${uipf-modules_SOURCE_DIR}/tests/improc_resize.sh
+		           ${uipf-modules_BINARY_DIR}/tests/improc_resize.sh
+	)
+	add_test(NAME module_improc_resize COMMAND ${uipf-modules_BINARY_DIR}/tests/improc_resize.sh WORKING_DIRECTORY ${uipf-modules_BINARY_DIR}/tests)
+
 endif()

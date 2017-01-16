@@ -13,8 +13,8 @@ namespace uipf {
 
 class ModuleInterface {
 	public:
+		// constructor
 		ModuleInterface(void) {};
-
 		// destructor
 		virtual ~ModuleInterface(void) {};
 
@@ -22,10 +22,13 @@ class ModuleInterface {
 		// Module provides access to all resources described in the module meta description (params,input,output)
 		virtual void run() = 0;
 
-		// the name of the module, which can be referenced in the yaml configuration
+		// the id of the module, which can be referenced in the yaml configuration
 		virtual std::string getId() const = 0;
+		// descriptive name to be displayed in the GUI
 		virtual std::string getName() const = 0;
+		// descriptive category for organizing modules in the GUI
 		virtual std::string getCategory() const = 0;
+		// module description TODO add possibilty to write more detailed module documentation
 		virtual std::string getDescription() const { return ""; };
 
 		// information about execution context
@@ -34,36 +37,16 @@ class ModuleInterface {
 		 * @return the name of the processing step this module is used in.
 		 * This can be used to provide defaul values for parameters, e.g. file names.
 		 */
-		std::string getProcessingStepName() const {
-			return pStepName_;
-		}
+		std::string getProcessingStepName() const;
 
 
 		// data management
-		virtual DataDescriptionMap getInputs() const {
-			return {};
-		};
-		virtual DataDescriptionMap getOutputs() const {
-			return {};
-		};
-		virtual ParamDescriptionMap getParams() const {
-			return {};
-		};
-
-//		// context 	is a container providing access to the current environment, allowing to open windows, write to logger etc...
-//		virtual void setContext(Context *) = 0;
-//
-//		// context 	is a container providing access to the current environment, allowing to open windows, write to logger etc...
-//		virtual void setContext(Context*) Q_DECL_OVERRIDE;
-//
-//		// the name of the module, which can be referenced in the yaml configuration
-//		virtual std::string name() const Q_DECL_OVERRIDE;
-
+		virtual DataDescriptionMap getInputs() const { return {}; };
+		virtual DataDescriptionMap getOutputs() const { return {}; };
+		virtual ParamDescriptionMap getParams() const { return {}; };
 
 		// check whether named input data is given
-		bool hasInputData( const std::string& strName) const {
-			return input_.find(strName) != input_.end();
-		};
+		bool hasInputData( const std::string& strName) const;
 
 		// returns a typesafe readonly smartpointer to input data by name if it is available
 		template <typename T>

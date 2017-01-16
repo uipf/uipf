@@ -358,7 +358,11 @@ int main(int argc, char** argv){
 	// run the current configuration
 	// TODO runner
 	Runner runner(chain, ml);
-	runner.run();
+	bool success = runner.run();
 
-	return 0;
+	if (success) {
+		return 0;
+	} else {
+		return 1;
+	}
 }

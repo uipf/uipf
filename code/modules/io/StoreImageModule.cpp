@@ -1,5 +1,6 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <boost/filesystem.hpp>
 
 #include "logging.hpp"
 #include "exceptions.hpp"
@@ -20,7 +21,8 @@
 		{"image", uipf::DataDescription(uipf::data::OpenCVMat::id(), "the stored image, optional, can be used for further processing.")}
 
 #define UIPF_MODULE_PARAMS \
-		{"filename", uipf::ParamDescription("file name of the file to save to. imageformat is derived by fileending automatically. Defaults to '<step name>.png'.", true) }, \
+		{"filename", uipf::ParamDescription("file name of the file to save to. imageformat is derived by fileending automatically. Defaults to 'ORIGINAL_NAME_<step name>.png'.", true) }, \
+		{"path", uipf::ParamDescription("optional, if given, will replace the path where the image is stored, also no postfix is added to the filename.", true) }, \
 		{"quality", uipf::ParamDescription("compression quality (optional)", true) }
 
 // TODO docs about quality param, refer to http://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html#imwrite
@@ -34,13 +36,35 @@ void StoreImage::run() {
 	using namespace uipf;
 	using namespace uipf::data;
 	using namespace uipf::util;
+	namespace fs = boost::filesystem;
 
 	std::string filename = getParam<std::string>("filename", "");
+	std::string basePath = getParam<std::string>("path", "");
 	OpenCVMat::ptr image = getInputData<OpenCVMat>("image");
 
 	// set image name based on processing step if not given
 	if (filename.empty()) {
-		filename = getProcessingStepName() + string(".png");
+		if (image->filename.empty()) {
+			filename = getProcessingStepName() + string(".png");
+		} else if (basePath.empty()) {
+			fs::path f(image->filename);
+			string ext = f.extension().string();
+			if (ext.empty()) {
+				ext = ".png";
+			}
+			string name = f.stem().string();
+			fs::path path = f.parent_path();
+			filename = (path / fs::path(name + string("_") + getProcessingStepName() + ext)).string();
+		}
+	}
+	if (!basePath.empty()) {
+		fs::path f(filename);
+		fs::path bp(basePath);
+		filename = (bp / f.filename()).string();
+		if (!fs::is_directory(bp)) {
+			// TODO error check and reporting
+			fs::create_directories(bp);
+		}
 	}
 
 	std::vector<int> params;

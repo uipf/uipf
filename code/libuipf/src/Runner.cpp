@@ -8,7 +8,7 @@
 #include "util.hpp"
 
 
-void uipf::Runner::run() {
+bool uipf::Runner::run() {
 
 	using namespace std;
 
@@ -68,6 +68,7 @@ void uipf::Runner::run() {
 	// contains the outputs of the processing steps
 	map<string, map<string, Data::ptr> > stepsOutputs;
 
+	bool hasError = false;
 	UIPF_LOG_INFO( "Starting processing chain." );
 
 // TODO	GUIEventDispatcher::instance()->clearSelectionInGraphView();
@@ -91,6 +92,7 @@ void uipf::Runner::run() {
 
 		} else {
 			UIPF_LOG_ERROR( "Module '", moduleName, "' could not be found." );
+			hasError = true;
 			break;
 		}
 
@@ -183,14 +185,17 @@ void uipf::Runner::run() {
 		} catch (const ErrorException& e) {
 			// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
 			UIPF_LOG_ERROR( string("Error: ") + e.what() );
+			hasError = true;
 			break;
 		} catch (const InvalidConfigException& e) {
 			// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
 			UIPF_LOG_ERROR( string("Invalid config: ") + e.what() );
+			hasError = true;
 			break;
 		} catch (const std::exception& e) {
 			// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
 			UIPF_LOG_ERROR( string("Error: module threw exception: ") + e.what() );
+			hasError = true;
 			break;
 		}
 
@@ -248,4 +253,5 @@ void uipf::Runner::run() {
 //	}
 
 	UIPF_LOG_INFO( "Finished processing chain." );
+	return !hasError;
 }

@@ -66,6 +66,7 @@ set(YAML_CPP_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP-bu
 add_library(libuipf-module SHARED
 
 	src/ModuleMetaData.cpp
+	src/ModuleInterface.cpp
 	src/data/opencv.cpp
 )
 set_target_properties(libuipf-module PROPERTIES

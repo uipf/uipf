@@ -19,7 +19,7 @@
 		{"imageset", uipf::DataDescription(uipf::data::OpenCVMat::id(), "the loaded images.")}
 
 #define UIPF_MODULE_PARAMS \
-		{"dirname", uipf::ParamDescription("name of the directory to load from.") }, \
+		{"path", uipf::ParamDescription("name of the directory to load from.") }, \
 		{"mode", uipf::ParamDescription("can be either 'color' or 'grayscale' for whether to load the image in color or grayscale mode. Defaults to 'color'.", true) }
 
 #include "Module.hpp"
@@ -53,7 +53,7 @@ void LoadImages::run() {
 
 	List::ptr list(new List());
 
-	std::string sPath = getParam<std::string>("dirname","./images");
+	std::string sPath = getParam<std::string>("path","./images");
 	std::string mode = getParam<std::string>("mode", "color");
 
 	UIPF_LOG_TRACE("Looking for images in ", sPath);
