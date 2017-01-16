@@ -84,7 +84,9 @@ void uipf::Runner::run() {
 		string moduleName = proSt.module;
 		if (moduleLoader_.hasModule(moduleName)) {
 			module = moduleLoader_.getModuleInstance(moduleName);
-			// TODO	context_.processingStepName_ = proSt.name;
+
+			// populate module context
+			module->pStepName_ = proSt.name;
 			// TODO	module->setContext(&context_);
 
 		} else {

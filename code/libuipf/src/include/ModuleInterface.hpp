@@ -28,6 +28,18 @@ class ModuleInterface {
 		virtual std::string getCategory() const = 0;
 		virtual std::string getDescription() const { return ""; };
 
+		// information about execution context
+
+		/**
+		 * @return the name of the processing step this module is used in.
+		 * This can be used to provide defaul values for parameters, e.g. file names.
+		 */
+		std::string getProcessingStepName() const {
+			return pStepName_;
+		}
+
+
+		// data management
 		virtual DataDescriptionMap getInputs() const {
 			return {};
 		};
@@ -76,6 +88,8 @@ class ModuleInterface {
 		std::map < std::string, Data::ptr > input_; // TODO const!
 		std::map < std::string, Data::ptr > output_;
 		std::map < std::string, std::string > params_;
+
+		std::string pStepName_;
 
 		// Make the Runner class a friend of Module, to allow populating data
 		friend class Runner;

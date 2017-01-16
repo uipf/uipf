@@ -2,6 +2,7 @@
 #define LIBUIPF_DATA_OPENCV_HPP
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 #include "../data.hpp"
 #include "list.hpp"
@@ -19,6 +20,13 @@ namespace uipf {
 			 * The file name of the original image file.
 			 */
 			std::string filename;
+
+			/**
+			 * @return whether this images is stored on the disk. If true, filename is set.
+			 */
+			bool getIsStored() { return !filename.empty(); }
+
+			void store(const std::string& f) { cv::imwrite(f, getContent()); filename = f; }
 
 		UIPF_DATA_TYPE_END
 
