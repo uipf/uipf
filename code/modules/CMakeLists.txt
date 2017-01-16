@@ -19,6 +19,11 @@ include_directories("${libuipf_SOURCE_DIR}/src/include")
 #
 
 if(WITH_OPENCV)
+	# imgproc modules
+	add_library(ResizeModule SHARED improc/ResizeModule.cpp)
+	target_link_libraries(ResizeModule libuipf-module opencv_core opencv_highgui opencv_imgproc)
+
+	# io modules
 	add_library(LoadImageModule SHARED io/LoadImageModule.cpp)
 	target_link_libraries(LoadImageModule libuipf-module opencv_core opencv_highgui)
 
@@ -30,9 +35,13 @@ if(WITH_OPENCV)
 
 	# installation targets
 	install(TARGETS
+		# imgproc modules
+		ResizeModule
+
+		# io modules
 		LoadImageModule
 		LoadImagesModule
-
+		StoreImageModule
 
 		LIBRARY DESTINATION lib/uipf
 		ARCHIVE DESTINATION lib/uipf
