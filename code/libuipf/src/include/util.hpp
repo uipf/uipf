@@ -29,6 +29,10 @@ namespace uipf {
 		std::string str_to_lower(const std::string& st);
 		std::string str_to_upper(const std::string& st);
 
+		// execute external program and return stdout
+		std::string exec(const char* cmd);
+
+
 	}
 }
 

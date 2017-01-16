@@ -111,3 +111,26 @@ std::string uipf::util::str_to_lower(const std::string& st) {
 	return s;
 }
 
+
+#include <cstdio>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <array>
+
+// http://stackoverflow.com/a/478960/1106908
+std::string uipf::util::exec(const char* cmd) {
+	std::array<char, 128> buffer;
+	std::string result;
+	std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+	// TODO fail on non-zero exit, also provide stderr output in that case
+	if (!pipe) {
+		throw std::runtime_error("popen() failed!");
+	}
+	while (!feof(pipe.get())) {
+		if (fgets(buffer.data(), 128, pipe.get()) != NULL)
+			result += buffer.data();
+	}
+	return result;
+}
