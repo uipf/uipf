@@ -1,6 +1,7 @@
 #include "util.hpp"
 
 #include <vector>
+#include <algorithm>
 
 
 // renames a filename by adding _result before the end, eg. ball.png -> ball_result.png
@@ -82,5 +83,31 @@ std::string uipf::util::firstPart(const std::string& s){
 			tokens.push_back(token);
 	}
 	return tokens[0];
+}
+
+bool uipf::util::str_begins_with(const std::string& s, const std::string& with) {
+	if (s.length() >= with.length()) {
+		return s.compare(0, with.length(), with) == 0;
+	}
+	return false;
+}
+
+bool uipf::util::str_ends_with(const std::string& s, const std::string& with) {
+	if (s.length() >= with.length()) {
+		return s.compare(s.length() - with.length(), with.length(), with) == 0;
+	}
+	return false;
+}
+
+std::string str_to_upper(const std::string& st) {
+	std::string s(st);
+	std::transform(s.begin(), s.end(), s.begin(), ::toupper);
+	return s;
+}
+
+std::string str_to_lower(const std::string& st) {
+	std::string s(st);
+	std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+	return s;
 }
 

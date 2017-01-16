@@ -24,9 +24,9 @@ namespace uipf {
 			/**
 			 * @return whether this images is stored on the disk. If true, filename is set.
 			 */
-			bool getIsStored() { return !filename.empty(); }
+			bool getIsStored() const;
 
-			void store(const std::string& f) { cv::imwrite(f, getContent()); filename = f; }
+			void store(const std::string& f, const std::vector<int>& params=std::vector<int>());
 
 		UIPF_DATA_TYPE_END
 

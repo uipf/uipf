@@ -95,4 +95,14 @@ std::vector<std::string> uipf::data::load_image_names(const std::string& path) {
 	return list;
 }
 
+bool uipf::data::OpenCVMat::getIsStored() const {
+	return !filename.empty();
+}
+
+void uipf::data::OpenCVMat::store(const std::string& f, const std::vector<int>& params) {
+	cv::imwrite(f, getContent(), params);
+	filename = f;
+}
+
+
 #endif

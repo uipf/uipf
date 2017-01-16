@@ -25,6 +25,9 @@ if(WITH_OPENCV)
 	add_library(LoadImagesModule SHARED io/LoadImagesModule.cpp)
 	target_link_libraries(LoadImagesModule libuipf-module opencv_core opencv_highgui ${Boost_LIBRARIES})
 
+	add_library(StoreImageModule SHARED io/StoreImageModule.cpp)
+	target_link_libraries(StoreImageModule libuipf-module opencv_core opencv_highgui)
+
 	# installation targets
 	install(TARGETS
 		LoadImageModule
