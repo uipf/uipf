@@ -22,6 +22,7 @@ namespace uipf {
 
 		// renames a filename by adding _result before the end, eg. ball.png -> ball_result.png
 		std::string rename(const std::string& s);
+		std::string rename_postfix(const std::string& s, const std::string& pf);
 
 		bool str_begins_with(const std::string& s, const std::string& with);
 		bool str_ends_with(const std::string& s, const std::string& with);

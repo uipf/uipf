@@ -9,6 +9,10 @@
 s	old name, which has to be renamed
 */
 std::string uipf::util::rename(const std::string& s){
+	return rename_postfix(s, "_result");
+}
+
+std::string uipf::util::rename_postfix(const std::string& s, const std::string& pf) {
 
 	std::istringstream iss(s);
 
@@ -23,13 +27,13 @@ std::string uipf::util::rename(const std::string& s){
 	} else if (tokens.size() == 1) {
 		std::string end = tokens[0];
 		tokens.pop_back();
-		tokens.push_back(end + "_result");
+		tokens.push_back(end + pf);
 	} else {
 		std::string end = tokens[tokens.size() - 1];
 		tokens.pop_back();
 		std::string beforeEnd = tokens[tokens.size() - 1];
 		tokens.pop_back();
-		beforeEnd = beforeEnd + "_result";
+		beforeEnd = beforeEnd + pf;
 		tokens.push_back(beforeEnd);
 		tokens.push_back(end);
 	}
