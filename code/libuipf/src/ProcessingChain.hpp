@@ -44,6 +44,9 @@ namespace uipf{
 		// inputs from other modules <inputName> => <nameOfOtherModule, outputOfOtherModule>
 		std::map<std::string, StepInput > inputs;
 
+		// if at least one of the inputs uses map() the output type will be list on all outputs
+		bool isMapping = false;
+
 	};
 
 	class ProcessingChain{

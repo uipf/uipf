@@ -16,7 +16,7 @@
 #define UIPF_MODULE_CLASS LoadImages
 
 #define UIPF_MODULE_OUTPUTS \
-		{"imageset", uipf::DataDescription(uipf::data::OpenCVMat::id(), "the loaded images.")}
+		{"imageset", uipf::DataDescription(uipf::data::List::id(/*TODO implement typed lists*/), "the loaded images.")}
 
 #define UIPF_MODULE_PARAMS \
 		{"path", uipf::ParamDescription("name of the directory to load from.") }, \
