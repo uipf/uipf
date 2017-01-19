@@ -55,7 +55,7 @@ void StoreImage::run() {
 			}
 			string name = f.stem().string();
 			fs::path path = f.parent_path();
-			filename = (path / fs::path(name + string("_") + getProcessingStepName() + ext)).string();
+			filename = (path / fs::path(name + string("_") + getProcessingStepName() + str_to_lower(ext))).string();
 		} else {
 			filename = image->filename;
 		}
@@ -64,7 +64,7 @@ void StoreImage::run() {
 	if (!basePath.empty()) {
 		fs::path f(filename);
 		fs::path bp(basePath);
-		filename = (bp / f.filename()).string();
+		filename = (bp / fs::path(f.stem().string() + str_to_lower(f.extension().string())) ).string();
 		if (!fs::is_directory(bp)) {
 			// TODO error check and reporting
 			fs::create_directories(bp);
