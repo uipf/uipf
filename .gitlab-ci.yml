@@ -1,0 +1,9 @@
+before_script:
+  - apt-get -y install build-essential cmake pkg-config libboost-serialization-dev libboost-program-options-dev libboost-graph-dev libopencv-dev qtbase5-dev qtbase5-dev-tools libglibmm-2.4-dev
+
+build:
+  script:
+    - if [ -d build/ ]; then rm -rf build/ fi
+    - mkdir build/ && cd build/
+    - cmake ../code
+    - make -j 4
