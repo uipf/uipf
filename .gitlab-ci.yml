@@ -6,17 +6,28 @@ stages:
   # TODO add tests
   - test
 
-build-uipf:
+# https://blog.bitexpert.de/blog/running-matrix-builds-with-gitlab-ci/
+.job_template: &job_definition
   stage: build
   script:
     - if [ -d build/ ]; then rm -rf build/ ; fi
     - mkdir build/ && cd build/
-    - cmake -DWITH_TESTS=OFF -DLIBUIPF_WITH_TESTS=OFF -DCMAKE_INSTALL_PREFIX=`pwd`/../prefix ../code
+    - cmake -DWITH_TESTS=OFF -DLIBUIPF_WITH_TESTS=OFF -DWITH_OPENCV=$WITH_OPENCV -DLIBUIPF_WITH_OPENCV=$WITH_OPENCV -DCMAKE_INSTALL_PREFIX=`pwd`/../prefix ../code
     - make -j 4
     - make install
   artifacts:
     paths:
       - prefix/
+
+build-uipf-with-cv:
+  <<: *job_definition
+  variables:
+    WITH_OPENCV: ON
+
+build-uipf-without-cv:
+  <<: *job_definition
+  variables:
+    WITH_OPENCV: OFF
 
 
 variables:
