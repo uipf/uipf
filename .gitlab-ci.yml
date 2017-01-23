@@ -3,7 +3,7 @@ before_script:
 
 build:
   script:
-    - if [ -d build/ ]; then rm -rf build/ fi
+    - if [ -d build/ ]; then rm -rf build/ ; fi
     - mkdir build/ && cd build/
     - cmake ../code
     - make -j 4
