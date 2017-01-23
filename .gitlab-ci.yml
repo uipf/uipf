@@ -6,7 +6,7 @@ stages:
   # TODO add tests
   - test
 
-# https://blog.bitexpert.de/blog/running-matrix-builds-with-gitlab-ci/
+# https://docs.gitlab.com/ee/ci/yaml/README.html#special-yaml-features
 .job_template: &job_definition
   stage: build
   script:
@@ -22,12 +22,12 @@ stages:
 build-uipf-with-cv:
   <<: *job_definition
   variables:
-    WITH_OPENCV: ON
+    WITH_OPENCV: 'ON'
 
 build-uipf-without-cv:
   <<: *job_definition
   variables:
-    WITH_OPENCV: OFF
+    WITH_OPENCV: 'OFF'
 
 
 variables:
