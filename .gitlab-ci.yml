@@ -7,3 +7,6 @@ build:
     - mkdir build/ && cd build/
     - cmake -DWITH_TESTS=OFF ../code
     - make -j 4
+
+variables:
+  GIT_STRATEGY: clone
