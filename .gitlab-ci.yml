@@ -3,7 +3,7 @@ before_script:
 
 build:
   script:
-    - if [ -d build/ ]; then rm -rf build/ ; fi
+    - if [ -d build/ ]; then echo "removing directory..."; rm -rf build/ ; fi
     - mkdir build/ && cd build/
     - cmake -DWITH_TESTS=OFF ../code
     - make -j 4
