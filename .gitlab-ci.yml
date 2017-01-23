@@ -1,12 +1,22 @@
 before_script:
   - sudo apt-get -y install build-essential cmake pkg-config libboost-serialization-dev libboost-program-options-dev libboost-filesystem-dev libboost-graph-dev libopencv-dev qtbase5-dev qtbase5-dev-tools libglibmm-2.4-dev
 
-build:
+stages:
+  - build
+  # TODO add tests
+  - test
+
+build-uipf:
+  stage: build
   script:
     - if [ -d build/ ]; then rm -rf build/ ; fi
     - mkdir build/ && cd build/
-    - cmake -DWITH_TESTS=OFF -DLIBUIPF_WITH_TESTS=OFF ../code
+    - cmake -DWITH_TESTS=OFF -DLIBUIPF_WITH_TESTS=OFF -DCMAKE_INSTALL_PREFIX=`pwd`/../prefix ../code
     - make -j 4
+  artifacts:
+    paths:
+      - prefix/
+
 
 variables:
   GIT_STRATEGY: clone
