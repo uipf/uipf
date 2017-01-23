@@ -13,6 +13,7 @@ build-uipf:
     - mkdir build/ && cd build/
     - cmake -DWITH_TESTS=OFF -DLIBUIPF_WITH_TESTS=OFF -DCMAKE_INSTALL_PREFIX=`pwd`/../prefix ../code
     - make -j 4
+    - make install
   artifacts:
     paths:
       - prefix/
