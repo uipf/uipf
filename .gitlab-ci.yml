@@ -36,7 +36,8 @@ deploy:
   script:
     # temporary solution for sharing uipf artifacts
     - rm -rf /tmp/uipf-prefix
-    - rsync -r prefix/ /tmp/uipf-prefix
+    - rsync -a prefix/ /tmp/uipf-prefix
+    - find /tmp/uipf-prefix |sort
   dependencies:
     - build-uipf-with-cv
 
