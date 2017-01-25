@@ -4,7 +4,8 @@ before_script:
 stages:
   - build
   # TODO add tests
-  - test
+  #- test
+  - deploy
 
 # https://docs.gitlab.com/ee/ci/yaml/README.html#special-yaml-features
 .job_template: &job_definition
@@ -15,9 +16,6 @@ stages:
     - cmake -DWITH_TESTS=OFF -DLIBUIPF_WITH_TESTS=OFF -DWITH_OPENCV=$WITH_OPENCV -DLIBUIPF_WITH_OPENCV=$WITH_OPENCV -DCMAKE_INSTALL_PREFIX=`pwd`/../prefix ../code
     - make -j 4
     - make install
-    # temporary solution for sharing uipf artifacts
-    - rm -rf /tmp/uipf-prefix
-    - rsync -r prefix/ /tmp/uipf-prefix
   artifacts:
     expire_in: 1 week
     paths:
@@ -33,6 +31,14 @@ build-uipf-without-cv:
   variables:
     WITH_OPENCV: 'OFF'
 
+deploy:
+  stage: deploy
+  script:
+    # temporary solution for sharing uipf artifacts
+    - rm -rf /tmp/uipf-prefix
+    - rsync -r prefix/ /tmp/uipf-prefix
+  dependencies:
+    - build-uipf-with-cv
 
 variables:
   GIT_STRATEGY: clone
