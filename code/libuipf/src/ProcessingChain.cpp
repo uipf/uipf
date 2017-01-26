@@ -87,7 +87,7 @@ void ProcessingChain::load(std::string filename){
 								dependsOn.outputName = dependsOnS.substr( dotPos + 1 );
 								if (dependsOn.outputName.length() >= 6) {
 									dependsOn.map = dependsOn.outputName.compare(dependsOn.outputName.length() - 6, 6, ".map()") == 0;
-									step.isMapping = true;
+									step.isMapping = dependsOn.map;
 								} else {
 									dependsOn.map = false;
 								}
@@ -219,7 +219,7 @@ pair< vector<string>, vector<string> > ProcessingChain::validate(map<string, Mod
 					if (outputType != inputType) {
 						errors.push_back( inStep + string("Type of input '") + inputIt->first + string("' ( ")
 							+ inputType
-							+ string(" ) does not match the type of the referenced output '") + inputIt->second.sourceStep + string(".") + inputIt->second.outputName + string("'")
+							+ string(" ) does not match the type of the referenced output '") + inputIt->second.sourceStep + string(".") + inputIt->second.outputName + string("' (module: ") + refModule.getId() + string(")")
 							+ string(" which is of type ")
 							+ outputType + string(".")
 						);
