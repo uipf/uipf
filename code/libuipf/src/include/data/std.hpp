@@ -29,6 +29,12 @@ namespace uipf {
 		UIPF_DATA_TYPE_BEGIN (Int, "de.tu-berlin.uipf.Int", int)
 		UIPF_DATA_TYPE_END
 
+		UIPF_DATA_TYPE_BEGIN (Float, "de.tu-berlin.uipf.Float", float)
+		UIPF_DATA_TYPE_END
+
+		UIPF_DATA_TYPE_BEGIN (Double, "de.tu-berlin.uipf.Double", double)
+		UIPF_DATA_TYPE_END
+
 		UIPF_DATA_TYPE_BEGIN (StringList, "de.tu-berlin.uipf.StringList", std::vector<std::string>)
 		UIPF_DATA_TYPE_END
 
