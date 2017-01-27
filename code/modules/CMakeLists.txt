@@ -24,6 +24,9 @@ if(WITH_OPENCV)
 	target_link_libraries(ResizeModule libuipf-module opencv_core opencv_highgui opencv_imgproc)
 
 	# io modules
+	add_library(CopyImageModule SHARED io/CopyImageModule.cpp)
+	target_link_libraries(CopyImageModule libuipf-module opencv_core opencv_highgui)
+
 	add_library(LoadImageModule SHARED io/LoadImageModule.cpp)
 	target_link_libraries(LoadImageModule libuipf-module opencv_core opencv_highgui)
 
@@ -39,6 +42,7 @@ if(WITH_OPENCV)
 		ResizeModule
 
 		# io modules
+		CopyImageModule
 		LoadImageModule
 		LoadImagesModule
 		StoreImageModule
