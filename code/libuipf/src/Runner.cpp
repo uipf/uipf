@@ -120,7 +120,7 @@ bool uipf::Runner::run() {
 				}
 				auto outputElement = moduleOutputs.find(input->second.outputName);
 				if (outputElement == moduleOutputs.end()) {
-					throw ErrorException(string("Output '") + input->second.outputName + string("' requested by step '") + proSt.name + string("' for input '") + input->second.sourceStep + string("' does not exist."));
+					throw ErrorException(string("Output '") + input->second.sourceStep + string(".") + input->second.outputName + string("' requested by step '") + proSt.name + string("' for input '") + input->first + string("' does not exist."));
 				}
 
 				if (input->second.map) {
