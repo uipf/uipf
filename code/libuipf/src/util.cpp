@@ -125,8 +125,9 @@ std::string uipf::util::str_to_lower(const std::string& st) {
 #include <exceptions.hpp>
 
 // http://stackoverflow.com/a/478960/1106908
+// TODO Replace popen and pclose with _popen and _pclose for Windows.
 std::string uipf::util::exec(const char* cmd) {
-	std::array<char, 128> buffer;
+	char buffer[128];
 	std::string result;
 
 	FILE* pipe = popen(cmd, "r");
@@ -135,8 +136,8 @@ std::string uipf::util::exec(const char* cmd) {
 	}
 	try {
 		while (!feof(pipe)) {
-			if (fgets(buffer.data(), 128, pipe) != NULL)
-				result += buffer.data();
+			if (fgets(buffer, 128, pipe) != NULL)
+				result += buffer;
 		}
 	} catch (...) {
 		pclose(pipe);
@@ -146,4 +147,5 @@ std::string uipf::util::exec(const char* cmd) {
 	if (ret != 0) {
 		throw new ErrorException(std::string("Command failed with exit code ") + std::to_string(ret) + std::string(" ") + cmd);
 	}
-	return result;}
+	return result;
+}
