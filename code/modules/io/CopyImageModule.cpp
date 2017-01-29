@@ -61,7 +61,7 @@ void CopyImageModule::run() {
 		if (getParam<bool>("overwrite", false)) {
 			fs::remove(target);
 		} else {
-			throw ErrorException(string("Traget file already exists: ") + src.string());
+			throw ErrorException(string("Target file already exists: ") + src.string());
 		}
 	}
 	// TODO error handling

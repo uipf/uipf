@@ -122,19 +122,28 @@ std::string uipf::util::str_to_lower(const std::string& st) {
 #include <stdexcept>
 #include <string>
 #include <array>
+#include <exceptions.hpp>
 
 // http://stackoverflow.com/a/478960/1106908
 std::string uipf::util::exec(const char* cmd) {
 	std::array<char, 128> buffer;
 	std::string result;
-	std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
-	// TODO fail on non-zero exit, also provide stderr output in that case
+
+	FILE* pipe = popen(cmd, "r");
 	if (!pipe) {
 		throw std::runtime_error("popen() failed!");
 	}
-	while (!feof(pipe.get())) {
-		if (fgets(buffer.data(), 128, pipe.get()) != NULL)
-			result += buffer.data();
+	try {
+		while (!feof(pipe)) {
+			if (fgets(buffer.data(), 128, pipe) != NULL)
+				result += buffer.data();
+		}
+	} catch (...) {
+		pclose(pipe);
+		throw;
 	}
-	return result;
-}
+	int ret = pclose(pipe);
+	if (ret != 0) {
+		throw new ErrorException(std::string("Command failed with exit code ") + std::to_string(ret) + std::string(" ") + cmd);
+	}
+	return result;}
