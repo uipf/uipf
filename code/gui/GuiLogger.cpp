@@ -25,8 +25,13 @@ GuiLogger::~GuiLogger() {
 
 	UIPF_UNREGISTER_LOGGER(logger_);
 	delete logger_;
-	UIPF_LOG_DEBUG("ende");
-	UIPF_LOG_DEBUG(uipf::log::Logger::instance()->logCallbacks.size());
+
+}
+
+void GuiLogger::log(log::Logger::LogLevel lvl, const std::string & msg)
+{
+	//send signal to GUI
+	emit logEvent(lvl, msg);
 }
 
 void GuiLoggerCallback::log(log::Logger::LogLevel lvl, const std::string& msg)

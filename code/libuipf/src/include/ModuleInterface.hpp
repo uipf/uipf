@@ -9,7 +9,11 @@
 #include "ModuleMetaData.hpp"
 #include "exceptions.hpp"
 
+
 namespace uipf {
+
+//#include "Runner.hpp"
+class Runner;
 
 class ModuleInterface {
 	public:
@@ -66,6 +70,10 @@ class ModuleInterface {
 		template <typename T>
 		T getParam(const std::string& strName, T defaultValue) const;
 
+	protected:
+
+		void updateProgress(int done, int max = 100);
+
 	private:
 
 		std::map < std::string, Data::ptr > input_; // TODO const!
@@ -73,6 +81,7 @@ class ModuleInterface {
 		std::map < std::string, std::string > params_;
 
 		std::string pStepName_;
+		uipf::Runner* runner_;
 
 		// Make the Runner class a friend of Module, to allow populating data
 		friend class Runner;
@@ -135,6 +144,7 @@ class ModuleInterface {
 		}
 	}
 
+	// TODO test if output requested?
 
 	template <typename T>
 	T ModuleInterface::getParam( const std::string& strName, T defaultValue) const

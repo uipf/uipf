@@ -3,7 +3,7 @@
 using namespace uipf;
 
 RunWorkerThread::RunWorkerThread(ProcessingChain& chain, ModuleLoader& ml)
- : runner_(Runner(chain, ml))
+ : runner_(Runner(chain, ml, *this))
 {
 
 }
@@ -20,4 +20,15 @@ void RunWorkerThread::stop()
 void RunWorkerThread::run()
 {
 	runner_.run();
+}
+
+
+void RunWorkerThread::updateGlobalProgress(int done, int max)
+{
+	emit eventUpdateGlobalProgress(done, max);
+}
+
+void RunWorkerThread::updateModuleProgress(int done, int max)
+{
+	emit eventUpdateModuleProgress(done, max);
 }

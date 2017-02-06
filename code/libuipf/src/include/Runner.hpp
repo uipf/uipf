@@ -4,6 +4,7 @@
 #include "ProcessingChain.hpp"
 #include "ModuleLoader.hpp"
 #include "ModuleInterface.hpp"
+#include "RunContext.hpp"
 
 namespace uipf{
 
@@ -11,9 +12,10 @@ class Runner{
 
 	public:
 		// constructor
-		Runner(const ProcessingChain& pc, ModuleLoader& ml) :
+		Runner(const ProcessingChain& pc, ModuleLoader& ml, RunContext& ct) :
 			processingChain_(pc),
-			moduleLoader_(ml) {};
+			moduleLoader_(ml),
+			context_(ct) {};
 
 		// destructor
 		~Runner(void) {};
@@ -40,6 +42,21 @@ class Runner{
 
 		const ProcessingChain& processingChain_;
 		ModuleLoader& moduleLoader_;
+		RunContext& context_;
+
+		int moduleProgressDone = 0;
+		int moduleProgressMax = 100;
+		int modulesDone = 0;
+		int moduleCount = 0;
+
+		std::vector<std::string> sortChain(const std::map<std::string, ProcessingStep>&);
+
+	private:
+
+		void updateModuleProgress(int done, int max = 100);
+
+		friend class ModuleInterface;
+
 
 };
 

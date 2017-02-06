@@ -63,3 +63,15 @@ if(WITH_OPENCV)
 	add_test(NAME module_improc_resize COMMAND ${uipf-modules_BINARY_DIR}/tests/improc_resize.sh WORKING_DIRECTORY ${uipf-modules_BINARY_DIR}/tests)
 
 endif()
+
+# imgproc modules
+add_library(LongRunningDummyModule SHARED dummy/LongRunningDummyModule.cpp)
+target_link_libraries(LongRunningDummyModule libuipf-module)
+
+install(TARGETS
+	# dummy modules
+	LongRunningDummyModule
+
+	LIBRARY DESTINATION lib/uipf
+	ARCHIVE DESTINATION lib/uipf
+)

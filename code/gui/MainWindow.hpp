@@ -63,7 +63,8 @@ private slots:
     void on_appendToLog(log::Logger::LogLevel, const std::string& );
 
     // moves the progressbar on every step of the processing chain
-    void on_reportProgress(const float& );
+    void on_reportModuleProgress(int done, int max);
+    void on_reportGlobalProgress(int done, int max);
 
     //this gets called from Backgroundthread when its work is finished or when it gets terminated by stop()
     void on_backgroundWorkerFinished();

@@ -1,51 +1,58 @@
-#include "LongRunningDummyModule.hpp"
+#include "logging.hpp"
 #include <unistd.h>
+#include "data/opencv.hpp"
 
-using namespace std;
-using namespace uipf;
+#define UIPF_MODULE_ID "uipf.dummy.LongRunningDummyModule"
+#define UIPF_MODULE_NAME "LongRunningDummyModule"
+#define UIPF_MODULE_CATEGORY "test"
+#define UIPF_MODULE_DESCRIPTION "A dummy module for testing long running tasks"
+#define UIPF_MODULE_CLASS LongRunningDummyModule
+
+#define UIPF_MODULE_INPUTS \
+		{"image", uipf::DataDescription(uipf::data::OpenCVMat::id(), "an image.")}
+
+#define UIPF_MODULE_OUTPUTS \
+		{"image", uipf::DataDescription(uipf::data::OpenCVMat::id(), "the same image again :)")}
+
+#define UIPF_MODULE_PARAMS \
+		{"steps", uipf::ParamDescription("number of dummy iterations.", true) }
+
+#include "Module.hpp"
 
 
-/*
+void LongRunningDummyModule::run() {
 
-*/
-void LongRunningDummyModule::run( DataManager& data) const
-{
-	unsigned int uiCounter = 30;
-	while(uiCounter-->0)
+	using namespace cv;
+	using namespace uipf;
+	using namespace uipf::data;
+
+	OpenCVMat::ptr image;
+	if (hasInputData("image")) {
+		image = getInputData<OpenCVMat>("image");
+	}
+
+	int steps = getParam<int>("steps", 10);
+	int c = 0;
+
+	while(c++ <= steps)
 	{
-		LOG_I("I am soo busy!");
+		UIPF_LOG_INFO("I am soo busy!");
 
-		if (context_->isStopRequested())
-		{
-			LOG_I("Hm, somebody wants me to stop doing my hard, hard work!");
-			LOG_I("giving up...");
-			break;
+// TODO
+//		if (context_->isStopRequested())
+//		{
+//			UIPF_LOG_INFO("Hm, somebody wants me to stop doing my hard, hard work!");
+//			UIPF_LOG_INFO("giving up...");
+//			break;
+//		}
+		for(int i = 0; i < 10; ++i) {
+			updateProgress(c * 10 + i, steps * 10);
+			usleep(100000);
 		}
-		usleep(1000000);
 
 	}
-	if (data.hasInputData("image")) {
-		Matrix::c_ptr oMatrix = data.getInputData<Matrix>("image");
-		cv::Mat m = oMatrix->getContent();
-		data.setOutputData<Matrix>("image", new Matrix(m));
+
+	if (hasInputData("image")) {
+		setOutputData<OpenCVMat>("image", image);
 	}
 }
-
-MetaData LongRunningDummyModule::getMetaData() const
-{
-	map<string, DataDescription> input = {
-		{"image", DataDescription(MATRIX, "the image.") }
-	};
-	map<string, DataDescription> output = {
-		{"image", DataDescription(MATRIX, "the same image again :)") }
-	};
-
-	return MetaData(
-		"A dummy module for testing long running tasks",
-		"Dummy",
-		input,
-		output,
-		map<string, ParamDescription>()
-	);
-}
-

@@ -66,8 +66,7 @@ private:
 
 signals: //for QT to connect
 	void reportProgressEvent(const float& val);
-// TODO logger
-//	void logEvent(const Logger::LogType& eType, const std::string& strMessage);
+
 	void createWindow(const std::string& strTitle);
 	void closeWindow(const std::string& strTitle);
 	void clearSelectionInGraphView();
@@ -75,8 +74,7 @@ signals: //for QT to connect
 
 public: //methods for model to call and trigger GUI
 	void triggerReportProgress(const float& );
-// TODO logger
-//	void triggerLogEvent(const Logger::LogType& eType, const std::string& strMessage);
+
 	void triggerCreateWindow(const std::string& strTitle, const cv::Mat& oMat);
 	void triggerCloseWindow(const std::string& strTitle);
 	void triggerClearSelectionInGraphView();

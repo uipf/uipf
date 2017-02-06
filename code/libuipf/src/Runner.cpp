@@ -7,17 +7,12 @@
 #include "logging.hpp"
 #include "util.hpp"
 
+using namespace std;
+using namespace uipf;
 
-bool uipf::Runner::run() {
 
-	using namespace std;
-
-	//reset StopSignal
-// TODO	context_.bStopRequested_ = false;
-	// get processing chain
-	map<string, ProcessingStep> chain = processingChain_.getProcessingSteps();
-
-	// TODO review starting here
+vector<string> Runner::sortChain(const map<string, ProcessingStep>& chain)
+{
 	map<string, ProcessingStep> chainTmp;
 	chainTmp.insert(chain.begin(), chain.end());
 
@@ -62,8 +57,21 @@ bool uipf::Runner::run() {
 			}
 		}
 	}
+	return sortedChain;
+}
 
 
+bool Runner::run() {
+
+	// get processing chain
+	map<string, ProcessingStep> chain = processingChain_.getProcessingSteps();
+	vector<string> sortedChain = sortChain(chain);
+
+	moduleCount = (int) chain.size();
+	modulesDone = 0;
+
+	//reset StopSignal
+// TODO	context_.bStopRequested_ = false;
 
 	// contains the outputs of the processing steps
 	map<string, map<string, Data::ptr> > stepsOutputs;
@@ -79,6 +87,8 @@ bool uipf::Runner::run() {
 		ProcessingStep proSt = chain[sortedChain[i]];
 
 		// TODO	GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::CURRENT,false);
+		// reset module progress bar
+		context_.updateModuleProgress(0, 0);
 
 		// load the module
 		ModuleInterface* module;
@@ -88,7 +98,7 @@ bool uipf::Runner::run() {
 
 			// populate module context
 			module->pStepName_ = proSt.name;
-			// TODO	module->setContext(&context_);
+			module->runner_ = this;
 
 		} else {
 			UIPF_LOG_ERROR( "Module '", moduleName, "' could not be found." );
@@ -200,8 +210,9 @@ bool uipf::Runner::run() {
 		}
 
 		// update the progress bar in the GUI
+		modulesDone++;
+		context_.updateGlobalProgress(modulesDone * 100, moduleCount * 100);
 		// TODO GUIEventDispatcher::instance()->triggerReportProgress(static_cast<float>(i+1)/static_cast<float>(sortedChain.size())*100.0f);
-
 		// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::GOOD,false);
 
 		// check if stop button was pressed
@@ -254,4 +265,16 @@ bool uipf::Runner::run() {
 
 	UIPF_LOG_INFO( "Finished processing chain." );
 	return !hasError;
+}
+
+void Runner::updateModuleProgress(int done, int max /*= 100*/) {
+
+	if (done > max) {
+		max = done;
+	}
+	moduleProgressDone = done;
+	moduleProgressMax = max;
+
+	context_.updateModuleProgress(done, max);
+	context_.updateGlobalProgress(modulesDone * 100 +  (int) ((float) done / (max) * 100), moduleCount * 100);
 }

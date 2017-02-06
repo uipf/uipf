@@ -73,8 +73,10 @@ MainWindow::MainWindow(ModuleLoader& ml, QWidget *parent) : QMainWindow(parent),
     // -> It may be triggered by hitting any key or double-click etc.
     ui->listProcessingSteps-> setEditTriggers(QAbstractItemView::AnyKeyPressed | QAbstractItemView::DoubleClicked);
 
-    ui->progressBar->setValue(0.0f);
+    ui->progressBar->setValue(0);
     ui->progressBar->setHidden(true);
+    ui->progressBarModule->setValue(0);
+    ui->progressBarModule->setHidden(true);
 	// set up slots for signals
 
 	// react to selection of the entries
@@ -107,11 +109,6 @@ MainWindow::MainWindow(ModuleLoader& ml, QWidget *parent) : QMainWindow(parent),
     // logger
     connect(GuiLogger::instance(), SIGNAL (logEvent(log::Logger::LogLevel, const std::string&)),
 			this, SLOT (on_appendToLog(log::Logger::LogLevel, const std::string&)));
-
-    // progressbar
-// TODO
-//    connect(GUIEventDispatcher::instance(), SIGNAL (reportProgressEvent(const float&)),
-//    			this, SLOT (on_reportProgress(const float&)));
 
     //synchronize selection in graph and combobox
     connect(graphView_, SIGNAL (nodeSelected(const uipf::gui::Node*)),
@@ -451,14 +448,6 @@ void MainWindow::on_closeWindow(const std::string& strTitle)
  */
 }
 
-Q_DECLARE_METATYPE(log::Logger::LogLevel)
-
-void GuiLogger::log(log::Logger::LogLevel lvl, const std::string & msg)
-{
-	//send signal to GUI
-	emit logEvent(lvl, msg);
-}
-
 // append messages from our logger to the log-textview
 void MainWindow::on_appendToLog(log::Logger::LogLevel lvl, const std::string& msg)
 {
@@ -497,9 +486,26 @@ void MainWindow::on_logFiltertextChanged(const QString& text)
 }
 
 // moves the progressbar on every step of the processing chain
-void MainWindow::on_reportProgress(const float& fValue)
+void MainWindow::on_reportGlobalProgress(int done, int max)
 {
-	ui->progressBar->setValue(fValue);
+	ui->progressBar->setMinimum(0);
+	ui->progressBar->setMaximum(max);
+	ui->progressBar->setValue(done);
+	ui->progressBar->update();
+}
+
+void MainWindow::on_reportModuleProgress(int done, int max)
+{
+	if (max == 0) {
+		ui->progressBarModule->setHidden(true);
+		return;
+	} else {
+		ui->progressBarModule->setHidden(false);
+	}
+	ui->progressBarModule->setMinimum(0);
+	ui->progressBarModule->setMaximum(max);
+	ui->progressBarModule->setValue(done);
+	ui->progressBarModule->update();
 }
 
 
@@ -832,8 +838,9 @@ void MainWindow::save_Data_Flow_as() {
 	}
 
 
-    if (! (fn.endsWith(".yaml", Qt::CaseInsensitive)) )
-        fn += ".yaml"; // default
+    if (! (fn.endsWith(".yaml", Qt::CaseInsensitive)) && ! (fn.endsWith(".yml", Qt::CaseInsensitive))) {
+	    fn += ".yaml"; // default
+    }
   	currentFileName = fn.toStdString();
     setWindowTitle(tr((currentFileName + string(" - ") + WINDOW_TITLE).c_str()));
 
@@ -986,11 +993,9 @@ void MainWindow::run() {
 	// validate configuration and show errors
 	pair< vector<string>, vector<string> > errors = conf_.validate(mm_.getAllMetaData());
 	if (!errors.first.empty()) {
-		// TODO
-//		LOG_E("There are configuration errors!");
+		UIPF_LOG_ERROR("There are configuration errors!");
 		for(unsigned int i = 0; i < errors.first.size(); ++i) {
-			// TODO
-//			LOG_E( errors.first[i]);
+			UIPF_LOG_ERROR( errors.first[i]);
 		}
 // TODO
 //		GUIEventDispatcher::instance()->triggerSelectNodesInGraphView(errors.second,gui::ERROR,false);
@@ -1002,6 +1007,7 @@ void MainWindow::run() {
 	runAct->setEnabled(false);
 	ui->progressBar->setHidden(false);
 	ui->progressBar->update();
+	ui->progressBarModule->setHidden(true);
 
 	if (workerThread_ != nullptr) return; //should not happen, because GUI prevents it. we only allow one chain to be processed by a thread
 
@@ -1009,6 +1015,10 @@ void MainWindow::run() {
 
 	// Setup callback for cleanup when it finishes
 	connect(workerThread_, SIGNAL(finished()),  this, SLOT(on_backgroundWorkerFinished()));
+	connect(workerThread_, SIGNAL(eventUpdateGlobalProgress(int, int)),
+	        this, SLOT (on_reportGlobalProgress(int, int)));
+	connect(workerThread_, SIGNAL(eventUpdateModuleProgress(int, int)),
+	        this, SLOT (on_reportModuleProgress(int, int)));
 
 	// Run, Forest, run!
 	workerThread_->start(); // This invokes WorkerThread::run in a new thread
@@ -1020,8 +1030,10 @@ void MainWindow::on_backgroundWorkerFinished()
 	// run is now activated and stop unactivated
 	stopAct->setEnabled(false);
 	runAct->setEnabled(true);
-	ui->progressBar->setHidden(true);
-	ui->progressBar->update();
+//	ui->progressBar->setHidden(true);
+//	ui->progressBar->update();
+	ui->progressBarModule->setHidden(true);
+	ui->progressBarModule->update();
 	delete workerThread_;
 	workerThread_ = nullptr;
 }

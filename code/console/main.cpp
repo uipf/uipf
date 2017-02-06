@@ -382,8 +382,8 @@ int main(int argc, char** argv){
 	}
 
 	// run the current configuration
-	// TODO runner
-	Runner runner(chain, ml);
+	RunContext context;
+	Runner runner(chain, ml, context);
 	bool success = runner.run();
 
 	if (success) {
