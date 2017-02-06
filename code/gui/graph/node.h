@@ -5,8 +5,9 @@
 #include <QGraphicsTextItem>
 #include <QList>
 #include <QPen>
-#include "../../framework/ProcessingStep.hpp"
-#include "../framework/GUIEventDispatcher.hpp"
+
+#include "GUIEventDispatcher.hpp"
+#include "ProcessingChain.hpp"
 
 namespace uipf{
 namespace gui{

@@ -3,8 +3,7 @@
 
 #include <QThread>
 
-#include "../framework/Configuration.hpp"
-#include "../framework/ModuleManager.hpp"
+#include "Runner.hpp"
 
 namespace uipf {
 
@@ -16,7 +15,7 @@ class RunWorkerThread: public QThread {
 	Q_OBJECT
 
 public:
-	RunWorkerThread(uipf::ModuleManager& mm, uipf::Configuration& config);
+	RunWorkerThread(ProcessingChain&, ModuleLoader&);
 	virtual ~RunWorkerThread();
 
 	//run module chain in a separate thread
@@ -26,8 +25,8 @@ public:
 
 private:
 
-	uipf::ModuleManager& mm_;
-	uipf::Configuration& config_;
+	Runner runner_;
+
 };
 
 } // namespace

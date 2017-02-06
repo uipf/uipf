@@ -2,7 +2,6 @@
 #include "edge.h"
 #include "node.h"
 #include "graphwidget.h"
-#include "../../framework/Logger.hpp"
 
 #include <QGraphicsScene>
 #include <QGraphicsView>
@@ -75,10 +74,10 @@ Node::Node(GraphWidget *graphWidget,QString name,uipf::ProcessingStep processing
 
     	for (auto inputIt = inputs.begin();inputIt!=inputs.end();++inputIt)
     	{
-    		if (inputIt->second.first.empty() || inputIt->second.second.empty())
+    		if (inputIt->second.sourceStep.empty() || inputIt->second.outputName.empty())
     			continue;
 
-    		ss << "<tr>    <td>"<< inputIt->second.first<<"</td> <td>"<< inputIt->second.second<<"</td>   </tr>  ";
+    		ss << "<tr>    <td>" << inputIt->second.sourceStep << "</td> <td>" << inputIt->second.outputName << "</td>   </tr>  ";
     		bHaveNonEmptyInputs = true;
 
     	}

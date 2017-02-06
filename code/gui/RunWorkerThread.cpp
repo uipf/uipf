@@ -2,8 +2,8 @@
 
 using namespace uipf;
 
-RunWorkerThread::RunWorkerThread(ModuleManager& mm, Configuration& config)
- : mm_(mm),config_(config)
+RunWorkerThread::RunWorkerThread(ProcessingChain& chain, ModuleLoader& ml)
+ : runner_(Runner(chain, ml))
 {
 
 }
@@ -13,10 +13,11 @@ RunWorkerThread::~RunWorkerThread() {
 
 void RunWorkerThread::stop()
 {
-	mm_.requestStop();
+// TODO
+//	runner_.requestStop();
 }
 
 void RunWorkerThread::run()
 {
-	mm_.run(config_);
+	runner_.run();
 }

@@ -23,7 +23,7 @@
 #include "MainWindow.hpp"
 #include "ImageWindow.hpp"
 #include "ui_mainwindow.h"
-#include "../framework/GUIEventDispatcher.hpp"
+#include "GUIEventDispatcher.hpp"
 #include "RunWorkerThread.h"
 
 using namespace std;
@@ -33,8 +33,6 @@ using namespace uipf;
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), workerThread_(nullptr) {
 
     ui->setupUi(this);
-
-    mm_.setHaveGUI();
 
     // Create models
 
@@ -68,7 +66,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	//create and add the graphwidget to the gui
 	graphView_ = new gui::GraphWidget();
-	ui->verticalLayoutRight->addWidget(graphView_);//add graphview
+	ui->verticalLayoutCenter->addWidget(graphView_);//add graphview
 
 	// Processing Step Names: allow to manually modify the data
     // -> It may be triggered by hitting any key or double-click etc.
@@ -106,12 +104,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(delegateTableInputs, SIGNAL(inputChanged(std::string, std::pair<std::string, std::string>)),
 			this, SLOT(on_inputChanged(std::string, std::pair<std::string, std::string>)));
     // logger
-    connect(GUIEventDispatcher::instance(), SIGNAL (logEvent(const Logger::LogType&,const std::string&)),
-			this, SLOT (on_appendToLog(const Logger::LogType&,const std::string&)));
+// TODO
+//    connect(GUIEventDispatcher::instance(), SIGNAL (logEvent(const Logger::LogType&,const std::string&)),
+//			this, SLOT (on_appendToLog(const Logger::LogType&,const std::string&)));
 
     // progressbar
-    connect(GUIEventDispatcher::instance(), SIGNAL (reportProgressEvent(const float&)),
-    			this, SLOT (on_reportProgress(const float&)));
+// TODO
+//    connect(GUIEventDispatcher::instance(), SIGNAL (reportProgressEvent(const float&)),
+//    			this, SLOT (on_reportProgress(const float&)));
 
     //synchronize selection in graph and combobox
     connect(graphView_, SIGNAL (nodeSelected(const uipf::gui::Node*)),
@@ -119,12 +119,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 
     // Window creation
-    connect(GUIEventDispatcher::instance(), SIGNAL (createWindow(const std::string&)),
-				this, SLOT (on_createWindow(const std::string&)));
+// TODO
+//    connect(GUIEventDispatcher::instance(), SIGNAL (createWindow(const std::string&)),
+//				this, SLOT (on_createWindow(const std::string&)));
 
     // Window deletion
-    connect(GUIEventDispatcher::instance(), SIGNAL (closeWindow(const std::string&)),
-    			this, SLOT (on_closeWindow(const std::string&)));
+// TODO
+//    connect(GUIEventDispatcher::instance(), SIGNAL (closeWindow(const std::string&)),
+//    			this, SLOT (on_closeWindow(const std::string&)));
 
     //Filter logwindow
     connect(ui->logFilterLE, SIGNAL (textChanged(const QString &)),
@@ -132,7 +134,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 
 	// fill module categories dropdown
-	map<string, MetaData> modules = mm_.getAllModuleMetaData();
+	map<string, ModuleMetaData> modules = mm_.getAllMetaData();
 	for (auto it = modules.begin(); it!=modules.end(); ++it) {
 		if(categories_.count(it->second.getCategory()) == 0){
 			vector<string> temp;
@@ -215,7 +217,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 }
 
 // loads a new configuration from file
-void MainWindow::loadDataFlow(string filename)
+void MainWindow::loadProcessingChain(string filename)
 {
 
 	ui->deleteButton->setEnabled(false);
@@ -252,7 +254,7 @@ void MainWindow::loadDataFlow(string filename)
 
 	// set the names of the processing steps:
 	QStringList list;
-	map<string, ProcessingStep> chain = conf_.getProcessingChain();
+	map<string, ProcessingStep> chain = conf_.getProcessingSteps();
 	for (auto it = chain.begin(); it!=chain.end(); ++it) {
 		list << it->first.c_str();
 	}
@@ -331,22 +333,23 @@ void MainWindow::refreshInputs()
 	// clear all data rows
 	modelTableInputs->setRowCount(0);
 
-	map<string, pair<string, string> > inputs = step.inputs;
+	map<string, StepInput> inputs = step.inputs;
 	vector<string> inputNames(inputs.size());
 	int row = 0;
 	for (auto it = inputs.begin(); it!=inputs.end(); ++it) {
 		QStandardItem* item = new QStandardItem((it->first).c_str());
 		if (mm_.hasModule(step.module)) {
-			map<string, DataDescription> inputs = mm_.getModuleMetaData(step.module).getInputs();
-			if (inputs.count(it->first) > 0) {
-				string str = inputs[it->first].getDescription();
+			map<string, DataDescription> minputs = mm_.getModuleMetaData(step.module).getInputs();
+			if (minputs.count(it->first) > 0) {
+				string str = minputs[it->first].getDescription();
 				item->setToolTip(QString(str.c_str()));
 			}
 		}
 		modelTableInputs->setVerticalHeaderItem(row, item);
 		inputNames[row] = it->first;
-		modelTableInputs->setItem(row, 0, new QStandardItem((it->second.first).c_str()));
-		modelTableInputs->setItem(row, 1, new QStandardItem((it->second.second).c_str()));
+		modelTableInputs->setItem(row, 0, new QStandardItem((it->second.sourceStep).c_str()));
+		modelTableInputs->setItem(row, 1, new QStandardItem((it->second.outputName).c_str()));
+		// TODO support mapping
 		row++;
 	}
 
@@ -413,6 +416,7 @@ void MainWindow::resetInputs()
 
 void MainWindow::on_createWindow(const std::string& strTitle)
 {
+/* TODO
 	// fetch the image from the GUIEventDispatcher
 	QImage image = GUIEventDispatcher::instance()->image_;
 
@@ -430,37 +434,41 @@ void MainWindow::on_createWindow(const std::string& strTitle)
 
 	// unlock the mutex with the working thread
 	GUIEventDispatcher::instance()->imageRendered.wakeAll();
+*/
 }
 
 void MainWindow::on_closeWindow(const std::string& strTitle)
 {
+/* TODO
 	auto qTitle = QString::fromStdString(strTitle);
 	for (auto v : createdWindwows_)
 	{
 		if (v->windowTitle() == qTitle)
 			v->close();
 	}
+ */
 }
 
 // append messages from our logger to the log-textview
-void MainWindow::on_appendToLog(const Logger::LogType& eType,const std::string& strText) {
-
-	if (!ui->logWarnCheckbox->isChecked() && eType == Logger::WARNING )return;
-	if (!ui->logInfoCheckbox->isChecked() && eType == Logger::INFO )return;
-	if (!ui->logErrorCheckbox->isChecked() && eType == Logger::ERROR )return;
-
-	QString qText = QString(strText.c_str());
-
-	//filter
-	if (!qText.toLower().contains(ui->logFilterLE->text().toLower()))return;
-
-	// For colored Messages we need html :-/
-	QString strColor = (eType == Logger::WARNING ? "Blue" : eType == Logger::ERROR ? "Red" : "Green");
-	QString alertHtml = "<font color=\""+strColor+"\">" + qText + "</font>";
-	ui->tbLog->appendHtml(alertHtml);
-	//autoscroll
-	ui->tbLog->verticalScrollBar()->setValue(ui->tbLog->verticalScrollBar()->maximum());
-}
+// TODO
+//void MainWindow::on_appendToLog(const Logger::LogType& eType,const std::string& strText) {
+//
+//	if (!ui->logWarnCheckbox->isChecked() && eType == Logger::WARNING )return;
+//	if (!ui->logInfoCheckbox->isChecked() && eType == Logger::INFO )return;
+//	if (!ui->logErrorCheckbox->isChecked() && eType == Logger::ERROR )return;
+//
+//	QString qText = QString(strText.c_str());
+//
+//	//filter
+//	if (!qText.toLower().contains(ui->logFilterLE->text().toLower()))return;
+//
+//	// For colored Messages we need html :-/
+//	QString strColor = (eType == Logger::WARNING ? "Blue" : eType == Logger::ERROR ? "Red" : "Green");
+//	QString alertHtml = "<font color=\""+strColor+"\">" + qText + "</font>";
+//	ui->tbLog->appendHtml(alertHtml);
+//	//autoscroll
+//	ui->tbLog->verticalScrollBar()->setValue(ui->tbLog->verticalScrollBar()->maximum());
+//}
 
 void MainWindow::on_clearLogButton_clicked()
 {
@@ -503,7 +511,7 @@ void MainWindow::on_addButton_clicked() {
 	bool nameAlreadyExists = true;
 	int i=1;
     string name = "new step " + std::to_string(i);
-	map<string, ProcessingStep> chain = conf_.getProcessingChain();
+	map<string, ProcessingStep> chain = conf_.getProcessingSteps();
 	while(nameAlreadyExists){
 		if (chain.count(name)){
 			i++;
@@ -631,7 +639,7 @@ void MainWindow::on_comboCategory_currentIndexChanged(int index)
 
 		string category = ui->comboCategory->itemData(index).toString().toStdString();
 
-		map<string, MetaData> modules = mm_.getAllModuleMetaData();
+		map<string, ModuleMetaData> modules = mm_.getAllMetaData();
 
 		// fill module dropdown
 		ui->comboModule->setEnabled(false);
@@ -685,8 +693,12 @@ void MainWindow::on_inputChanged(std::string inputName, std::pair<std::string, s
 {
 	if (!currentStepName.empty() && conf_.hasProcessingStep(currentStepName)) {
 		beforeConfigChange();
-		map<string, pair<string, string> > inputs = conf_.getProcessingStep(currentStepName).inputs;
-		inputs[inputName] = value;
+		map<string, StepInput> inputs = conf_.getProcessingStep(currentStepName).inputs;
+		// TODO support map()
+		StepInput svalue;
+		svalue.sourceStep = value.first;
+		svalue.outputName = value.second;
+		inputs[inputName] = svalue;
 		conf_.setProcessingStepInputs(currentStepName, inputs);
 
 		refreshInputs();
@@ -731,7 +743,7 @@ void MainWindow::new_Data_Flow() {
 	currentFileName = "newFile";
 	setWindowTitle(tr((currentFileName + string(" - ") + WINDOW_TITLE).c_str()));
 
-	Configuration conf;
+	ProcessingChain conf;
 	conf_ = conf;
 
 	QStringList list;
@@ -751,14 +763,14 @@ void MainWindow::load_Data_Flow()
 	//check whether there are unsaved changes, and ask the user, whether he wants to save them
 	if (!okToContinue()) return;
 
-	QString fn = QFileDialog::getOpenFileName(this, tr("Open File..."), QString(), tr("YAML-Files (*.yaml);;All Files (*)"));
+	QString fn = QFileDialog::getOpenFileName(this, tr("Open File..."), QString(), tr("YAML-Files (*.yaml *.yml);;All Files (*)"));
 
 	// if abort button has been pressed
 	if (fn.isEmpty()) {
 		return;
 	}
 
-	loadDataFlow(fn.toStdString());
+	loadProcessingChain(fn.toStdString());
 }
 
 // when unsaved changes occure, give the user the possibility to save them
@@ -849,7 +861,7 @@ void MainWindow::undo() {
 
 		// set the names of the processing steps:
 		QStringList list;
-		map<string, ProcessingStep> chain = conf_.getProcessingChain();
+		map<string, ProcessingStep> chain = conf_.getProcessingSteps();
 		for (auto it = chain.begin(); it!=chain.end(); ++it) {
 			list << it->first.c_str();
 		}
@@ -902,7 +914,7 @@ void MainWindow::redo() {
 
 		// set the names of the processing steps:
 		QStringList list;
-		map<string, ProcessingStep> chain = conf_.getProcessingChain();
+		map<string, ProcessingStep> chain = conf_.getProcessingSteps();
 		for (auto it = chain.begin(); it!=chain.end(); ++it) {
 			list << it->first.c_str();
 		}
@@ -958,13 +970,16 @@ void MainWindow::beforeConfigChange(){
 void MainWindow::run() {
 
 	// validate configuration and show errors
-	pair< vector<string>, vector<string> > errors = conf_.validate(mm_.getAllModuleMetaData());
+	pair< vector<string>, vector<string> > errors = conf_.validate(mm_.getAllMetaData());
 	if (!errors.first.empty()) {
-		LOG_E("There are configuration errors!");
+		// TODO
+//		LOG_E("There are configuration errors!");
 		for(unsigned int i = 0; i < errors.first.size(); ++i) {
-			LOG_E( errors.first[i]);
+			// TODO
+//			LOG_E( errors.first[i]);
 		}
-		GUIEventDispatcher::instance()->triggerSelectNodesInGraphView(errors.second,gui::ERROR,false);
+// TODO
+//		GUIEventDispatcher::instance()->triggerSelectNodesInGraphView(errors.second,gui::ERROR,false);
 		return;
 	}
 
@@ -976,7 +991,7 @@ void MainWindow::run() {
 
 	if (workerThread_ != nullptr) return; //should not happen, because GUI prevents it. we only allow one chain to be processed by a thread
 
-	workerThread_ = new RunWorkerThread(mm_,conf_);
+	workerThread_ = new RunWorkerThread(conf_, mm_);
 
 	// Setup callback for cleanup when it finishes
 	connect(workerThread_, SIGNAL(finished()),  this, SLOT(on_backgroundWorkerFinished()));
@@ -1014,7 +1029,8 @@ void MainWindow::stop() {
 void MainWindow::keyReleaseEvent(QKeyEvent *)
 {
 	// resume a paused chain on key press
-	mm_.resumeChain();
+// TODO
+//	mm_.resumeChain();
 }
 
 // Up to here: SLOTS -------------------------------------------------------------------------------------------------------------------------------

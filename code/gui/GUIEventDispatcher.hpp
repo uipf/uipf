@@ -6,8 +6,9 @@
 #include <QMutex>
 #include <QWaitCondition>
 
-#include "StdIncl.hpp"
-#include "Logger.hpp"
+#include <opencv2/opencv.hpp>
+
+//#include "Logger.hpp"
 
 namespace uipf
 {
@@ -65,7 +66,8 @@ private:
 
 signals: //for QT to connect
 	void reportProgressEvent(const float& val);
-	void logEvent(const Logger::LogType& eType, const std::string& strMessage);
+// TODO logger
+//	void logEvent(const Logger::LogType& eType, const std::string& strMessage);
 	void createWindow(const std::string& strTitle);
 	void closeWindow(const std::string& strTitle);
 	void clearSelectionInGraphView();
@@ -73,7 +75,8 @@ signals: //for QT to connect
 
 public: //methods for model to call and trigger GUI
 	void triggerReportProgress(const float& );
-	void triggerLogEvent(const Logger::LogType& eType, const std::string& strMessage);
+// TODO logger
+//	void triggerLogEvent(const Logger::LogType& eType, const std::string& strMessage);
 	void triggerCreateWindow(const std::string& strTitle, const cv::Mat& oMat);
 	void triggerCloseWindow(const std::string& strTitle);
 	void triggerClearSelectionInGraphView();

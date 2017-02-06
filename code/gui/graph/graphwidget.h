@@ -2,8 +2,8 @@
 #define GRAPHWIDGET_H
 
 #include <QGraphicsView>
-#include "../../framework/Configuration.hpp"
-#include "../framework/GUIEventDispatcher.hpp"
+#include "ProcessingChain.hpp"
+#include "../GUIEventDispatcher.hpp"
 
 namespace uipf{
 namespace gui{
@@ -19,7 +19,7 @@ class GraphWidget : public QGraphicsView
 public:
     GraphWidget(QWidget *parent = 0);
 
-   void renderConfig(uipf::Configuration& config);
+   void renderConfig(uipf::ProcessingChain& config);
 
    void selectNodeByName(const QString name, bool bUnselectOthers=true);
 

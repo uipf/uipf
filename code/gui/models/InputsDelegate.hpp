@@ -6,9 +6,9 @@
 
 #include <QItemDelegate>
 
-#include <../framework/Configuration.hpp>
-#include <../framework/ModuleManager.hpp>
-#include <../framework/MetaData.hpp>
+#include "ProcessingChain.hpp"
+#include "ModuleLoader.hpp"
+
 
 class QModelIndex;
 class QWidget;
@@ -20,7 +20,7 @@ class InputsDelegate : public QItemDelegate
 {
 Q_OBJECT
 public:
-	InputsDelegate(ModuleManager&, QObject *parent = 0);
+	InputsDelegate(ModuleLoader&, QObject *parent = 0);
 
 	// create editor widget
 	QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
@@ -30,13 +30,13 @@ public:
 	void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
 
 	// updates the model by setting the current configuration
-	void setConfiguration(const Configuration&, const std::string&, std::vector<std::string>);
+	void setConfiguration(const ProcessingChain&, const std::string&, std::vector<std::string>);
 
 signals:
 	void inputChanged(std::string, std::pair<std::string, std::string>) const;
 
 private:
-	ModuleManager& mm_;
+	ModuleLoader& mm_;
 
 	// available options for the step dropdown box
 	std::vector<std::string> stepItems_;

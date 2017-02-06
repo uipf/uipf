@@ -1,7 +1,7 @@
 #include <QApplication>
+#include <iostream>
 
-#include "framework/ModuleManager.hpp"
-#include "gui/MainWindow.hpp"
+#include "MainWindow.hpp"
 
 using namespace std;
 using namespace uipf;
@@ -17,7 +17,13 @@ int main(int argc, char *argv[])
 
 	// it is possible to give a config file as first argument
 	if (argc > 1) {
-		w.loadDataFlow(argv[1]);
+		if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help")) {
+			cout << "Usage:" << endl;
+			cout << "  " << argv[0] << "             launch GUI with empty processing chain." << endl;
+			cout << "  " << argv[0] << " <filename>  open processing chain from file." << endl;
+			cout << "  " << argv[0] << " --help      show this help message" << endl;
+		}
+		w.loadProcessingChain(argv[1]);
 	}
 
 	return a.exec();

@@ -7,10 +7,12 @@ project(UIPFramework)
 
 option(WITH_TESTS "Build test binaries and enable `make test` target" ON)
 option(WITH_OPENCV "Build with openCV, enable openCV types" OFF)
+option(WITH_GUI "Build with graphical user interface (requires Qt)" ON)
 
 message("Build options:")
 message("With Tests: ${WITH_TESTS}")
 message("With OpenCV: ${WITH_OPENCV}")
+message("With GUI: ${WITH_GUI}")
 
 set(LIBUIPF_WITH_TESTS ${WITH_TESTS})
 set(LIBUIPF_WITH_OPENCV ${WITH_OPENCV})
@@ -19,7 +21,7 @@ if(WITH_TESTS)
 	enable_testing()
 endif()
 
-#c++11 support
+# c++11 support
 if(${CMAKE_VERSION} VERSION_LESS 3.1.0)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x")
 else()
@@ -43,8 +45,8 @@ set(UIPFramework_VERSION_MINOR 0)
 set(UIPFramework_VERSION_PATCH 0)
 set(UIPFramework_VERSION "${UIPFramework_VERSION_MAJOR}.${UIPFramework_VERSION_MINOR}.${UIPFramework_VERSION_PATCH}-alpha")
 configure_file (
-		"${PROJECT_SOURCE_DIR}/uipf.hpp.in"
-		"${PROJECT_BINARY_DIR}/uipf.hpp"
+	"${PROJECT_SOURCE_DIR}/uipf.hpp.in"
+	"${PROJECT_BINARY_DIR}/uipf.hpp"
 )
 
 
@@ -54,7 +56,10 @@ add_subdirectory(modules)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 add_subdirectory(console)
-#add_subdirectory(gui)
+
+if (WITH_GUI)
+	add_subdirectory(gui)
+endif()
 
 
 ##
@@ -96,9 +101,21 @@ add_subdirectory(console)
 #	${headerFilesData}
 #	DESTINATION include/uipf/data
 #)
-#install(FILES
-#	${CMAKE_CURRENT_SOURCE_DIR}/uipf-gui.desktop
-#	${CMAKE_CURRENT_SOURCE_DIR}/uipf.desktop
-#	DESTINATION /usr/share/applications
-#)
 
+if(UNIX)
+	# install desktop files
+
+	include(GNUInstallDirs)
+
+	install(FILES
+		${UIPFramework_SOURCE_DIR}/uipf-gui.desktop
+		${UIPFramework_SOURCE_DIR}/uipf.desktop
+		DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications"
+	)
+
+# TODO write a manpage
+#	install(FILES
+#		uipf.1
+#		DESTINATION "${CMAKE_INSTALL_MANDIR}/man1"
+#	)
+endif()

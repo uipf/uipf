@@ -23,18 +23,16 @@
 
 #include "RunWorkerThread.h"
 
-#include "../framework/Configuration.hpp"
-#include "../framework/Logger.hpp"
-#include "../framework/ProcessingStep.hpp"
-#include "../framework/ModuleManager.hpp"
-#include "../framework/GUIEventDispatcher.hpp"
+#include "ProcessingChain.hpp"
+// TODO logging
+//#include "../framework/Logger.hpp"
 
 #include "graph/graphwidget.h"
 #include "graph/node.h"
 
 
 namespace Ui {
-class MainWindow;
+	class MainWindow;
 }
 
 namespace uipf {
@@ -48,7 +46,7 @@ public:
     ~MainWindow();
 
 	// loads a new configuration from file
-	void loadDataFlow(std::string);
+	void loadProcessingChain(std::string);
 
 private slots:
 	// Buttons addStep/deleteStep
@@ -61,7 +59,8 @@ private slots:
     void on_stepSelectionChanged(const QItemSelection&);
 
     // append messages from our logger to the log-textview
-    void on_appendToLog(const Logger::LogType&, const std::string& );
+// TODO
+//    void on_appendToLog(const Logger::LogType&, const std::string& );
     // moves the progressbar on every step of the processing chain
     void on_reportProgress(const float& );
 
@@ -116,7 +115,7 @@ private:
     Ui::MainWindow *ui;
 
 	// the module manager instance
-	ModuleManager mm_;
+	ModuleLoader mm_;
 
 	// model for the listView of processing steps
     QStringListModel *modelStep;
@@ -132,7 +131,7 @@ private:
 	// asks the user, whether he wants to save the file
 	bool okToContinue();
 	// the currently loaded configuration represented in the window
-   	Configuration conf_;
+   	ProcessingChain conf_;
 
 	// map of all available categories
 	std::map<std::string, std::vector<std::string> > categories_;
@@ -146,8 +145,8 @@ private:
 	std::string currentStepName;
 
    	// Redo and Undo stacks, which store configurations
-   	std::stack<Configuration> undoStack;
-   	std::stack<Configuration> redoStack;
+   	std::stack<ProcessingChain> undoStack;
+   	std::stack<ProcessingChain> redoStack;
 	// fills the undo and redo stacks
 	void beforeConfigChange();
 

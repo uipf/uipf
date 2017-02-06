@@ -11,21 +11,21 @@
 using namespace std;
 using namespace uipf;
 
-InputsDelegate::InputsDelegate(ModuleManager& mm, QObject *parent) : QItemDelegate(parent) , mm_(mm) {
+InputsDelegate::InputsDelegate(ModuleLoader& mm, QObject *parent) : QItemDelegate(parent) , mm_(mm) {
 
 }
 
-void InputsDelegate::setConfiguration(const Configuration& conf, const std::string& currentStepName, std::vector<std::string> inputNames) {
+void InputsDelegate::setConfiguration(const ProcessingChain& conf, const std::string& currentStepName, std::vector<std::string> inputNames) {
 
 	inputNames_ = inputNames;
 
 	stepItems_.clear();
 	outputItems_.clear();
 
-	map<string, MetaData> moduleMetaData = mm_.getAllModuleMetaData();
+	map<string, ModuleMetaData> moduleMetaData = mm_.getAllMetaData();
 
 	// fill vector of possible reference steps
-	map<string, ProcessingStep> chain = conf.getProcessingChain();
+	map<string, ProcessingStep> chain = conf.getProcessingSteps();
 	for (auto it = chain.begin(); it!=chain.end(); ++it) {
 		// the current step can not depend on itself
 		if (it->first.compare(currentStepName) == 0) {
@@ -56,9 +56,9 @@ void InputsDelegate::setConfiguration(const Configuration& conf, const std::stri
 
 		// fill vector of possible outputs for each referenced module
 		vector<string> subItems;
-		if (conf.hasProcessingStep(it->second.first)) {
+		if (conf.hasProcessingStep(it->second.sourceStep)) {
 			// only possible to add items if the referenced step exists and we can get its module
-			ProcessingStep referencedStep = conf.getProcessingStep(it->second.first);
+			ProcessingStep referencedStep = conf.getProcessingStep(it->second.sourceStep);
 
 			// fill vector of possible output selections if module exists
 			auto metaIt = moduleMetaData.find(referencedStep.module);

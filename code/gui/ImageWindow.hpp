@@ -3,7 +3,9 @@
 
 #include <QGraphicsView>
 
-#include <../framework/ModuleManager.hpp>
+#include "ModuleLoader.hpp"
+
+// TODO rewrite this
 
 namespace uipf {
 
@@ -12,8 +14,8 @@ class ImageWindow : public QGraphicsView
     Q_OBJECT
 
 public:
-    ImageWindow(ModuleManager& mm, QWidget *parent = 0) : QGraphicsView(parent), mm_(mm) {};
-    ImageWindow(ModuleManager& mm, QGraphicsScene * scene, QWidget * parent = 0) : QGraphicsView(scene, parent), mm_(mm) {};
+    ImageWindow(ModuleLoader& mm, QWidget *parent = 0) : QGraphicsView(parent), mm_(mm) {};
+    ImageWindow(ModuleLoader& mm, QGraphicsScene * scene, QWidget * parent = 0) : QGraphicsView(scene, parent), mm_(mm) {};
     ~ImageWindow() {};
 
 protected:
@@ -22,7 +24,7 @@ protected:
 
 private:
 
-	ModuleManager& mm_;
+	ModuleLoader& mm_;
 
 };
 
