@@ -1,6 +1,4 @@
 
-ModuleLoader ml;
-
 // add default search paths for modules
 ml.addSearchPath("@uipf-modules_BINARY_DIR@"); // TODO these should only apply if testing is enabled
 ml.addSearchPath(".");

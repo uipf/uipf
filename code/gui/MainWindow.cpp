@@ -25,12 +25,13 @@
 #include "ui_mainwindow.h"
 #include "GUIEventDispatcher.hpp"
 #include "RunWorkerThread.h"
+#include "GuiLogger.hpp"
 
 using namespace std;
 using namespace uipf;
 
 // constructor
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), workerThread_(nullptr) {
+MainWindow::MainWindow(ModuleLoader& ml, QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), mm_(ml), workerThread_(nullptr) {
 
     ui->setupUi(this);
 
@@ -104,9 +105,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(delegateTableInputs, SIGNAL(inputChanged(std::string, std::pair<std::string, std::string>)),
 			this, SLOT(on_inputChanged(std::string, std::pair<std::string, std::string>)));
     // logger
-// TODO
-//    connect(GUIEventDispatcher::instance(), SIGNAL (logEvent(const Logger::LogType&,const std::string&)),
-//			this, SLOT (on_appendToLog(const Logger::LogType&,const std::string&)));
+    connect(GuiLogger::instance(), SIGNAL (logEvent(log::Logger::LogLevel, const std::string&)),
+			this, SLOT (on_appendToLog(log::Logger::LogLevel, const std::string&)));
 
     // progressbar
 // TODO
@@ -451,26 +451,38 @@ void MainWindow::on_closeWindow(const std::string& strTitle)
  */
 }
 
+Q_DECLARE_METATYPE(log::Logger::LogLevel)
+
+void GuiLogger::log(log::Logger::LogLevel lvl, const std::string & msg)
+{
+	//send signal to GUI
+	emit logEvent(lvl, msg);
+}
+
 // append messages from our logger to the log-textview
-// TODO
-//void MainWindow::on_appendToLog(const Logger::LogType& eType,const std::string& strText) {
-//
+void MainWindow::on_appendToLog(log::Logger::LogLevel lvl, const std::string& msg)
+{
+	if (lvl == log::Logger::TRACE) {
+		return;
+	}
+
+// TODO filter
 //	if (!ui->logWarnCheckbox->isChecked() && eType == Logger::WARNING )return;
 //	if (!ui->logInfoCheckbox->isChecked() && eType == Logger::INFO )return;
 //	if (!ui->logErrorCheckbox->isChecked() && eType == Logger::ERROR )return;
-//
-//	QString qText = QString(strText.c_str());
-//
-//	//filter
-//	if (!qText.toLower().contains(ui->logFilterLE->text().toLower()))return;
-//
-//	// For colored Messages we need html :-/
-//	QString strColor = (eType == Logger::WARNING ? "Blue" : eType == Logger::ERROR ? "Red" : "Green");
-//	QString alertHtml = "<font color=\""+strColor+"\">" + qText + "</font>";
-//	ui->tbLog->appendHtml(alertHtml);
-//	//autoscroll
-//	ui->tbLog->verticalScrollBar()->setValue(ui->tbLog->verticalScrollBar()->maximum());
-//}
+
+	QString qText = QString(msg.c_str());
+
+	//filter
+	if (!qText.toLower().contains(ui->logFilterLE->text().toLower()))return;
+
+	// For colored Messages we need html :-/
+	QString strColor = (lvl == log::Logger::WARNING ? "Blue" : lvl == log::Logger::ERROR ? "Red" : "Green");
+	QString alertHtml = "<font color=\""+strColor+"\">" + qText + "</font>";
+	ui->tbLog->appendHtml(alertHtml);
+	//autoscroll
+	ui->tbLog->verticalScrollBar()->setValue(ui->tbLog->verticalScrollBar()->maximum());
+}
 
 void MainWindow::on_clearLogButton_clicked()
 {

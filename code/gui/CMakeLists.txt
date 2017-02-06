@@ -42,7 +42,7 @@ add_executable(uipf-gui
 	RunWorkerThread.cpp
 
 	${RC_SRCS}
-)
+	GuiLogger.cpp GuiLogger.hpp)
 
 target_link_libraries (uipf-gui boost_graph libuipf)
 qt5_use_modules(uipf-gui Core Gui Widgets)

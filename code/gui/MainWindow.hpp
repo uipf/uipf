@@ -24,8 +24,7 @@
 #include "RunWorkerThread.h"
 
 #include "ProcessingChain.hpp"
-// TODO logging
-//#include "../framework/Logger.hpp"
+#include "logging.hpp"
 
 #include "graph/graphwidget.h"
 #include "graph/node.h"
@@ -37,12 +36,14 @@ namespace Ui {
 
 namespace uipf {
 
+class GuiLogger;
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(ModuleLoader& ml, QWidget *parent = 0);
     ~MainWindow();
 
 	// loads a new configuration from file
@@ -59,8 +60,8 @@ private slots:
     void on_stepSelectionChanged(const QItemSelection&);
 
     // append messages from our logger to the log-textview
-// TODO
-//    void on_appendToLog(const Logger::LogType&, const std::string& );
+    void on_appendToLog(log::Logger::LogLevel, const std::string& );
+
     // moves the progressbar on every step of the processing chain
     void on_reportProgress(const float& );
 
@@ -115,7 +116,7 @@ private:
     Ui::MainWindow *ui;
 
 	// the module manager instance
-	ModuleLoader mm_;
+	ModuleLoader& mm_;
 
 	// model for the listView of processing steps
     QStringListModel *modelStep;

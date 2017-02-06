@@ -22,8 +22,8 @@ void Logger::Error(const std::string& strMessage)
 	if (level < ERROR) {
 		return;
 	}
-	for (LogFunction f: logCallbacks) {
-		f(ERROR, strMessage);
+	for (LogCallback* f: logCallbacks) {
+		f->log(ERROR, strMessage);
 	}
 }
 
@@ -32,8 +32,8 @@ void Logger::Warn(const std::string& strMessage)
 	if (level < WARNING) {
 		return;
 	}
-	for (LogFunction f: logCallbacks) {
-		f(WARNING, strMessage);
+	for (LogCallback* f: logCallbacks) {
+		f->log(WARNING, strMessage);
 	}
 }
 
@@ -42,8 +42,8 @@ void Logger::Info(const std::string& strMessage)
 	if (level < INFO) {
 		return;
 	}
-	for (LogFunction f: logCallbacks) {
-		f(INFO, strMessage);
+	for (LogCallback* f: logCallbacks) {
+		f->log(INFO, strMessage);
 	}
 }
 void Logger::Debug(const std::string& strMessage)
@@ -51,8 +51,8 @@ void Logger::Debug(const std::string& strMessage)
 	if (level < DEBUG) {
 		return;
 	}
-	for (LogFunction f: logCallbacks) {
-		f(DEBUG, strMessage);
+	for (LogCallback* f: logCallbacks) {
+		f->log(DEBUG, strMessage);
 	}
 }
 void Logger::Trace(const std::string& strMessage)
@@ -60,7 +60,7 @@ void Logger::Trace(const std::string& strMessage)
 	if (level < TRACE) {
 		return;
 	}
-	for (LogFunction f: logCallbacks) {
-		f(TRACE, strMessage);
+	for (LogCallback* f: logCallbacks) {
+		f->log(TRACE, strMessage);
 	}
 }

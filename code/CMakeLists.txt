@@ -54,6 +54,9 @@ add_subdirectory(libuipf)
 
 add_subdirectory(modules)
 
+include_directories("${UIPFramework_BINARY_DIR}")
+configure_file(paths.cpp.in ${UIPFramework_BINARY_DIR}/paths.cpp)
+
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
 add_subdirectory(console)
 

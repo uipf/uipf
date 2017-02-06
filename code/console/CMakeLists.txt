@@ -14,12 +14,9 @@ message(status "** Boost Console Libraries: ${Boost_LIBRARIES}")
 include_directories(${Boost_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 
-configure_file(paths.cpp.in ${UIPFramework_BINARY_DIR}/paths.cpp)
-
 # include libuipf headers
 include_directories("${libuipf_SOURCE_DIR}/src/include")
 include_directories("${libuipf_SOURCE_DIR}/src")
-include_directories("${UIPFramework_BINARY_DIR}")
 
 # add one executeable for the console application
 add_executable(uipf

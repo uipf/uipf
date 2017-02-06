@@ -88,9 +88,14 @@ namespace uipf {
 
 				LogLevel level = INFO;
 
-				typedef void (*LogFunction)(LogLevel, const std::string&);
+				class LogCallback
+				{
+					public:
+						virtual ~LogCallback() {};
+						virtual void log(LogLevel, const std::string&) = 0;
+				};
 
-				std::vector<LogFunction> logCallbacks;
+				std::vector<LogCallback*> logCallbacks;
 
 			private:
 
@@ -103,6 +108,7 @@ namespace uipf {
 
 #define UIPF_LOG_LEVEL uipf::log::Logger::instance()->level
 #define UIPF_REGISTER_LOGGER(fun) uipf::log::Logger::instance()->logCallbacks.push_back(fun);
+#define UIPF_UNREGISTER_LOGGER(fun) for(auto it = uipf::log::Logger::instance()->logCallbacks.begin(); it != uipf::log::Logger::instance()->logCallbacks.end(); it++) { if (*it == fun) { uipf::log::Logger::instance()->logCallbacks.erase(it); break; }}
 
 // shortcuts to log
 // can be used like UIPF_LOG_ERROR("something bad happened!")

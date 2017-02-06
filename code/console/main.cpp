@@ -22,30 +22,33 @@ namespace po = boost::program_options;
 using namespace std;
 using namespace uipf;
 
+class ConsoleLogger : public log::Logger::LogCallback {
+public:
+	void log(log::Logger::LogLevel lvl, const string& msg) {
 
-void log_fun(log::Logger::LogLevel lvl, const string& msg) {
-
-	switch (lvl) {
-		case log::Logger::LogLevel::ERROR:
-			cout << "\033[1;31mError: \033[0m";
-			break;
-		case log::Logger::LogLevel::WARNING:
-			cout << "\033[1;33mWarning: \033[0m";
-			break;
-		case log::Logger::LogLevel::INFO:
-			cout << "\033[1mInfo: \033[0m";
-			break;
-		case log::Logger::LogLevel::DEBUG:
-			cout << "\033[1;36mDebug: \033[0m";
-			break;
-		case log::Logger::LogLevel::TRACE:
-			cout << "Trace ";
-			break;
-		default:
-			cout << "Log: ";
+		switch (lvl) {
+			case log::Logger::LogLevel::ERROR:
+				cout << "\033[1;31mError: \033[0m";
+				break;
+			case log::Logger::LogLevel::WARNING:
+				cout << "\033[1;33mWarning: \033[0m";
+				break;
+			case log::Logger::LogLevel::INFO:
+				cout << "\033[1mInfo: \033[0m";
+				break;
+			case log::Logger::LogLevel::DEBUG:
+				cout << "\033[1;36mDebug: \033[0m";
+				break;
+			case log::Logger::LogLevel::TRACE:
+				cout << "Trace ";
+				break;
+			default:
+				cout << "Log: ";
+		}
+		cout << msg << endl;
 	}
-	cout << msg << endl;
-}
+
+};
 
 // argument is a configFile
 int main(int argc, char** argv){
@@ -108,7 +111,8 @@ int main(int argc, char** argv){
 	}
 
 	// set log level
-	UIPF_REGISTER_LOGGER(&log_fun);
+	log::Logger::LogCallback* logger = new ConsoleLogger();
+	UIPF_REGISTER_LOGGER(logger);
 	if (vm.count("trace")) {
 		UIPF_LOG_LEVEL = log::Logger::LogLevel::TRACE;
 	} else if (vm.count("verbose")) {
@@ -119,7 +123,7 @@ int main(int argc, char** argv){
 
 	ProcessingChain chain;
 
-	//ModuleLoader ml;
+	ModuleLoader ml;
 	// add default search paths for modules
 	// add user configured module search paths
 	#include "paths.cpp"
