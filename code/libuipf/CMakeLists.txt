@@ -89,6 +89,7 @@ add_library(libuipf STATIC
 	src/ProcessingChain.cpp
 	src/Runner.cpp
 	src/util.cpp
+	src/logging.cpp
 )
 set_target_properties(libuipf PROPERTIES
 	# name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html

@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
 			cout << "  " << argv[0] << "             launch GUI with empty processing chain." << endl;
 			cout << "  " << argv[0] << " <filename>  open processing chain from file." << endl;
 			cout << "  " << argv[0] << " --help      show this help message" << endl;
+			return 1;
 		}
 		w.loadProcessingChain(argv[1]);
 	}

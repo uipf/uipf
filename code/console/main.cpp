@@ -13,9 +13,6 @@
 #include "ProcessingChain.hpp"
 #include "util.hpp"
 
-// TODO setting this level does not seem to work
-volatile int uipf_console_log_level = 3;
-#define UIPF_LOG_LEVEL uipf_console_log_level
 #include "include/logging.hpp"
 
 
@@ -25,6 +22,30 @@ namespace po = boost::program_options;
 using namespace std;
 using namespace uipf;
 
+
+void log_fun(log::Logger::LogLevel lvl, const string& msg) {
+
+	switch (lvl) {
+		case log::Logger::LogLevel::ERROR:
+			cout << "\033[1;31mError: \033[0m";
+			break;
+		case log::Logger::LogLevel::WARNING:
+			cout << "\033[1;33mWarning: \033[0m";
+			break;
+		case log::Logger::LogLevel::INFO:
+			cout << "\033[1mInfo: \033[0m";
+			break;
+		case log::Logger::LogLevel::DEBUG:
+			cout << "\033[1;36mDebug: \033[0m";
+			break;
+		case log::Logger::LogLevel::TRACE:
+			cout << "Trace ";
+			break;
+		default:
+			cout << "Log: ";
+	}
+	cout << msg << endl;
+}
 
 // argument is a configFile
 int main(int argc, char** argv){
@@ -86,16 +107,17 @@ int main(int argc, char** argv){
 		return 1;
 	}
 
-	ProcessingChain chain;
-
 	// set log level
+	UIPF_REGISTER_LOGGER(&log_fun);
 	if (vm.count("trace")) {
-		uipf_console_log_level = 5;
+		UIPF_LOG_LEVEL = log::Logger::LogLevel::TRACE;
 	} else if (vm.count("verbose")) {
-		uipf_console_log_level = 4;
+		UIPF_LOG_LEVEL = log::Logger::LogLevel::DEBUG;
 	} else if (vm.count("quiet")) {
-		uipf_console_log_level = 0;
+		UIPF_LOG_LEVEL = log::Logger::LogLevel::NONE;
 	}
+
+	ProcessingChain chain;
 
 	//ModuleLoader ml;
 	// add default search paths for modules

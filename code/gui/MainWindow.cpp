@@ -235,6 +235,8 @@ void MainWindow::loadProcessingChain(string filename)
 	redoAct->setEnabled(false);
 	undoAct->setEnabled(false);
 
+	// TODO fail if file does not exist
+
 	currentFileName = filename;
     setWindowTitle(tr((currentFileName + string(" - ") + WINDOW_TITLE).c_str()));
 
