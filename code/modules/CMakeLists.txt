@@ -64,14 +64,17 @@ if(WITH_OPENCV)
 
 endif()
 
-# imgproc modules
-add_library(LongRunningDummyModule SHARED dummy/LongRunningDummyModule.cpp)
-target_link_libraries(LongRunningDummyModule libuipf-module)
+if(${CMAKE_BUILD_TYPE} MATCHES Debug)
 
-install(TARGETS
-	# dummy modules
-	LongRunningDummyModule
+	# imgproc modules
+	add_library(LongRunningDummyModule SHARED dummy/LongRunningDummyModule.cpp)
+	target_link_libraries(LongRunningDummyModule libuipf-module)
 
-	LIBRARY DESTINATION lib/uipf
-	ARCHIVE DESTINATION lib/uipf
-)
+	install(TARGETS
+		# dummy modules
+		LongRunningDummyModule
+
+		LIBRARY DESTINATION lib/uipf
+		ARCHIVE DESTINATION lib/uipf
+	)
+endif()
