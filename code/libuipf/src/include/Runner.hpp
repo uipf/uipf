@@ -20,6 +20,16 @@ class Runner{
 		// destructor
 		~Runner(void) {};
 
+		enum DataMode {
+			// keep data as long as there are modules that need them
+			// TODO allow marking some data for explicit save
+			MODE_ECONOMY,
+			// keep all data for later inspection
+			MODE_KEEP,
+		};
+
+		DataMode dataMode = MODE_ECONOMY;
+
 		/**
 		 * Runs the processing chain by invoking the modules
 		 * with given parameters.
@@ -48,11 +58,16 @@ class Runner{
 		int moduleProgressMax = 100;
 		int modulesDone = 0;
 		int moduleCount = 0;
+		int mapDone = 0;
+		int mapItems = 0;
 
 		std::vector<std::string> sortChain(const std::map<std::string, ProcessingStep>&);
 
 	private:
 
+		void stepActive(std::string stepName);
+		void dataUpdated(std::string stepName, std::string outputName);
+		void dataDeleted(std::string stepName, std::string outputName);
 		void updateModuleProgress(int done, int max = 100);
 
 		friend class ModuleInterface;

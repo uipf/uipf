@@ -8,6 +8,10 @@ namespace uipf {
 	public:
 		virtual void updateGlobalProgress(int done, int max) {};
 		virtual void updateModuleProgress(int done, int max) {};
+
+		virtual void stepActive(std::string stepName) {};
+		virtual void dataUpdated(std::string stepName, std::string outputName) {};
+		virtual void dataDeleted(std::string stepName, std::string outputName) {};
 	};
 
 }

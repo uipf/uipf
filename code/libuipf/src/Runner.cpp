@@ -106,6 +106,8 @@ bool Runner::run() {
 			break;
 		}
 
+		// mark step as active in the GUI
+		stepActive(proSt.name);
 
 		try {
 
@@ -150,6 +152,10 @@ bool Runner::run() {
 
 			if (mapInput.empty()) {
 
+				// reset map data counter used for progress calculation
+				mapDone = 0;
+				mapItems = 0;
+
 				UIPF_LOG_INFO("Running step '", proSt.name, "'...");
 				module->run();
 				UIPF_LOG_INFO("Done with step '", proSt.name, "'.");
@@ -161,12 +167,19 @@ bool Runner::run() {
 
 				map< string, data::List::ptr > mapOutputs;
 
-				UIPF_LOG_INFO("Running step '", proSt.name, "' in map() mode on ", mapData->getContent().size(), " items...");
+				// reset map data counter used for progress calculation
+				mapDone = 0;
+				mapItems = (int) mapData->getContent().size();
+
+				UIPF_LOG_INFO("Running step '", proSt.name, "' in map() mode on ", mapItems, " items...");
 				uipf_cforeach(mapItem, mapData->getContent()) {
 
 					module->input_.insert(pair<string, Data::ptr>(mapInput, *mapItem));
 					module->run();
 					module->input_.erase(mapInput);
+
+					mapDone++;
+					updateModuleProgress(100, 100);
 
 					for(auto mapOutput = module->output_.begin(); mapOutput != module->output_.end(); /*no ++ here*/) {
 
@@ -226,33 +239,37 @@ bool Runner::run() {
 		// TODO delete module, check for side effects with the data pointers first
 
 		// free some outputs that are not needed anymore
-		uipf_foreach(osit, stepsOutputs) {
+		if (dataMode != MODE_KEEP) {
+			uipf_foreach(osit, stepsOutputs) {
 
-			string outputStep = osit->first;
+				string outputStep = osit->first;
 
-			for (auto oit = osit->second.begin(); oit!=osit->second.end(); /* no ++ here */) {
+				for (auto oit = osit->second.begin(); oit != osit->second.end(); /* no ++ here */) {
 
-				string outputName = oit->first;
+					string outputName = oit->first;
 
-				// iterate over the future steps to see if this output is requested
-				bool requested = false;
-				for (unsigned int s = i + 1; s<sortedChain.size() && !requested; s++){
+					// iterate over the future steps to see if this output is requested
+					bool requested = false;
+					for (unsigned int s = i + 1; s < sortedChain.size() && !requested; s++) {
 
-					ProcessingStep fstep = chain[sortedChain[s]];
-					uipf_cforeach(iit, fstep.inputs) {
-						if (outputStep.compare(iit->second.sourceStep) == 0 && outputName.compare(iit->second.outputName) == 0) {
-							requested = true;
-							UIPF_LOG_DEBUG(outputStep, ".", outputName, " is requested.");
-							break;
+						ProcessingStep fstep = chain[sortedChain[s]];
+						uipf_cforeach(iit, fstep.inputs) {
+							if (outputStep.compare(iit->second.sourceStep) == 0 &&
+							    outputName.compare(iit->second.outputName) == 0) {
+								requested = true;
+								UIPF_LOG_DEBUG(outputStep, ".", outputName, " is requested.");
+								break;
+							}
 						}
 					}
-				}
-				if (!requested) {
-					// output is not requested in any further step, delete it
-					UIPF_LOG_INFO("deleted ", outputStep, ".", outputName);
-					oit = osit->second.erase(oit);
-				} else {
-					++oit;
+					if (!requested) {
+						// output is not requested in any further step, delete it
+						UIPF_LOG_INFO("deleted ", outputStep, ".", outputName);
+						dataDeleted(outputStep, outputName);
+						oit = osit->second.erase(oit);
+					} else {
+						++oit;
+					}
 				}
 			}
 		}
@@ -269,12 +286,31 @@ bool Runner::run() {
 
 void Runner::updateModuleProgress(int done, int max /*= 100*/) {
 
+	if (mapItems > 0) {
+		// calculate module progress scaled by items in this run
+		done = mapDone * 100 + (int) ((float) done / (max) * 100);
+		max = mapItems * 100;
+	}
+
 	if (done > max) {
 		max = done;
 	}
+
 	moduleProgressDone = done;
 	moduleProgressMax = max;
 
 	context_.updateModuleProgress(done, max);
 	context_.updateGlobalProgress(modulesDone * 100 +  (int) ((float) done / (max) * 100), moduleCount * 100);
+}
+void Runner::stepActive(std::string stepName)
+{
+	context_.stepActive(stepName);
+}
+void Runner::dataUpdated(std::string stepName, std::string outputName)
+{
+	context_.dataUpdated(stepName, outputName);
+}
+void Runner::dataDeleted(std::string stepName, std::string outputName)
+{
+	context_.dataDeleted(stepName, outputName);
 }

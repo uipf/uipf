@@ -28,10 +28,13 @@ class ModuleInterface {
 
 		// the id of the module, which can be referenced in the yaml configuration
 		virtual std::string getId() const = 0;
+
 		// descriptive name to be displayed in the GUI
 		virtual std::string getName() const = 0;
+
 		// descriptive category for organizing modules in the GUI
 		virtual std::string getCategory() const = 0;
+
 		// module description TODO add possibilty to write more detailed module documentation
 		virtual std::string getDescription() const { return ""; };
 
@@ -46,29 +49,32 @@ class ModuleInterface {
 
 		// data management
 		virtual DataDescriptionMap getInputs() const { return {}; };
+
 		virtual DataDescriptionMap getOutputs() const { return {}; };
+
 		virtual ParamDescriptionMap getParams() const { return {}; };
 
 		// check whether named input data is given
-		bool hasInputData( const std::string& strName) const;
+		bool hasInputData(const std::string &strName) const;
 
 		// returns a typesafe readonly smartpointer to input data by name if it is available
-		template <typename T>
-		const typename T::ptr getInputData( const std::string& strName) const;
+		template<typename T>
+		const typename T::ptr getInputData(const std::string &strName) const;
 
 //		// returns a typesafe smartpointer to output data by name if it is available
 //		template <typename T>
 //		typename T::ptr getOutputData( const std::string& strName) const;
 
 		// sets a typesafe smartpointer for output data by name
-		template <typename T>
-		void setOutputData( const std::string& strName, T*);
-		template <typename T>
-		void setOutputData( const std::string& strName, typename T::ptr);
+		template<typename T>
+		void setOutputData(const std::string &strName, T *);
+
+		template<typename T>
+		void setOutputData(const std::string &strName, typename T::ptr);
 
 		// returns a typesafe parameter by name if it is available. otherwise a defaultValue is used.
-		template <typename T>
-		T getParam(const std::string& strName, T defaultValue) const;
+		template<typename T>
+		T getParam(const std::string &strName, T defaultValue) const;
 
 	protected:
 
@@ -76,12 +82,12 @@ class ModuleInterface {
 
 	private:
 
-		std::map < std::string, Data::ptr > input_; // TODO const!
-		std::map < std::string, Data::ptr > output_;
-		std::map < std::string, std::string > params_;
+		std::map<std::string, Data::ptr> input_; // TODO const!
+		std::map<std::string, Data::ptr> output_;
+		std::map<std::string, std::string> params_;
 
 		std::string pStepName_;
-		uipf::Runner* runner_;
+		uipf::Runner *runner_;
 
 		// Make the Runner class a friend of Module, to allow populating data
 		friend class Runner;

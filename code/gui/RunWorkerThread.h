@@ -25,10 +25,16 @@ public:
 
 	void updateGlobalProgress(int done, int max);
 	void updateModuleProgress(int done, int max);
+	void stepActive(std::string stepName);
+	void dataUpdated(std::string stepName, std::string outputName);
+	void dataDeleted(std::string stepName, std::string outputName);
 
 signals: //for QT to connect
 	void eventUpdateGlobalProgress(int done, int max);
 	void eventUpdateModuleProgress(int done, int max);
+	void eventStepActive(std::string stepName);
+	void eventDataUpdated(std::string stepName, std::string outputName);
+	void eventDataDeleted(std::string stepName, std::string outputName);
 
 private:
 
