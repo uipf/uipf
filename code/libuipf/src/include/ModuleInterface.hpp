@@ -93,25 +93,25 @@ class ModuleInterface {
 		friend class Runner;
 	};
 
-	/*
-	 * templates need to be implemented in headers
-	 */
+/*
+ * templates need to be implemented in headers
+ */
 
-	template <typename T>
-	const typename T::ptr ModuleInterface::getInputData( const std::string& strName) const
+template <typename T>
+const typename T::ptr ModuleInterface::getInputData( const std::string& strName) const
+{
+	auto it = input_.find(strName);
+	if (it != input_.end())
 	{
-		auto it = input_.find(strName);
-		if (it != input_.end())
-		{
-			//do downcasting..
-			Data::ptr ptr = it->second;
-			return std::dynamic_pointer_cast<T>(ptr);
-		}
-		else
-		{
-			throw InvalidConfigException(std::string("input data '") + strName + std::string("' not found!"));
-		}
+		//do downcasting..
+		Data::ptr ptr = it->second;
+		return std::dynamic_pointer_cast<T>(ptr);
 	}
+	else
+	{
+		throw InvalidConfigException(std::string("input data '") + strName + std::string("' not found!"));
+	}
+}
 
 
 //	template <typename T>
@@ -130,100 +130,102 @@ class ModuleInterface {
 //		}
 //	}
 
-	template <typename T>
-	void ModuleInterface::setOutputData( const std::string& strName, T* outputData)
-	{
-		if (outputData != nullptr) {
-			output_.insert (std::pair < std::string, Data::ptr >(strName, typename T::ptr(outputData)));
-		} else {
-			throw ErrorException("Can not use an uninitialized pointer as output data.");
-		}
+template <typename T>
+void ModuleInterface::setOutputData( const std::string& strName, T* outputData)
+{
+	if (outputData != nullptr) {
+		output_.insert (std::pair < std::string, Data::ptr >(strName, typename T::ptr(outputData)));
+		runner_->dataUpdated(getProcessingStepName(), strName);
+	} else {
+		throw ErrorException("Can not use an uninitialized pointer as output data.");
 	}
+}
 
-	template <typename T>
-	void ModuleInterface::setOutputData( const std::string& strName, typename T::ptr outputData)
-	{
-		if (outputData != nullptr) {
-			output_.insert (std::pair < std::string, Data::ptr >(strName, outputData));
-		} else {
-			throw ErrorException("Can not use an uninitialized pointer as output data.");
-		}
+template <typename T>
+void ModuleInterface::setOutputData( const std::string& strName, typename T::ptr outputData)
+{
+	if (outputData != nullptr) {
+		output_.insert (std::pair < std::string, Data::ptr >(strName, outputData));
+		runner_->dataUpdated(getProcessingStepName(), strName);
+	} else {
+		throw ErrorException("Can not use an uninitialized pointer as output data.");
 	}
+}
 
-	// TODO test if output requested?
+// TODO test if output requested?
 
-	template <typename T>
-	T ModuleInterface::getParam( const std::string& strName, T defaultValue) const
-	{
-		auto it = params_.find(strName);
-		if (it != params_.end()) {
-			return static_cast<T>(it->second);
-		} else {
-			return defaultValue;
-		}
+template <typename T>
+T ModuleInterface::getParam( const std::string& strName, T defaultValue) const
+{
+	auto it = params_.find(strName);
+	if (it != params_.end()) {
+		return static_cast<T>(it->second);
+	} else {
+		return defaultValue;
 	}
+}
 
-	template <>
-	inline int ModuleInterface::getParam( const std::string& strName, int defaultValue) const
-	{
-		auto it = params_.find(strName);
-		if (it != params_.end() && !it->second.empty()) {
-			return std::stoi(it->second);
-		} else {
-			return defaultValue;
-		}
+template <>
+inline int ModuleInterface::getParam( const std::string& strName, int defaultValue) const
+{
+	auto it = params_.find(strName);
+	if (it != params_.end() && !it->second.empty()) {
+		return std::stoi(it->second);
+	} else {
+		return defaultValue;
 	}
+}
 
-	template <>
-	inline float ModuleInterface::getParam(const std::string& strName, float defaultValue) const
-	{
-		auto it = params_.find(strName);
-		if (it != params_.end() && !it->second.empty()) {
-			// std::stof() is locale aware, meaning params are not portable between platforms
-			// the following is a locale independend stof():
-			float value = defaultValue;
-			std::istringstream istr(it->second);
-			istr.imbue(std::locale("C"));
-			istr >> value;
-			return value;
-		} else {
-			return defaultValue;
-		}
+template <>
+inline float ModuleInterface::getParam(const std::string& strName, float defaultValue) const
+{
+	auto it = params_.find(strName);
+	if (it != params_.end() && !it->second.empty()) {
+		// std::stof() is locale aware, meaning params are not portable between platforms
+		// the following is a locale independend stof():
+		float value = defaultValue;
+		std::istringstream istr(it->second);
+		istr.imbue(std::locale("C"));
+		istr >> value;
+		return value;
+	} else {
+		return defaultValue;
 	}
+}
 
-	template <>
-	inline double ModuleInterface::getParam( const std::string& strName, double defaultValue) const
-	{
-		auto it = params_.find(strName);
-		if (it != params_.end() && !it->second.empty()) {
-			// std::stod() is locale aware, meaning params are not portable between platforms
-			// the following is a locale independend stod():
-			double value = defaultValue;
-			std::istringstream istr(it->second);
-			istr.imbue(std::locale("C"));
-			istr >> value;
-			return value;
-		} else {
-			return defaultValue;
-		}
+template <>
+inline double ModuleInterface::getParam( const std::string& strName, double defaultValue) const
+{
+	auto it = params_.find(strName);
+	if (it != params_.end() && !it->second.empty()) {
+		// std::stod() is locale aware, meaning params are not portable between platforms
+		// the following is a locale independend stod():
+		double value = defaultValue;
+		std::istringstream istr(it->second);
+		istr.imbue(std::locale("C"));
+		istr >> value;
+		return value;
+	} else {
+		return defaultValue;
 	}
+}
 
-	template <>
-	inline bool ModuleInterface::getParam( const std::string& strName, bool defaultValue) const
-	{
-		auto it = params_.find(strName);
-		if (it != params_.end() && !it->second.empty()) {
-			std::string lower = it->second;
-			std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-			return lower.compare("true") == 0
-			       || lower.compare("yes") == 0
-			       || lower.compare("y") == 0
-			       || lower.compare("t") == 0
-			       || lower.compare("1") == 0;
-		} else {
-			return defaultValue;
-		}
+template <>
+inline bool ModuleInterface::getParam( const std::string& strName, bool defaultValue) const
+{
+	auto it = params_.find(strName);
+	if (it != params_.end() && !it->second.empty()) {
+		std::string lower = it->second;
+		std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+		return lower.compare("true") == 0
+		       || lower.compare("yes") == 0
+		       || lower.compare("y") == 0
+		       || lower.compare("t") == 0
+		       || lower.compare("1") == 0;
+	} else {
+		return defaultValue;
 	}
+}
 
 
 } //namespace
