@@ -6,16 +6,15 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <Runner.hpp>
 
 #include "uipf.hpp"
+#include "ModuleInterface.hpp"
+#include "Runner.hpp"
 #include "ModuleLoader.hpp"
 #include "ProcessingChain.hpp"
 #include "util.hpp"
 
-#include "include/logging.hpp"
-
-
+#include "logging.hpp"
 
 namespace po = boost::program_options;
 

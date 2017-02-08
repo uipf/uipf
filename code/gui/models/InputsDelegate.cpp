@@ -1,3 +1,4 @@
+#include "ModuleInterface.hpp"
 #include "InputsDelegate.hpp"
 
 #include <QComboBox>

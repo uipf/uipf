@@ -7,6 +7,7 @@
 
 #include "yaml-cpp/yaml.h"
 
+#include "ModuleInterface.hpp"
 #include "ModuleLoader.hpp"
 #include "util.hpp"
 #include "logging.hpp"

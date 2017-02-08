@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <iostream>
 
+#include "ModuleInterface.hpp"
 #include "MainWindow.hpp"
 #include "logging.hpp"
 

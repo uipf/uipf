@@ -32,9 +32,8 @@ void LongRunningDummyModule::run() {
 	}
 
 	int steps = getParam<int>("steps", 10);
-	int c = 0;
 
-	while(c++ <= steps)
+	for(int c = 0; c < steps; c++)
 	{
 		UIPF_LOG_INFO("I am soo busy!");
 

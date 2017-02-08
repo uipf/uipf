@@ -28,6 +28,7 @@
 
 #include "graph/graphwidget.h"
 #include "graph/node.h"
+#include "RunControl.hpp"
 
 
 namespace Ui {
@@ -115,6 +116,7 @@ private:
 	const std::string WINDOW_TITLE = "uipf";
 
     Ui::MainWindow *ui;
+	friend class RunControl;
 
 	// the module manager instance
 	ModuleLoader& mm_;
@@ -201,6 +203,8 @@ private:
 
     //our current backgroundworker or a nullptr
     RunWorkerThread* workerThread_;
+
+	RunControl* runControl;
 
     //keep track of all windows we created so we can close them later
     std::vector<QGraphicsView* > createdWindwows_;

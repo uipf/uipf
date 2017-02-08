@@ -3,6 +3,7 @@
 
 #include <QGraphicsView>
 
+#include "ModuleInterface.hpp"
 #include "ModuleLoader.hpp"
 
 // TODO rewrite this

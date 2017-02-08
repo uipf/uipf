@@ -20,6 +20,7 @@
 #include <libgen.h>
 #include <unistd.h>
 
+#include "ModuleInterface.hpp"
 #include "MainWindow.hpp"
 #include "ImageWindow.hpp"
 #include "ui_mainwindow.h"
@@ -35,6 +36,10 @@ MainWindow::MainWindow(ModuleLoader& ml, QWidget *parent) : QMainWindow(parent),
 
     ui->setupUi(this);
 
+
+	runControl = new RunControl(this);
+
+
     // Create models
 
     // create model for step list
@@ -42,7 +47,8 @@ MainWindow::MainWindow(ModuleLoader& ml, QWidget *parent) : QMainWindow(parent),
     // create model for params list
     modelTableParams = new ParamsModel(mm_,this);
 
-    // create model for inputs list
+
+	// create model for inputs list
     modelTableInputs = new QStandardItemModel(this);
 	modelTableInputs->setColumnCount(2);
 	QStandardItem* item0 = new QStandardItem("From Step:");
@@ -1015,10 +1021,13 @@ void MainWindow::run() {
 
 	// Setup callback for cleanup when it finishes
 	connect(workerThread_, SIGNAL(finished()),  this, SLOT(on_backgroundWorkerFinished()));
+	// progress updates
 	connect(workerThread_, SIGNAL(eventUpdateGlobalProgress(int, int)),
 	        this, SLOT (on_reportGlobalProgress(int, int)));
 	connect(workerThread_, SIGNAL(eventUpdateModuleProgress(int, int)),
 	        this, SLOT (on_reportModuleProgress(int, int)));
+	// data updates
+	runControl->registerWorkerSlots(workerThread_);
 
 	// Run, Forest, run!
 	workerThread_->start(); // This invokes WorkerThread::run in a new thread

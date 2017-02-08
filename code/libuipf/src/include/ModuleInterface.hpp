@@ -13,12 +13,13 @@
 namespace uipf {
 
 //#include "Runner.hpp"
-class Runner;
+	class Runner;
 
-class ModuleInterface {
+	class ModuleInterface {
 	public:
 		// constructor
 		ModuleInterface(void) {};
+
 		// destructor
 		virtual ~ModuleInterface(void) {};
 
@@ -92,6 +93,12 @@ class ModuleInterface {
 		// Make the Runner class a friend of Module, to allow populating data
 		friend class Runner;
 	};
+
+}
+
+#include "Runner.hpp"
+
+namespace uipf {
 
 /*
  * templates need to be implemented in headers

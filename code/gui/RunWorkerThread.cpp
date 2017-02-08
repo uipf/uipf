@@ -1,3 +1,4 @@
+#include "ModuleInterface.hpp"
 #include "RunWorkerThread.h"
 
 using namespace uipf;

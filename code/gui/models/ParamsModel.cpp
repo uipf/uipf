@@ -1,3 +1,4 @@
+#include "ModuleInterface.hpp"
 #include "ParamsModel.hpp"
 
 using namespace std;
