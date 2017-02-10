@@ -65,6 +65,7 @@ MainWindow::MainWindow(ModuleLoader& ml, QWidget *parent) : QMainWindow(parent),
     ui->tableInputs->setModel(modelTableInputs);
 	ui->tableInputs->setItemDelegateForColumn(0, delegateTableInputs);
 	ui->tableInputs->setItemDelegateForColumn(1, delegateTableInputs);
+	ui->tableInputs->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 	// ensure size of the columns match the widget
 	for (int c = 0; c < ui->tableInputs->horizontalHeader()->count(); ++c) {
 		ui->tableInputs->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);

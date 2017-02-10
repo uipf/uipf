@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QtCore/QStringListModel>
 #include <QtCore/QItemSelection>
+#include <QtGui/QStandardItemModel>
 
 #include "RunWorkerThread.h"
 
@@ -57,7 +58,7 @@ namespace uipf {
 		QStringListModel *modelRunSteps_;
 
 		// model for the listView of processing steps outputs
-		QStringListModel *modelStepOutputs_;
+		QStandardItemModel *modelStepOutputs_;
 
 	};
 };

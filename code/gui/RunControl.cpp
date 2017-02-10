@@ -13,16 +13,32 @@ RunControl::RunControl(uipf::MainWindow *mw) : mainWindow_(mw)
 	// create model for step list in run mode
 	modelRunSteps_ = new QStringListModel(this);
 	mw->ui->listRunSteps->setModel(modelRunSteps_);
-
-	modelStepOutputs_ = new QStringListModel(this);
-	mw->ui->tableOutputs->setModel(modelStepOutputs_);
-
 	// step list is not editable
 	mw->ui->listRunSteps->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
 	// react to selection of the entries
 	connect(mw->ui->listRunSteps->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
 	        this, SLOT(on_stepSelectionChanged(QItemSelection)));
+
+
+	modelStepOutputs_ = new QStandardItemModel(this);
+	modelStepOutputs_->setColumnCount(3);
+	QStandardItem* item0 = new QStandardItem("Output:");
+	QStandardItem* item1 = new QStandardItem("Type:");
+	item0->setToolTip(QString("Name of the module output."));
+	item1->setToolTip(QString("Data type of the module output."));
+	modelStepOutputs_->setHorizontalHeaderItem(0, item0);
+	modelStepOutputs_->setHorizontalHeaderItem(1, item1);
+	modelStepOutputs_->setHorizontalHeaderItem(2, new QStandardItem(""));
+
+	mw->ui->tableOutputs->setModel(modelStepOutputs_);
+	mw->ui->tableOutputs->setEnabled(false);
+	mw->ui->tableOutputs->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+	mw->ui->tableOutputs->verticalHeader()->setVisible(false);
+	mw->ui->tableOutputs->setSelectionMode(QAbstractItemView::NoSelection);
+	for (int c = 0; c < mw->ui->tableOutputs->horizontalHeader()->count(); ++c) {
+		mw->ui->tableOutputs->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
+	}
+
 }
 
 void RunControl::registerWorkerSlots(RunWorkerThread *wt)
@@ -79,13 +95,34 @@ void RunControl::on_workerDataDeleted(std::string stepName, std::string outputNa
 // gets called when a processing step is selected
 void RunControl::on_stepSelectionChanged(const QItemSelection& selection){
 	if(selection.indexes().isEmpty()) {
-		// TODO resetOutputs();
+		modelStepOutputs_->setRowCount(0);
+		mainWindow_->ui->tableOutputs->setEnabled(false);
 	} else {
 //		mainWindow_->ui->listRunSteps->setCurrentIndex(selection.indexes().first()); // TODO WTF?
 
 		selectedStep_ = modelRunSteps_->data(selection.indexes().first(), Qt::DisplayRole).toString().toStdString();
 		UIPF_LOG_TRACE("selected step: ", selectedStep_);
 
-		//refreshOutputs();
+		// TODO move below to separate function
+
+		// reset outputs
+		modelStepOutputs_->setRowCount(0);
+
+		auto outputData = stepOutputs_.find(selectedStep_);
+		if (outputData != stepOutputs_.end()) {
+			int r = 0;
+			for(string output: outputData->second) {
+				QStandardItem* item = new QStandardItem(output.c_str());
+				item->setEditable(false);
+				// TODO set tooltip from model data description
+				modelStepOutputs_->setItem(r, 0, item);
+				modelStepOutputs_->setItem(r, 1, new QStandardItem("TODO"));
+				mainWindow_->ui->tableOutputs->setIndexWidget(
+					mainWindow_->ui->tableOutputs->model()->index(r, 2),
+					new QPushButton(QString::fromStdString(string("TODO Buttons")))
+				);
+			}
+		}
+		mainWindow_->ui->tableOutputs->setEnabled(true);
 	}
 }

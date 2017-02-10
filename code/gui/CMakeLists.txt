@@ -45,7 +45,9 @@ add_executable(uipf-gui
 
 	GuiLogger.cpp
 	GuiLogger.hpp
-	RunControl.cpp RunControl.hpp)
+	RunControl.cpp
+	RunControl.hpp
+)
 
 target_link_libraries (uipf-gui boost_graph libuipf)
 qt5_use_modules(uipf-gui Core Gui Widgets)
