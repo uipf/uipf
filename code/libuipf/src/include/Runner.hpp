@@ -8,17 +8,31 @@
 
 namespace uipf{
 
+/**
+ * Runner implements the class that brings Modules and Data together in a ProcessingChain.
+ *
+ * It takes the ProcessingChain and a ModuleLoader to run the chain by executing the modules.
+ *
+ * There are two run modi:
+ *
+ * 1. Run the whole chain. Simply call `run()` to do so. Call `pauseChain()` to reduce a run to step mode.
+ * 2. Run step by step. Start with `runStep()`. Call `resumeChain()` to change to whole run mode.
+ *
+ * Abort a running chain with `requestStop()`.
+ * TODO this is untested so far.
+ *
+ *
+ *
+ *
+ * Runner assumes the processing chain has been validated before, do not pass an invalid chain!
+ */
 class Runner{
 
 	public:
 		// constructor
-		Runner(const ProcessingChain& pc, ModuleLoader& ml, RunContext& ct) :
-			processingChain_(pc),
-			moduleLoader_(ml),
-			context_(ct) {};
-
+		Runner(const ProcessingChain& pc, ModuleLoader& ml, RunContext& ct);
 		// destructor
-		~Runner(void) {};
+		~Runner(void);
 
 		enum DataMode {
 			// keep data as long as there are modules that need them
@@ -35,6 +49,7 @@ class Runner{
 		 * with given parameters.
 		 */
 		bool run();
+		bool runStep();
 
 		/**
 		 * if set modules should finish their work
@@ -50,9 +65,22 @@ class Runner{
 
 	private:
 
+		void cleanupData();
+
 		const ProcessingChain& processingChain_;
 		ModuleLoader& moduleLoader_;
 		RunContext& context_;
+
+		std::map<std::string, uipf::ProcessingStep> chain_;
+
+		unsigned int currentStep_ = 0;
+		std::vector<std::string> sortedChain_;
+
+		// contains the outputs of the processing steps
+		std::map<std::string, std::map<std::string, uipf::Data::ptr> > stepsOutputs_;
+
+
+
 
 		int moduleProgressDone = 0;
 		int moduleProgressMax = 100;

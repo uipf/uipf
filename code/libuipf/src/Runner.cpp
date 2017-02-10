@@ -11,6 +11,29 @@
 using namespace std;
 using namespace uipf;
 
+Runner::Runner(const ProcessingChain& pc, ModuleLoader& ml, RunContext& ct) :
+		processingChain_(pc),
+		moduleLoader_(ml),
+		context_(ct)
+{
+	// get processing chain
+	chain_ = processingChain_.getProcessingSteps();
+	sortedChain_ = sortChain(chain_);
+
+	moduleCount = (int) chain_.size();
+	modulesDone = 0;
+
+	//reset StopSignal
+// TODO	context_.bStopRequested_ = false;
+
+}
+
+
+Runner::~Runner()
+{
+
+}
+
 
 vector<string> Runner::sortChain(const map<string, ProcessingStep>& chain)
 {
@@ -62,174 +85,19 @@ vector<string> Runner::sortChain(const map<string, ProcessingStep>& chain)
 }
 
 
-bool Runner::run() {
-
-	// get processing chain
-	map<string, ProcessingStep> chain = processingChain_.getProcessingSteps();
-	vector<string> sortedChain = sortChain(chain);
-
-	moduleCount = (int) chain.size();
-	modulesDone = 0;
-
-	//reset StopSignal
-// TODO	context_.bStopRequested_ = false;
-
-	// contains the outputs of the processing steps
-	map<string, map<string, Data::ptr> > stepsOutputs;
-
-	bool hasError = false;
+bool Runner::run()
+{
 	UIPF_LOG_INFO( "Starting processing chain." );
 
 // TODO	GUIEventDispatcher::instance()->clearSelectionInGraphView();
 
 	// iterate over the sortedChain and run the modules in the order given by the chain
-	for (unsigned int i=0; i<sortedChain.size(); i++){
+	for (currentStep_ = 0; currentStep_ < sortedChain_.size(); currentStep_++) {
 
-		ProcessingStep proSt = chain[sortedChain[i]];
-
-		// TODO	GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::CURRENT,false);
-		// reset module progress bar
-		context_.updateModuleProgress(0, 0);
-
-		// load the module
-		ModuleInterface* module;
-		string moduleName = proSt.module;
-		if (moduleLoader_.hasModule(moduleName)) {
-			module = moduleLoader_.getModuleInstance(moduleName);
-
-			// populate module context
-			module->pStepName_ = proSt.name;
-			module->runner_ = this;
-
-		} else {
-			UIPF_LOG_ERROR( "Module '", moduleName, "' could not be found." );
-			hasError = true;
-			break;
+		if (!runStep()) {
+			return false;
 		}
-
-		// mark step as active in the GUI
-		stepActive(proSt.name);
-
-		try {
-
-	//		// prepare an empty map of outputs that will be filled by the module
-	//		map<string, Data::ptr >* outputs = new map<string, Data::ptr>();
-	//		// inputs are references to the data pointer to allow sending one output to multiple steps
-	//		map<string, Data::ptr& > inputs;
-
-			std::string mapInput;
-			data::List::ptr mapData;
-
-			// fill the inputs of the current processing step by taking it from the stored outputs
-			uipf_foreach(input, proSt.inputs) {
-				// skip empty references (unset optional input)
-				if (input->second.sourceStep.empty()) {
-					continue;
-				}
-
-				map<string, Data::ptr> moduleOutputs = stepsOutputs[input->second.sourceStep];
-				uipf_cforeach(debug, moduleOutputs) {
-					UIPF_LOG_WARNING(debug->first, ": ", debug->second.use_count());
-				}
-				auto outputElement = moduleOutputs.find(input->second.outputName);
-				if (outputElement == moduleOutputs.end()) {
-					throw ErrorException(string("Output '") + input->second.sourceStep + string(".") + input->second.outputName + string("' requested by step '") + proSt.name + string("' for input '") + input->first + string("' does not exist."));
-				}
-
-				if (input->second.map) {
-					if (!mapInput.empty()) {
-						throw InvalidConfigException("Multiple map() calls in one step detected, this is currently not supported.");
-					}
-					// map() input gets special handling
-					mapInput = input->first;
-					mapData = std::dynamic_pointer_cast<data::List>(outputElement->second);
-				} else {
-					module->input_.insert(pair<string, Data::ptr>(input->first, outputElement->second));
-				}
-			}
-
-			// set module params
-			module->params_ = proSt.params;
-
-			if (mapInput.empty()) {
-
-				// reset map data counter used for progress calculation
-				mapDone = 0;
-				mapItems = 0;
-
-				UIPF_LOG_INFO("Running step '", proSt.name, "'...");
-				module->run();
-				UIPF_LOG_INFO("Done with step '", proSt.name, "'.");
-
-				// fill the outputs of the current processing step
-				stepsOutputs.insert(pair<string, map<string, Data::ptr> > (proSt.name, module->output_));
-
-			} else {
-
-				map< string, data::List::ptr > mapOutputs;
-
-				// reset map data counter used for progress calculation
-				mapDone = 0;
-				mapItems = (int) mapData->getContent().size();
-
-				UIPF_LOG_INFO("Running step '", proSt.name, "' in map() mode on ", mapItems, " items...");
-				uipf_cforeach(mapItem, mapData->getContent()) {
-
-					module->input_.insert(pair<string, Data::ptr>(mapInput, *mapItem));
-					module->run();
-					module->input_.erase(mapInput);
-
-					mapDone++;
-					updateModuleProgress(100, 100);
-
-					for(auto mapOutput = module->output_.begin(); mapOutput != module->output_.end(); /*no ++ here*/) {
-
-						auto pos = mapOutputs.find(mapOutput->first);
-						if (pos == mapOutputs.end()) {
-							auto ins = mapOutputs.insert(pair<string, data::List::ptr>(mapOutput->first, data::List::ptr(new data::List())));
-							pos = ins.first;
-						}
-
-						pos->second->getContent().push_back(mapOutput->second);
-						mapOutput = module->output_.erase(mapOutput);
-					}
-
-				}
-				UIPF_LOG_INFO("Done with step '", proSt.name, "'.");
-
-				// fill the outputs of the current processing step
-//				stepsOutputs.insert(pair<string, map<string, data::List::ptr> > (proSt.name, mapOutputs));
-				stepsOutputs.insert(pair<string, map<string, Data::ptr> > (proSt.name, map<string, Data::ptr>()));
-				uipf_foreach(output, mapOutputs) {
-					stepsOutputs[proSt.name].insert(pair<string, Data::ptr>( output->first, output->second ));
-				}
-
-			}
-
-		} catch (const ErrorException& e) {
-			// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
-			UIPF_LOG_ERROR( string("Error: ") + e.what() );
-			hasError = true;
-			break;
-		} catch (const InvalidConfigException& e) {
-			// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
-			UIPF_LOG_ERROR( string("Invalid config: ") + e.what() );
-			hasError = true;
-			break;
-		} catch (const std::exception& e) {
-			// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
-			UIPF_LOG_ERROR( string("Error: module threw exception: ") + e.what() );
-			hasError = true;
-			break;
-		}
-
-		// update the progress bar in the GUI
-		modulesDone++;
-		context_.updateGlobalProgress(modulesDone * 100, moduleCount * 100);
-		// TODO GUIEventDispatcher::instance()->triggerReportProgress(static_cast<float>(i+1)/static_cast<float>(sortedChain.size())*100.0f);
-		// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::GOOD,false);
-
-		// check if stop button was pressed
+	// check if stop button was pressed
 // TODO
 //		if (context_.bStopRequested_ )
 //		{
@@ -237,53 +105,216 @@ bool Runner::run() {
 //			break;
 //		}
 
-		// TODO delete module, check for side effects with the data pointers first
-
-		// free some outputs that are not needed anymore
-		if (dataMode != MODE_KEEP) {
-			uipf_foreach(osit, stepsOutputs) {
-
-				string outputStep = osit->first;
-
-				for (auto oit = osit->second.begin(); oit != osit->second.end(); /* no ++ here */) {
-
-					string outputName = oit->first;
-
-					// iterate over the future steps to see if this output is requested
-					bool requested = false;
-					for (unsigned int s = i + 1; s < sortedChain.size() && !requested; s++) {
-
-						ProcessingStep fstep = chain[sortedChain[s]];
-						uipf_cforeach(iit, fstep.inputs) {
-							if (outputStep.compare(iit->second.sourceStep) == 0 &&
-							    outputName.compare(iit->second.outputName) == 0) {
-								requested = true;
-								UIPF_LOG_DEBUG(outputStep, ".", outputName, " is requested.");
-								break;
-							}
-						}
-					}
-					if (!requested) {
-						// output is not requested in any further step, delete it
-						UIPF_LOG_INFO("deleted ", outputStep, ".", outputName);
-						dataDeleted(outputStep, outputName);
-						oit = osit->second.erase(oit);
-					} else {
-						++oit;
-					}
-				}
-			}
-		}
+		cleanupData();
 	}
 
-	// delete the ouput map
-//	uipf_foreach(it, stepsOutputs) {
+
+	// TODO delete the ouput map
+//	uipf_foreach(it, stepsOutputs_) {
 //		delete it->second;
 //	}
 
 	UIPF_LOG_INFO( "Finished processing chain." );
-	return !hasError;
+	return true;
 }
+
+
+bool Runner::runStep() {
+	if (currentStep_ >= sortedChain_.size()) {
+		UIPF_LOG_ERROR("Invalid call to runStep().");
+		return false;
+	}
+
+	ProcessingStep proSt = chain_[sortedChain_[currentStep_]];
+
+	// TODO	GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::CURRENT,false);
+	// reset module progress bar
+	context_.updateModuleProgress(0, 0);
+
+	// load the module
+	ModuleInterface *module;
+	string moduleName = proSt.module;
+	if (moduleLoader_.hasModule(moduleName)) {
+		module = moduleLoader_.getModuleInstance(moduleName);
+
+		// populate module context
+		module->pStepName_ = proSt.name;
+		module->runner_ = this;
+
+	} else {
+		UIPF_LOG_ERROR("Module '", moduleName, "' could not be found.");
+		return false;
+	}
+
+	// mark step as active in the GUI
+	stepActive(proSt.name);
+
+	try {
+
+//		// prepare an empty map of outputs that will be filled by the module
+//		map<string, Data::ptr >* outputs = new map<string, Data::ptr>();
+//		// inputs are references to the data pointer to allow sending one output to multiple steps
+//		map<string, Data::ptr& > inputs;
+
+		std::string mapInput;
+		data::List::ptr mapData;
+
+		// fill the inputs of the current processing step by taking it from the stored outputs
+		uipf_foreach(input, proSt.inputs) {
+			// skip empty references (unset optional input)
+			if (input->second.sourceStep.empty()) {
+				continue;
+			}
+
+			map<string, Data::ptr> moduleOutputs = stepsOutputs_[input->second.sourceStep];
+			uipf_cforeach(debug, moduleOutputs) {
+				UIPF_LOG_WARNING(debug->first, ": ", debug->second.use_count());
+			}
+			auto outputElement = moduleOutputs.find(input->second.outputName);
+			if (outputElement == moduleOutputs.end()) {
+				throw ErrorException(
+						string("Output '") + input->second.sourceStep + string(".") + input->second.outputName +
+						string("' requested by step '") + proSt.name + string("' for input '") + input->first +
+						string("' does not exist."));
+			}
+
+			if (input->second.map) {
+				if (!mapInput.empty()) {
+					throw InvalidConfigException(
+							"Multiple map() calls in one step detected, this is currently not supported.");
+				}
+				// map() input gets special handling
+				mapInput = input->first;
+				mapData = std::dynamic_pointer_cast<data::List>(outputElement->second);
+			} else {
+				module->input_.insert(pair<string, Data::ptr>(input->first, outputElement->second));
+			}
+		}
+
+		// set module params
+		module->params_ = proSt.params;
+
+		if (mapInput.empty()) {
+
+			// reset map data counter used for progress calculation
+			mapDone = 0;
+			mapItems = 0;
+
+			UIPF_LOG_INFO("Running step '", proSt.name, "'...");
+			module->run();
+			UIPF_LOG_INFO("Done with step '", proSt.name, "'.");
+
+			// fill the outputs of the current processing step
+			stepsOutputs_.insert(pair<string, map<string, Data::ptr> >(proSt.name, module->output_));
+
+		} else {
+
+			map<string, data::List::ptr> mapOutputs;
+
+			// reset map data counter used for progress calculation
+			mapDone = 0;
+			mapItems = (int) mapData->getContent().size();
+
+			UIPF_LOG_INFO("Running step '", proSt.name, "' in map() mode on ", mapItems, " items...");
+			uipf_cforeach(mapItem, mapData->getContent()) {
+
+				module->input_.insert(pair<string, Data::ptr>(mapInput, *mapItem));
+				module->run();
+				module->input_.erase(mapInput);
+
+				mapDone++;
+				updateModuleProgress(100, 100);
+
+				for (auto mapOutput = module->output_.begin(); mapOutput != module->output_.end(); /*no ++ here*/) {
+
+					auto pos = mapOutputs.find(mapOutput->first);
+					if (pos == mapOutputs.end()) {
+						auto ins = mapOutputs.insert(
+								pair<string, data::List::ptr>(mapOutput->first, data::List::ptr(new data::List())));
+						pos = ins.first;
+					}
+
+					pos->second->getContent().push_back(mapOutput->second);
+					mapOutput = module->output_.erase(mapOutput);
+				}
+
+			}
+			UIPF_LOG_INFO("Done with step '", proSt.name, "'.");
+
+			// fill the outputs of the current processing step
+//				stepsOutputs_.insert(pair<string, map<string, data::List::ptr> > (proSt.name, mapOutputs));
+			stepsOutputs_.insert(pair<string, map<string, Data::ptr> >(proSt.name, map<string, Data::ptr>()));
+			uipf_foreach(output, mapOutputs) {
+				stepsOutputs_[proSt.name].insert(pair<string, Data::ptr>(output->first, output->second));
+			}
+
+		}
+
+	} catch (const ErrorException &e) {
+		// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
+		UIPF_LOG_ERROR(string("Error: ") + e.what());
+		return false;
+	} catch (const InvalidConfigException &e) {
+		// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
+		UIPF_LOG_ERROR(string("Invalid config: ") + e.what());
+		return false;
+	} catch (const std::exception &e) {
+		// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
+		UIPF_LOG_ERROR(string("Error: module threw exception: ") + e.what());
+		return false;
+	}
+
+	// TODO delete module, check for side effects with the data pointers first
+
+	// update the progress bar in the GUI
+	modulesDone++;
+	context_.updateGlobalProgress(modulesDone * 100, moduleCount * 100);
+	// TODO GUIEventDispatcher::instance()->triggerReportProgress(static_cast<float>(i+1)/static_cast<float>(sortedChain_.size())*100.0f);
+	// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::GOOD,false);
+
+	return true;
+}
+
+void Runner::cleanupData()
+{
+	// free some outputs that are not needed anymore
+	if (dataMode == MODE_KEEP) {
+		return;
+	}
+	uipf_foreach(osit, stepsOutputs_) {
+
+		string outputStep = osit->first;
+
+		for (auto oit = osit->second.begin(); oit != osit->second.end(); /* no ++ here */) {
+
+			string outputName = oit->first;
+
+			// iterate over the future steps to see if this output is requested
+			bool requested = false;
+			for (unsigned int s = currentStep_ + 1; s < sortedChain_.size() && !requested; s++) {
+
+				ProcessingStep fstep = chain_[sortedChain_[s]];
+				uipf_cforeach(iit, fstep.inputs) {
+					if (outputStep.compare(iit->second.sourceStep) == 0 &&
+					    outputName.compare(iit->second.outputName) == 0) {
+						requested = true;
+						UIPF_LOG_DEBUG(outputStep, ".", outputName, " is requested.");
+						break;
+					}
+				}
+			}
+			if (!requested) {
+				// output is not requested in any further step, delete it
+				UIPF_LOG_INFO("deleted ", outputStep, ".", outputName);
+				dataDeleted(outputStep, outputName);
+				oit = osit->second.erase(oit);
+			} else {
+				++oit;
+			}
+		}
+	}
+}
+
 
 void Runner::updateModuleProgress(int done, int max /*= 100*/) {
 
