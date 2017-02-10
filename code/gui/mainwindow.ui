@@ -277,7 +277,7 @@
              <number>24</number>
             </property>
             <property name="format">
-             <string>%p% Chain</string>
+             <string>Chain: %p% (%v/%m)</string>
             </property>
            </widget>
           </item>
@@ -292,17 +292,8 @@
             <property name="value">
              <number>24</number>
             </property>
-            <property name="textVisible">
-             <bool>true</bool>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="invertedAppearance">
-             <bool>false</bool>
-            </property>
             <property name="format">
-             <string>%p% Module</string>
+             <string>Module: %p%</string>
             </property>
            </widget>
           </item>

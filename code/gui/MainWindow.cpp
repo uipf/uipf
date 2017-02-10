@@ -32,7 +32,7 @@ using namespace std;
 using namespace uipf;
 
 // constructor
-MainWindow::MainWindow(ModuleLoader& ml, QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), mm_(ml), workerThread_(nullptr) {
+MainWindow::MainWindow(ModuleLoader& ml, QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), mm_(ml) {
 
     ui->setupUi(this);
 
@@ -992,74 +992,22 @@ void MainWindow::beforeConfigChange(){
 }
 
 
-
-
-// run the current configuration
-void MainWindow::run() {
-
+bool MainWindow::validateChain()
+{
 	// validate configuration and show errors
 	pair< vector<string>, vector<string> > errors = conf_.validate(mm_.getAllMetaData());
-	if (!errors.first.empty()) {
-		UIPF_LOG_ERROR("There are configuration errors!");
-		for(unsigned int i = 0; i < errors.first.size(); ++i) {
-			UIPF_LOG_ERROR( errors.first[i]);
-		}
-// TODO
-//		GUIEventDispatcher::instance()->triggerSelectNodesInGraphView(errors.second,gui::ERROR,false);
-		return;
+	if (errors.first.empty()) {
+		return true;
 	}
 
-	// stop is now activated and run unactivated
-	stopAct->setEnabled(true);
-	runAct->setEnabled(false);
-	ui->progressBar->setHidden(false);
-	ui->progressBar->update();
-	ui->progressBarModule->setHidden(true);
+	UIPF_LOG_ERROR("There are configuration errors!");
+	for(unsigned int i = 0; i < errors.first.size(); ++i) {
+		UIPF_LOG_ERROR( errors.first[i]);
+	}
 
-	if (workerThread_ != nullptr) return; //should not happen, because GUI prevents it. we only allow one chain to be processed by a thread
-
-	workerThread_ = new RunWorkerThread(conf_, mm_);
-
-	// Setup callback for cleanup when it finishes
-	connect(workerThread_, SIGNAL(finished()),  this, SLOT(on_backgroundWorkerFinished()));
-	// progress updates
-	connect(workerThread_, SIGNAL(eventUpdateGlobalProgress(int, int)),
-	        this, SLOT (on_reportGlobalProgress(int, int)));
-	connect(workerThread_, SIGNAL(eventUpdateModuleProgress(int, int)),
-	        this, SLOT (on_reportModuleProgress(int, int)));
-	// data updates
-	runControl->registerWorkerSlots(workerThread_);
-
-	// Run, Forest, run!
-	workerThread_->start(); // This invokes WorkerThread::run in a new thread
-}
-
-//this gets called from Backgroundthread when its work is finished or when it gets terminated by stop()
-void MainWindow::on_backgroundWorkerFinished()
-{
-	// run is now activated and stop unactivated
-	stopAct->setEnabled(false);
-	runAct->setEnabled(true);
-//	ui->progressBar->setHidden(true);
-//	ui->progressBar->update();
-	ui->progressBarModule->setHidden(true);
-	ui->progressBarModule->update();
-	delete workerThread_;
-	workerThread_ = nullptr;
-}
-
-void MainWindow::stop() {
-
-	if (workerThread_ == nullptr) return;
-
-	//signal modules to stop
-	workerThread_->stop();
-	//give them some time
-	workerThread_->wait(1000);
-	//kill if not ready yet
-	workerThread_->terminate();
-	//not need to delete -> finished()
-
+// TODO
+//	GUIEventDispatcher::instance()->triggerSelectNodesInGraphView(errors.second,gui::ERROR,false);
+	return false;
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *)
@@ -1120,13 +1068,13 @@ void MainWindow::createActions() {
     runAct = new QAction(tr("&Run"), this);
     runAct->setShortcut(QKeySequence(tr("Ctrl+R")));
     runAct->setStatusTip(tr("Run the configuration"));
-    connect(runAct, SIGNAL(triggered()), this, SLOT(run()));
+    connect(runAct, SIGNAL(triggered()), runControl, SLOT(on_buttonRun()));
 
     stopAct = new QAction(tr("&Stop"), this);
 	stopAct->setShortcut(QKeySequence(tr("Shift+Ctrl+R")));
     stopAct->setStatusTip(tr("Stop the execution of the configuration"));
     stopAct->setEnabled(false); // initially inactive
-    connect(stopAct, SIGNAL(triggered()), this, SLOT(stop()));
+    connect(stopAct, SIGNAL(triggered()), runControl, SLOT(on_buttonStop()));
 
     closeWindowsAct = new QAction(tr("&Close windows"), this);
 	closeWindowsAct->setShortcut(QKeySequence(tr("Ctrl+W")));

@@ -20,17 +20,21 @@ Runner::Runner(const ProcessingChain& pc, ModuleLoader& ml, RunContext& ct) :
 	chain_ = processingChain_.getProcessingSteps();
 	sortedChain_ = sortChain(chain_);
 
+	currentStep_ = 0;
+
 	moduleCount = (int) chain_.size();
 	modulesDone = 0;
 
 	//reset StopSignal
-// TODO	context_.bStopRequested_ = false;
+	ct.stopRequested = false;
+	ct.pauseRequested = false;
 
 }
 
 
 Runner::~Runner()
 {
+	UIPF_LOG_TRACE("Runner destructor.");
 
 }
 
@@ -92,20 +96,24 @@ bool Runner::run()
 // TODO	GUIEventDispatcher::instance()->clearSelectionInGraphView();
 
 	// iterate over the sortedChain and run the modules in the order given by the chain
-	for (currentStep_ = 0; currentStep_ < sortedChain_.size(); currentStep_++) {
+	while(currentStep_ < sortedChain_.size()) {
 
 		if (!runStep()) {
 			return false;
 		}
-	// check if stop button was pressed
-// TODO
-//		if (context_.bStopRequested_ )
-//		{
-//			LOG_I("processing stopped");
-//			break;
-//		}
+		// check if stop button was pressed
+		if (context_.stopRequested) {
+			UIPF_LOG_INFO("processing stopped");
+			return false;
+		}
+		// check if pause button was pressed
+		if (context_.pauseRequested) {
+			UIPF_LOG_INFO("processing paused");
 
-		cleanupData();
+			// TODO somehow wait for resume
+			return true;
+		}
+
 	}
 
 
@@ -147,7 +155,7 @@ bool Runner::runStep() {
 	}
 
 	// mark step as active in the GUI
-	stepActive(proSt.name);
+	stepActive(proSt.name, currentStep_ + 1, (int) sortedChain_.size());
 
 	try {
 
@@ -264,10 +272,13 @@ bool Runner::runStep() {
 		return false;
 	}
 
+	cleanupData();
+
 	// TODO delete module, check for side effects with the data pointers first
 
 	// update the progress bar in the GUI
 	modulesDone++;
+	currentStep_++;
 	context_.updateGlobalProgress(modulesDone * 100, moduleCount * 100);
 	// TODO GUIEventDispatcher::instance()->triggerReportProgress(static_cast<float>(i+1)/static_cast<float>(sortedChain_.size())*100.0f);
 	// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::GOOD,false);
@@ -334,9 +345,9 @@ void Runner::updateModuleProgress(int done, int max /*= 100*/) {
 	context_.updateModuleProgress(done, max);
 	context_.updateGlobalProgress(modulesDone * 100 +  (int) ((float) done / (max) * 100), moduleCount * 100);
 }
-void Runner::stepActive(std::string stepName)
+void Runner::stepActive(std::string stepName, int number, int count)
 {
-	context_.stepActive(stepName);
+	context_.stepActive(stepName, number, count);
 }
 void Runner::dataUpdated(std::string stepName, std::string outputName)
 {

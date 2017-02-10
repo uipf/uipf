@@ -50,6 +50,8 @@ public:
 	// loads a new configuration from file
 	void loadProcessingChain(std::string);
 
+	bool validateChain();
+
 private slots:
 	// Buttons addStep/deleteStep
     void on_addButton_clicked();
@@ -66,9 +68,6 @@ private slots:
     // moves the progressbar on every step of the processing chain
     void on_reportModuleProgress(int done, int max);
     void on_reportGlobalProgress(int done, int max);
-
-    //this gets called from Backgroundthread when its work is finished or when it gets terminated by stop()
-    void on_backgroundWorkerFinished();
 
 	// change of module dropdown
 	void on_comboModule_currentIndexChanged(int);
@@ -95,9 +94,6 @@ private slots:
 	// Edit
 	void undo();
 	void redo();
-	// Configuration
-	void run();
-	void stop();
 
 	void closeAllCreatedWindows();
 
@@ -200,9 +196,6 @@ private:
 
     //the view, that displays the graph
     gui::GraphWidget* graphView_;
-
-    //our current backgroundworker or a nullptr
-    RunWorkerThread* workerThread_;
 
 	RunControl* runControl;
 

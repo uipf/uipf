@@ -15,30 +15,42 @@ class RunWorkerThread: public QThread, public RunContext {
 	Q_OBJECT
 
 public:
-	RunWorkerThread(ProcessingChain&, ModuleLoader&);
+
+	enum ExecutionMode {
+		RUN_CHAIN,
+		RUN_STEP,
+	};
+
+	RunWorkerThread(ProcessingChain&, ModuleLoader&, ExecutionMode = RUN_CHAIN);
 	virtual ~RunWorkerThread();
+
+	void setMode(ExecutionMode);
 
 	//run module chain in a separate thread
 	void run() Q_DECL_OVERRIDE;
 	//tell modules to stop work now
 	void stop();
 
+	void pause();
+
+
 	void updateGlobalProgress(int done, int max);
 	void updateModuleProgress(int done, int max);
-	void stepActive(std::string stepName);
+	void stepActive(std::string stepName, int number, int count);
 	void dataUpdated(std::string stepName, std::string outputName);
 	void dataDeleted(std::string stepName, std::string outputName);
 
 signals: //for QT to connect
 	void eventUpdateGlobalProgress(int done, int max);
 	void eventUpdateModuleProgress(int done, int max);
-	void eventStepActive(std::string stepName);
+	void eventStepActive(std::string stepName, int number, int count);
 	void eventDataUpdated(std::string stepName, std::string outputName);
 	void eventDataDeleted(std::string stepName, std::string outputName);
 
 private:
 
 	Runner runner_;
+	ExecutionMode mode_;
 
 };
 

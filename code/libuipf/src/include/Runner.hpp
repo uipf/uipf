@@ -59,7 +59,7 @@ class Runner{
 		/**
 		 * set pause and resume to enable blocking windows in GUI mode
 		 */
-		void pauseChain();
+		void requestPause();
 		void resumeChain();
 
 
@@ -80,8 +80,6 @@ class Runner{
 		std::map<std::string, std::map<std::string, uipf::Data::ptr> > stepsOutputs_;
 
 
-
-
 		int moduleProgressDone = 0;
 		int moduleProgressMax = 100;
 		int modulesDone = 0;
@@ -93,7 +91,7 @@ class Runner{
 
 	private:
 
-		void stepActive(std::string stepName);
+		void stepActive(std::string stepName, int number, int count);
 		void dataUpdated(std::string stepName, std::string outputName);
 		void dataDeleted(std::string stepName, std::string outputName);
 		void updateModuleProgress(int done, int max = 100);
