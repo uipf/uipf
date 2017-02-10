@@ -40,7 +40,6 @@ namespace uipf {
 
 		//this gets called from Backgroundthread when its work is finished or when it gets terminated by stop()
 		void on_workerFinished();
-		void on_workerPaused();
 
 
 

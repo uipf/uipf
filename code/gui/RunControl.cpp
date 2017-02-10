@@ -159,11 +159,13 @@ void RunControl::on_workerFinished()
 		mainWindow_->ui->buttonRun->setEnabled(false);
 		mainWindow_->ui->buttonRun->setText(tr("Run"));
 		mainWindow_->ui->buttonStep->setEnabled(false);
+		mainWindow_->ui->buttonStep->setText(tr("Step"));
 		runStatus = StatusDone;
 	} else {
 		mainWindow_->ui->buttonRun->setEnabled(true);
 		mainWindow_->ui->buttonRun->setText(tr("Resume"));
 		mainWindow_->ui->buttonStep->setEnabled(true);
+		mainWindow_->ui->buttonStep->setText(tr("Step"));
 		runStatus = StatusPaused;
 	}
 	mainWindow_->ui->buttonStop->setEnabled(false);
@@ -175,24 +177,6 @@ void RunControl::on_workerFinished()
 	}
 
 }
-
-void RunControl::on_workerPaused()
-{
-	UIPF_LOG_TRACE("Worker paused.");
-
-	// run is now activated and stop unactivated
-	mainWindow_->stopAct->setEnabled(false);
-	mainWindow_->runAct->setEnabled(true);
-//	ui->progressBar->setHidden(true);
-//	ui->progressBar->update();
-	mainWindow_->ui->progressBarModule->setHidden(true);
-	mainWindow_->ui->progressBarModule->update();
-
-	// TODO delete worker thread only on clear
-//	delete workerThread_;
-//	workerThread_ = nullptr;
-}
-
 
 void RunControl::on_buttonRun()
 {
@@ -234,13 +218,18 @@ void RunControl::on_buttonStop() {
 	mainWindow_->ui->buttonClear->setEnabled(false);
 	mainWindow_->ui->buttonClear->update();
 
+	mainWindow_->ui->listRunSteps->setEnabled(false);
+	mainWindow_->ui->tableOutputs->setEnabled(false);
+	mainWindow_->ui->progressBar->setUpdatesEnabled(false);
+	mainWindow_->ui->progressBarModule->setUpdatesEnabled(false);
+
 	runStatus = StatusStopping;
 
 	//signal modules to stop
 	UIPF_LOG_TRACE("workerThread_->stop();");
 	workerThread_->stop();
 	// give them some time before killing it
-	QTimer::singleShot(1000, this, SLOT(killWorker()));
+	QTimer::singleShot(3000, this, SLOT(killWorker()));
 }
 
 void RunControl::killWorker()
@@ -266,13 +255,16 @@ void RunControl::on_buttonClear() {
 
 	mainWindow_->ui->progressBar->setValue(0);
 	mainWindow_->ui->progressBar->setHidden(true);
+	mainWindow_->ui->progressBar->setUpdatesEnabled(true);
 	mainWindow_->ui->progressBar->update();
 	mainWindow_->ui->progressBarModule->setHidden(true);
 	mainWindow_->ui->progressBarModule->update();
+	mainWindow_->ui->progressBarModule->setUpdatesEnabled(true);
 
 	modelRunSteps_->removeRows(0, modelRunSteps_->rowCount());
 	modelStepOutputs_->setRowCount(0);
 	mainWindow_->ui->tableOutputs->setEnabled(false);
+	mainWindow_->ui->listRunSteps->setEnabled(true);
 
 
 	delete workerThread_;
