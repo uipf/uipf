@@ -36,7 +36,6 @@ void RunWorkerThread::pause() {
 	pauseRequested = true;
 }
 
-
 void RunWorkerThread::updateGlobalProgress(int done, int max)
 {
 	emit eventUpdateGlobalProgress(done, max);
@@ -51,10 +50,12 @@ void RunWorkerThread::stepActive(std::string stepName, int number, int count)
 {
 	emit eventStepActive(stepName, number, count);
 }
+
 void RunWorkerThread::dataUpdated(std::string stepName, std::string outputName)
 {
 	emit eventDataUpdated(stepName, outputName);
 }
+
 void RunWorkerThread::dataDeleted(std::string stepName, std::string outputName)
 {
 	emit eventDataDeleted(stepName, outputName);

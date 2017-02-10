@@ -51,6 +51,7 @@ namespace uipf {
 		void on_buttonStep();
 		void on_buttonStop();
 		void on_buttonClear();
+		void killWorker();
 
 	private:
 
@@ -72,6 +73,7 @@ namespace uipf {
 			StatusRunningChain,
 			StatusRunningStep,
 			StatusPaused,
+			StatusStopping,
 			StatusDone,
 		};
 		RunStatus runStatus = StatusNew;

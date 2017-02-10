@@ -3,6 +3,8 @@
 #include "MainWindow.hpp"
 #include "ui_mainwindow.h"
 
+#include <QTimer>
+
 #include <algorithm>
 
 using namespace uipf;
@@ -147,6 +149,8 @@ void RunControl::on_workerFinished()
 {
 	UIPF_LOG_TRACE("Worker finished.");
 
+	bool clear = (runStatus == StatusStopping);
+
 	mainWindow_->ui->progressBarModule->setHidden(true);
 	mainWindow_->ui->progressBarModule->update();
 
@@ -155,33 +159,20 @@ void RunControl::on_workerFinished()
 		mainWindow_->ui->buttonRun->setEnabled(false);
 		mainWindow_->ui->buttonRun->setText(tr("Run"));
 		mainWindow_->ui->buttonStep->setEnabled(false);
+		runStatus = StatusDone;
 	} else {
 		mainWindow_->ui->buttonRun->setEnabled(true);
 		mainWindow_->ui->buttonRun->setText(tr("Resume"));
 		mainWindow_->ui->buttonStep->setEnabled(true);
+		runStatus = StatusPaused;
 	}
 	mainWindow_->ui->buttonStop->setEnabled(false);
 	mainWindow_->ui->buttonStop->setText(tr("Stop"));
 	mainWindow_->ui->buttonClear->setEnabled(true);
 
-	switch(runStatus) {
-		case StatusRunningChain:
-			// run is now activated and stop unactivated
-			mainWindow_->stopAct->setEnabled(false);
-			mainWindow_->runAct->setEnabled(true);
-			//	ui->progressBar->setHidden(true);
-			//	ui->progressBar->update();
-
-
-			runStatus = StatusDone;
-			break;
-		case StatusRunningStep:
-
-
-			runStatus = StatusPaused;
-			break;
+	if (clear) {
+		on_buttonClear();
 	}
-
 
 }
 
@@ -203,29 +194,20 @@ void RunControl::on_workerPaused()
 }
 
 
-void RunControl::on_buttonRun() {
+void RunControl::on_buttonRun()
+{
 	UIPF_LOG_TRACE("button run");
 
 	if (runStatus == StatusRunningChain) {
 		// pausing...
 
 		mainWindow_->ui->buttonRun->setText(tr("Pause..."));
+		mainWindow_->ui->buttonRun->setEnabled(false);
 		workerThread_->pause();
 
 		// TODO handle reply from thread
 
 	} else {
-
-		mainWindow_->ui->buttonRun->setEnabled(true);
-		mainWindow_->ui->buttonStep->setEnabled(false);
-		mainWindow_->ui->buttonStop->setEnabled(true);
-		mainWindow_->ui->buttonClear->setEnabled(false);
-
-		mainWindow_->ui->buttonRun->setText(tr("Pause"));
-
-		runStatus = StatusRunningChain;
-
-		// TODO run chain
 		runChain();
 	}
 
@@ -243,23 +225,35 @@ void RunControl::on_buttonStop() {
 	if (workerThread_ == nullptr) return;
 
 	mainWindow_->ui->buttonStop->setText(tr("Stop..."));
+	mainWindow_->ui->buttonStop->setEnabled(false);
+	mainWindow_->ui->buttonStop->update();
+	mainWindow_->ui->buttonRun->setEnabled(false);
+	mainWindow_->ui->buttonRun->update();
+	mainWindow_->ui->buttonStep->setEnabled(false);
+	mainWindow_->ui->buttonStep->update();
+	mainWindow_->ui->buttonClear->setEnabled(false);
+	mainWindow_->ui->buttonClear->update();
 
-	// TODO stop/pause chain
-
+	runStatus = StatusStopping;
 
 	//signal modules to stop
+	UIPF_LOG_TRACE("workerThread_->stop();");
 	workerThread_->stop();
-	//give them some time
-	workerThread_->wait(1000);
-	//kill if not ready yet
-	workerThread_->terminate();
-	//not need to delete -> finished()
-
-	mainWindow_->ui->buttonRun->setEnabled(false);
-	mainWindow_->ui->buttonStep->setEnabled(false);
-	mainWindow_->ui->buttonStop->setEnabled(true);
-	mainWindow_->ui->buttonClear->setEnabled(false);
+	// give them some time before killing it
+	QTimer::singleShot(1000, this, SLOT(killWorker()));
 }
+
+void RunControl::killWorker()
+{
+	if (workerThread_ == nullptr) {
+		return;
+	}
+
+	//kill if not ready yet
+	UIPF_LOG_TRACE("workerThread_->terminate();");
+	workerThread_->terminate();
+}
+
 
 void RunControl::on_buttonClear() {
 	UIPF_LOG_TRACE("button clear");
@@ -305,13 +299,16 @@ void RunControl::runChain()
 	mainWindow_->ui->progressBar->update();
 	mainWindow_->ui->progressBarModule->setHidden(true);
 
+	mainWindow_->ui->buttonRun->setEnabled(true);
+	mainWindow_->ui->buttonRun->setText(tr("Pause"));
+	mainWindow_->ui->buttonStep->setEnabled(false);
+	mainWindow_->ui->buttonStop->setEnabled(true);
+	mainWindow_->ui->buttonClear->setEnabled(false);
 
-	// TODO proper setup and run
+	runStatus = StatusRunningChain;
 
 	workerThread_->setMode(RunWorkerThread::RUN_CHAIN);
 
-
-	// Run, Forest, run!
 	workerThread_->start(); // This invokes WorkerThread::run in a new thread
 }
 
@@ -327,11 +324,10 @@ void RunControl::runStep()
 	}
 
 	mainWindow_->ui->buttonRun->setEnabled(false);
+	mainWindow_->ui->buttonStep->setText(tr("Step..."));
 	mainWindow_->ui->buttonStep->setEnabled(false);
 	mainWindow_->ui->buttonStop->setEnabled(true);
 	mainWindow_->ui->buttonClear->setEnabled(false);
-
-	runStatus = StatusRunningStep;
 
 	// stop is now activated and run unactivated
 	mainWindow_->stopAct->setEnabled(true);
@@ -339,6 +335,8 @@ void RunControl::runStep()
 	mainWindow_->ui->progressBar->setHidden(false);
 	mainWindow_->ui->progressBar->update();
 	mainWindow_->ui->progressBarModule->setHidden(true);
+
+	runStatus = StatusRunningStep;
 
 	workerThread_->setMode(RunWorkerThread::RUN_STEP);
 
