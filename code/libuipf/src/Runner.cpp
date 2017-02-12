@@ -349,9 +349,9 @@ void Runner::stepActive(std::string stepName, int number, int count)
 {
 	context_.stepActive(stepName, number, count);
 }
-void Runner::dataUpdated(std::string stepName, std::string outputName)
+void Runner::dataUpdated(std::string stepName, std::string outputName, Data::ptr data)
 {
-	context_.dataUpdated(stepName, outputName);
+	context_.dataUpdated(stepName, outputName, data);
 }
 void Runner::dataDeleted(std::string stepName, std::string outputName)
 {

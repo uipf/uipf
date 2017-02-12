@@ -54,8 +54,8 @@ void RunControl::registerWorkerSlots(RunWorkerThread *wt)
 {
 	connect(wt, SIGNAL(eventStepActive(std::string, int, int)),
 	        this, SLOT (on_workerStepActive(std::string, int, int)));
-	connect(wt, SIGNAL(eventDataUpdated(std::string, std::string)),
-	        this, SLOT (on_workerDataUpdated(std::string, std::string)));
+	connect(wt, SIGNAL(eventDataUpdated(std::string, std::string, Data::ptr)),
+	        this, SLOT (on_workerDataUpdated(std::string, std::string, Data::ptr)));
 	connect(wt, SIGNAL(eventDataDeleted(std::string, std::string)),
 	        this, SLOT (on_workerDataDeleted(std::string, std::string)));
 
@@ -69,7 +69,7 @@ void RunControl::on_workerStepActive(std::string stepName, int number, int count
 	UIPF_LOG_DEBUG("step active: ", stepName);
 
 	steps_.push_back(stepName);
-	stepOutputs_.insert(pair<string, vector<string> >(stepName, vector<string>()));
+	stepOutputs_.insert(pair<string, vector<StepOutput> >(stepName, vector<StepOutput>()));
 
 	int row = modelRunSteps_->rowCount();
 	modelRunSteps_->insertRow(row);
@@ -83,15 +83,25 @@ void RunControl::on_workerStepActive(std::string stepName, int number, int count
 //	mainWindow_->ui->listRunSteps->setCurrentIndex(index);
 }
 
-void RunControl::on_workerDataUpdated(std::string stepName, std::string outputName)
+void RunControl::on_workerDataUpdated(std::string stepName, std::string outputName, Data::ptr data)
 {
 	UIPF_LOG_DEBUG("on_workerDataUpdated: ", stepName, outputName);
 
 	auto pos = stepOutputs_.find(stepName);
 	if (pos != stepOutputs_.end()) {
 		// insert output name to the list if it did not exist
-		if (find(pos->second.begin(), pos->second.end(), outputName) == pos->second.end()) {
-			pos->second.push_back(outputName);
+		bool exists = false;
+		for(StepOutput o: pos->second) {
+			if (o.name == outputName) {
+				exists = true;
+				break;
+			}
+		}
+		if (!exists) {
+			StepOutput output;
+			output.name = outputName;
+			output.data = data;
+			pos->second.push_back(output);
 
 			// TODO if step is selected ,update UI
 		}
@@ -127,16 +137,29 @@ void RunControl::on_stepSelectionChanged(const QItemSelection& selection){
 		auto outputData = stepOutputs_.find(selectedStep_);
 		if (outputData != stepOutputs_.end()) {
 			int r = 0;
-			for(string output: outputData->second) {
-				QStandardItem* item = new QStandardItem(output.c_str());
+			for(StepOutput output: outputData->second) {
+				QStandardItem* item = new QStandardItem(output.name.c_str());
 				item->setEditable(false);
 				// TODO set tooltip from model data description
+
+				QStandardItem* type = new QStandardItem(output.data->getType().c_str());
+				type->setToolTip(output.data->getType().c_str());
+				type->setEditable(false);
+
 				modelStepOutputs_->setItem(r, 0, item);
-				modelStepOutputs_->setItem(r, 1, new QStandardItem("TODO"));
-				mainWindow_->ui->tableOutputs->setIndexWidget(
-					mainWindow_->ui->tableOutputs->model()->index(r, 2),
-					new QPushButton(QString::fromStdString(string("TODO Buttons")))
-				);
+				modelStepOutputs_->setItem(r, 1, type);
+				if (output.data->isSerializable()) {
+					mainWindow_->ui->tableOutputs->setIndexWidget(
+							mainWindow_->ui->tableOutputs->model()->index(r, 2),
+							new QPushButton(QString::fromStdString(string("View serialization")))
+					);
+				}
+				if (output.data->isVisualizable()) {
+					mainWindow_->ui->tableOutputs->setIndexWidget(
+							mainWindow_->ui->tableOutputs->model()->index(r, 2),
+							new QPushButton(QString::fromStdString(string("Visualize")))
+					);
+				}
 			}
 		}
 		mainWindow_->ui->tableOutputs->setEnabled(true);

@@ -8,6 +8,8 @@ RunWorkerThread::RunWorkerThread(ProcessingChain& chain, ModuleLoader& ml, Execu
  : runner_(Runner(chain, ml, *this)),
    mode_(mode)
 {
+	qRegisterMetaType<Data::ptr>("Data::ptr");
+	qRegisterMetaType<std::string>("std::string");
 
 }
 
@@ -51,9 +53,9 @@ void RunWorkerThread::stepActive(std::string stepName, int number, int count)
 	emit eventStepActive(stepName, number, count);
 }
 
-void RunWorkerThread::dataUpdated(std::string stepName, std::string outputName)
+void RunWorkerThread::dataUpdated(std::string stepName, std::string outputName, Data::ptr& data)
 {
-	emit eventDataUpdated(stepName, outputName);
+	emit eventDataUpdated(stepName, outputName, data);
 }
 
 void RunWorkerThread::dataDeleted(std::string stepName, std::string outputName)

@@ -28,6 +28,8 @@ namespace uipf {
 
 			void store(const std::string& f, const std::vector<int>& params=std::vector<int>());
 
+			bool isVisualizable();
+
 		UIPF_DATA_TYPE_END
 
 		OpenCVMat::ptr load_image_color(const std::string& filename);

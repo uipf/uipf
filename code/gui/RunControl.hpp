@@ -35,7 +35,7 @@ namespace uipf {
 
 		// worker data updates
 		void on_workerStepActive(std::string, int, int);
-		void on_workerDataUpdated(std::string, std::string);
+		void on_workerDataUpdated(std::string, std::string, Data::ptr);
 		void on_workerDataDeleted(std::string, std::string);
 
 		//this gets called from Backgroundthread when its work is finished or when it gets terminated by stop()
@@ -65,7 +65,11 @@ namespace uipf {
 		// steps that have run and have data available
 		std::vector<std::string> steps_;
 		// available output data per step
-		std::map<std::string, std::vector<std::string> > stepOutputs_;
+		struct StepOutput {
+			std::string name;
+			Data::ptr data;
+		};
+		std::map<std::string, std::vector<StepOutput> > stepOutputs_;
 
 		enum RunStatus {
 			StatusNew,

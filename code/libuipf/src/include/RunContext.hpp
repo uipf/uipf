@@ -10,7 +10,7 @@ namespace uipf {
 		virtual void updateModuleProgress(int done, int max) {};
 
 		virtual void stepActive(std::string stepName, int number, int count) {};
-		virtual void dataUpdated(std::string stepName, std::string outputName) {};
+		virtual void dataUpdated(std::string stepName, std::string outputName, Data::ptr& data) {};
 		virtual void dataDeleted(std::string stepName, std::string outputName) {};
 
 		bool stopRequested = false;

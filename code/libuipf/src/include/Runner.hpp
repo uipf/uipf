@@ -92,7 +92,7 @@ class Runner{
 	private:
 
 		void stepActive(std::string stepName, int number, int count);
-		void dataUpdated(std::string stepName, std::string outputName);
+		void dataUpdated(std::string stepName, std::string outputName, Data::ptr data);
 		void dataDeleted(std::string stepName, std::string outputName);
 		void updateModuleProgress(int done, int max = 100);
 

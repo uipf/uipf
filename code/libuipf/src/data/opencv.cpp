@@ -104,5 +104,10 @@ void uipf::data::OpenCVMat::store(const std::string& f, const std::vector<int>& 
 	filename = f;
 }
 
+bool uipf::data::OpenCVMat::isVisualizable() {
+	return  true;
+}
+
+
 
 #endif

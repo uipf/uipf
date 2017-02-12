@@ -141,8 +141,9 @@ template <typename T>
 void ModuleInterface::setOutputData( const std::string& strName, T* outputData)
 {
 	if (outputData != nullptr) {
-		output_.insert (std::pair < std::string, Data::ptr >(strName, typename T::ptr(outputData)));
-		runner_->dataUpdated(getProcessingStepName(), strName);
+		typename T::ptr p(outputData);
+		output_.insert (std::pair < std::string, Data::ptr >(strName, p));
+		runner_->dataUpdated(getProcessingStepName(), strName, p);
 	} else {
 		throw ErrorException("Can not use an uninitialized pointer as output data.");
 	}
@@ -153,7 +154,7 @@ void ModuleInterface::setOutputData( const std::string& strName, typename T::ptr
 {
 	if (outputData != nullptr) {
 		output_.insert (std::pair < std::string, Data::ptr >(strName, outputData));
-		runner_->dataUpdated(getProcessingStepName(), strName);
+		runner_->dataUpdated(getProcessingStepName(), strName, outputData);
 	} else {
 		throw ErrorException("Can not use an uninitialized pointer as output data.");
 	}

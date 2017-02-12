@@ -47,8 +47,8 @@ namespace uipf {
 		// this is a virtual method, which has to be overwritten in the class, which derives of Data
 		virtual std::string getType() const = 0;
 
-		// returns the value of the integer
-//		virtual T getContent() const = 0;
+		virtual bool isSerializable() { return false; };
+		virtual bool isVisualizable() { return false; };
 
 		// serialization, allow reading from files and writing to files
 		// or other string transport

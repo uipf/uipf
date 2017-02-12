@@ -13,6 +13,9 @@ namespace uipf {
 		// define default types that ship with UIPF
 
 		UIPF_DATA_TYPE_BEGIN (String, "de.tu-berlin.uipf.String", std::string)
+
+			bool isSerializable() { return true; };
+
 			void serialize(std::ostream& stream) const {
 				stream << getContent();
 			}
