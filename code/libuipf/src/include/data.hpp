@@ -8,7 +8,7 @@
 #include <memory>
 
 #include "exceptions.hpp"
-
+#include "VisualizationContext.hpp"
 /*
  * This file contains the Declaration for the UIPF Type system.
  *
@@ -29,7 +29,6 @@
 
 namespace uipf {
 
-	//template <typename T>
 	class Data {
 
 	public:
@@ -49,6 +48,8 @@ namespace uipf {
 
 		virtual bool isSerializable() { return false; };
 		virtual bool isVisualizable() { return false; };
+
+		virtual void visualize(VisualizationContext& context) { throw uipf::ErrorException("Data Type is not visualizable."); };
 
 		// serialization, allow reading from files and writing to files
 		// or other string transport
@@ -78,5 +79,7 @@ namespace uipf {
 	private: \
 		TYPE data_;
 #define UIPF_DATA_TYPE_END };
+
+#include "VisualizationContext.hpp"
 
 #endif //LIBUIPF_DATA_HPP

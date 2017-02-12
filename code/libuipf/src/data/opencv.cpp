@@ -1,10 +1,12 @@
 #ifdef WITH_OPENCV
 
+#include "VisualizationContext.hpp"
 #include "data/opencv.hpp"
 
 #include <opencv2/highgui/highgui.hpp>
 #include <boost/filesystem.hpp>
 
+#include "logging.hpp"
 #include "util.hpp"
 
 using namespace cv;
@@ -108,6 +110,11 @@ bool uipf::data::OpenCVMat::isVisualizable() {
 	return  true;
 }
 
+
+void uipf::data::OpenCVMat::visualize(VisualizationContext& context) {
+	UIPF_LOG_TRACE("showing opencv mat");
+	context.displayImage(getContent());
+}
 
 
 #endif

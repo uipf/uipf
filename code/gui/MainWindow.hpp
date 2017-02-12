@@ -29,6 +29,7 @@
 #include "graph/graphwidget.h"
 #include "graph/node.h"
 #include "RunControl.hpp"
+#include "GuiVisualizationContext.hpp"
 
 
 namespace Ui {
@@ -81,7 +82,6 @@ private slots:
 
 	void on_createWindow(const std::string& strTitle);
 
-	void on_closeWindow(const std::string& strTitle);
 	// menu bar
 	// File
 	void new_Data_Flow();
@@ -201,6 +201,8 @@ private:
 
     //keep track of all windows we created so we can close them later
     std::vector<QGraphicsView* > createdWindwows_;
+
+	GuiVisualizationContext* visualizationContext_;
 };
 
 } // namespace

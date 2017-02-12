@@ -122,15 +122,10 @@ MainWindow::MainWindow(ModuleLoader& ml, QWidget *parent) : QMainWindow(parent),
        			this, SLOT (on_graphNodeSelected(const uipf::gui::Node*)));
 
 
+	visualizationContext_ = new GuiVisualizationContext();
     // Window creation
-// TODO
-//    connect(GUIEventDispatcher::instance(), SIGNAL (createWindow(const std::string&)),
-//				this, SLOT (on_createWindow(const std::string&)));
-
-    // Window deletion
-// TODO
-//    connect(GUIEventDispatcher::instance(), SIGNAL (closeWindow(const std::string&)),
-//    			this, SLOT (on_closeWindow(const std::string&)));
+    connect(visualizationContext_, SIGNAL (createWindow(const std::string&)),
+				this, SLOT (on_createWindow(const std::string&)));
 
     //Filter logwindow
     connect(ui->logFilterLE, SIGNAL (textChanged(const QString &)),
@@ -422,9 +417,10 @@ void MainWindow::resetInputs()
 
 void MainWindow::on_createWindow(const std::string& strTitle)
 {
-/* TODO
-	// fetch the image from the GUIEventDispatcher
-	QImage image = GUIEventDispatcher::instance()->image_;
+	UIPF_LOG_TRACE("on_createWindow()");
+
+	// fetch the image from the visualisation context
+	QImage image = visualizationContext_->image_;
 
 	//simple view that contains an Image
 	QPointer<QGraphicsScene> scene = new QGraphicsScene;
@@ -438,21 +434,10 @@ void MainWindow::on_createWindow(const std::string& strTitle)
 
 	closeWindowsAct->setEnabled(true);
 
-	// unlock the mutex with the working thread
-	GUIEventDispatcher::instance()->imageRendered.wakeAll();
-*/
-}
+	UIPF_LOG_TRACE("on_createWindow() -> wakeAll");
 
-void MainWindow::on_closeWindow(const std::string& strTitle)
-{
-/* TODO
-	auto qTitle = QString::fromStdString(strTitle);
-	for (auto v : createdWindwows_)
-	{
-		if (v->windowTitle() == qTitle)
-			v->close();
-	}
- */
+	// unlock the mutex with the working thread
+	visualizationContext_->imageRendered.wakeAll();
 }
 
 // append messages from our logger to the log-textview

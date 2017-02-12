@@ -39,17 +39,20 @@ add_executable(uipf-gui
 	models/ParamsModel.cpp
 	models/InputsDelegate.cpp
 
+	RunControl.cpp
 	RunWorkerThread.cpp
 
 	${RC_SRCS}
 
 	GuiLogger.cpp
-	GuiLogger.hpp
-	RunControl.cpp
-	RunControl.hpp
+	GuiVisualizationContext.cpp
 )
 
-target_link_libraries (uipf-gui boost_graph libuipf)
+if (WITH_OPENCV)
+	target_link_libraries (uipf-gui boost_graph libuipf opencv_core opencv_highgui opencv_imgproc)
+else()
+	target_link_libraries (uipf-gui boost_graph libuipf)
+endif()
 qt5_use_modules(uipf-gui Core Gui Widgets)
 
 

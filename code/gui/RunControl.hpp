@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <QObject>
+#include <QSignalMapper>
 #include <QtCore/QStringListModel>
 #include <QtCore/QItemSelection>
 #include <QtGui/QStandardItemModel>
@@ -52,6 +53,8 @@ namespace uipf {
 		void on_buttonClear();
 		void killWorker();
 
+		void on_vizButtonClick(QString outputName);
+
 	private:
 
 		void runChain();
@@ -93,6 +96,8 @@ namespace uipf {
 
 		// model for the listView of processing steps outputs
 		QStandardItemModel *modelStepOutputs_;
+
+		QSignalMapper* vizButtonMapper_;
 
 	};
 };

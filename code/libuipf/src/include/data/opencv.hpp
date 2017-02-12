@@ -30,6 +30,9 @@ namespace uipf {
 
 			bool isVisualizable();
 
+			void visualize(VisualizationContext& context);
+
+
 		UIPF_DATA_TYPE_END
 
 		OpenCVMat::ptr load_image_color(const std::string& filename);

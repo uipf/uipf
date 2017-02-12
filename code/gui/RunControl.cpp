@@ -48,6 +48,11 @@ RunControl::RunControl(uipf::MainWindow *mw) : mainWindow_(mw), workerThread_(nu
 	connect(mw->ui->buttonClear, SIGNAL(clicked()), this, SLOT(on_buttonClear()));
 	mw->ui->buttonStop->setEnabled(false);
 	mw->ui->buttonClear->setEnabled(false);
+
+	// view button signal mapper
+	vizButtonMapper_ = new QSignalMapper(this);
+	connect(vizButtonMapper_, SIGNAL(mapped(QString)), this, SLOT(on_vizButtonClick(QString)));
+
 }
 
 void RunControl::registerWorkerSlots(RunWorkerThread *wt)
@@ -155,14 +160,36 @@ void RunControl::on_stepSelectionChanged(const QItemSelection& selection){
 					);
 				}
 				if (output.data->isVisualizable()) {
+					QPushButton* button = new QPushButton(QString::fromStdString(string("Visualize")));
+
+					connect(button, SIGNAL(clicked()), vizButtonMapper_, SLOT(map()));
+					vizButtonMapper_->setMapping(button, QString::fromStdString(output.name));
+
 					mainWindow_->ui->tableOutputs->setIndexWidget(
 							mainWindow_->ui->tableOutputs->model()->index(r, 2),
-							new QPushButton(QString::fromStdString(string("Visualize")))
+							button
 					);
 				}
 			}
 		}
 		mainWindow_->ui->tableOutputs->setEnabled(true);
+	}
+}
+
+void RunControl::on_vizButtonClick(QString outputName)
+{
+	UIPF_LOG_TRACE("Viz button: ", outputName.toStdString());
+
+
+	for(StepOutput o: stepOutputs_[selectedStep_]) {
+		if (o.name == outputName.toStdString()) {
+			Data::ptr d = o.data;
+
+			UIPF_LOG_TRACE("showing window");
+			VisualizationContext& context = *(mainWindow_->visualizationContext_);
+			d->visualize(context);
+			return;
+		}
 	}
 }
 
