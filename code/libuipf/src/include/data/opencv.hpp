@@ -28,9 +28,9 @@ namespace uipf {
 
 			void store(const std::string& f, const std::vector<int>& params=std::vector<int>());
 
-			bool isVisualizable();
+			std::vector<std::string> visualizations();
 
-			void visualize(VisualizationContext& context);
+			void visualize(std::string option, VisualizationContext& context);
 
 
 		UIPF_DATA_TYPE_END

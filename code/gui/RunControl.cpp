@@ -4,6 +4,7 @@
 #include "ui_mainwindow.h"
 
 #include <QTimer>
+#include <QWindow>
 
 #include <algorithm>
 
@@ -23,14 +24,17 @@ RunControl::RunControl(uipf::MainWindow *mw) : mainWindow_(mw), workerThread_(nu
 
 
 	modelStepOutputs_ = new QStandardItemModel(this);
-	modelStepOutputs_->setColumnCount(3);
+	modelStepOutputs_->setColumnCount(4);
 	QStandardItem* item0 = new QStandardItem("Output:");
 	QStandardItem* item1 = new QStandardItem("Type:");
+	QStandardItem* item2 = new QStandardItem("Serialize:");
+	QStandardItem* item3 = new QStandardItem("Visualize:");
 	item0->setToolTip(QString("Name of the module output."));
 	item1->setToolTip(QString("Data type of the module output."));
 	modelStepOutputs_->setHorizontalHeaderItem(0, item0);
 	modelStepOutputs_->setHorizontalHeaderItem(1, item1);
-	modelStepOutputs_->setHorizontalHeaderItem(2, new QStandardItem(""));
+	modelStepOutputs_->setHorizontalHeaderItem(2, item2);
+	modelStepOutputs_->setHorizontalHeaderItem(3, item3);
 
 	mw->ui->tableOutputs->setModel(modelStepOutputs_);
 	mw->ui->tableOutputs->setEnabled(false);
@@ -52,6 +56,9 @@ RunControl::RunControl(uipf::MainWindow *mw) : mainWindow_(mw), workerThread_(nu
 	// view button signal mapper
 	vizButtonMapper_ = new QSignalMapper(this);
 	connect(vizButtonMapper_, SIGNAL(mapped(QString)), this, SLOT(on_vizButtonClick(QString)));
+	// serialize button signal mapper
+	serializeButtonMapper_ = new QSignalMapper(this);
+	connect(serializeButtonMapper_, SIGNAL(mapped(QString)), this, SLOT(on_serializeButtonClick(QString)));
 
 }
 
@@ -154,22 +161,51 @@ void RunControl::on_stepSelectionChanged(const QItemSelection& selection){
 				modelStepOutputs_->setItem(r, 0, item);
 				modelStepOutputs_->setItem(r, 1, type);
 				if (output.data->isSerializable()) {
-					mainWindow_->ui->tableOutputs->setIndexWidget(
-							mainWindow_->ui->tableOutputs->model()->index(r, 2),
-							new QPushButton(QString::fromStdString(string("View serialization")))
-					);
-				}
-				if (output.data->isVisualizable()) {
-					QPushButton* button = new QPushButton(QString::fromStdString(string("Visualize")));
+					QPushButton *button = new QPushButton(QString("show"));
 
-					connect(button, SIGNAL(clicked()), vizButtonMapper_, SLOT(map()));
-					vizButtonMapper_->setMapping(button, QString::fromStdString(output.name));
-
+					connect(button, SIGNAL(clicked()), serializeButtonMapper_, SLOT(map()));
+					serializeButtonMapper_->setMapping(button, QString::fromStdString(output.name));
 					mainWindow_->ui->tableOutputs->setIndexWidget(
 							mainWindow_->ui->tableOutputs->model()->index(r, 2),
 							button
 					);
+				} else {
+					QStandardItem* noser = new QStandardItem("n/a");
+					noser->setToolTip("Data type is not serializable.");
+					noser->setEditable(false);
+					modelStepOutputs_->setItem(r, 2, noser);
 				}
+				if (output.data->visualizations().size() == 0) {
+					QStandardItem* noviz = new QStandardItem("n/a");
+					noviz->setToolTip("No Visualization options available for this data type.");
+					noviz->setEditable(false);
+					modelStepOutputs_->setItem(r, 3, noviz);
+				} else {
+					int a = r;
+					for (string v: output.data->visualizations()) {
+						if (r > a) {
+							QStandardItem* dummyItem0 = new QStandardItem();
+							dummyItem0->setEditable(false);
+							modelStepOutputs_->setItem(r, 0, dummyItem0);
+							QStandardItem* dummyItem1 = new QStandardItem();
+							dummyItem1->setEditable(false);
+							modelStepOutputs_->setItem(r, 1, dummyItem1);
+							QStandardItem* dummyItem2 = new QStandardItem();
+							dummyItem2->setEditable(false);
+							modelStepOutputs_->setItem(r, 2, dummyItem2);
+						}
+						UIPF_LOG_TRACE("add vis option ", v);
+						QPushButton *button = new QPushButton(QString::fromStdString(v));
+
+						connect(button, SIGNAL(clicked()), vizButtonMapper_, SLOT(map()));
+						vizButtonMapper_->setMapping(button, QString::fromStdString(to_string(output.name.size()) + " " + output.name + v));
+						mainWindow_->ui->tableOutputs->setIndexWidget(
+								mainWindow_->ui->tableOutputs->model()->index(r++, 3),
+								button
+						);
+					}
+				}
+				r++;
 			}
 		}
 		mainWindow_->ui->tableOutputs->setEnabled(true);
@@ -180,19 +216,58 @@ void RunControl::on_vizButtonClick(QString outputName)
 {
 	UIPF_LOG_TRACE("Viz button: ", outputName.toStdString());
 
+	// split string into parts: "<len(output)> <output><vizoption>"
+	string outputAndViz = outputName.toStdString();
+	unsigned long pos = outputAndViz.find(" ");
+	long split = atol(outputAndViz.substr(0, pos).c_str());
+	string output = outputAndViz.substr(pos + 1, (unsigned)split);
+	string option = outputAndViz.substr(pos + 1 + split);
+
+	UIPF_LOG_TRACE("Viz button: split: '", output, "' , '", option, "'");
 
 	for(StepOutput o: stepOutputs_[selectedStep_]) {
-		if (o.name == outputName.toStdString()) {
+		if (o.name == output) {
 			Data::ptr d = o.data;
 
 			UIPF_LOG_TRACE("showing window");
 			VisualizationContext& context = *(mainWindow_->visualizationContext_);
-			d->visualize(context);
+			d->visualize(option, context);
 			return;
 		}
 	}
 }
 
+void RunControl::on_serializeButtonClick(QString outputName)
+{
+	UIPF_LOG_TRACE("Serialize button: ", outputName.toStdString());
+
+	for(StepOutput o: stepOutputs_[selectedStep_]) {
+		if (o.name == outputName.toStdString()) {
+			Data::ptr d = o.data;
+
+			ostringstream s;
+			d->serialize(s);
+			UIPF_LOG_INFO("Serialization: ", s.str());
+
+			QWidget* textWindow = new QWidget();
+
+			QTextEdit* textEdit = new QTextEdit(textWindow);
+			textEdit->setPlainText(QString::fromStdString(s.str()));
+			textEdit->setReadOnly(true);
+			QVBoxLayout* textWindowLayout = new QVBoxLayout();
+			textWindowLayout->addWidget(textEdit);
+
+			textWindow->setLayout(textWindowLayout);
+			textWindow->setWindowTitle(QString("Serialization of output '") + outputName + QString("' from step '") + QString::fromStdString(selectedStep_) + QString("'"));
+			textWindow->setVisible(true);
+
+			mainWindow_->createdWindwows_.push_back(textWindow);
+			mainWindow_->closeWindowsAct->setEnabled(true);
+
+			return;
+		}
+	}
+}
 
 //this gets called from Backgroundthread when its work is finished or when it gets terminated by stop()
 void RunControl::on_workerFinished()

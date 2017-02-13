@@ -43,13 +43,16 @@ namespace uipf {
 		virtual ~Data(void) {};
 
 		// returns the data type of this data object
-		// this is a virtual method, which has to be overwritten in the class, which derives of Data
+		// this is a virtual method, which has to be overwritten in the class, which derives from Data
 		virtual std::string getType() const = 0;
 
 		virtual bool isSerializable() { return false; };
-		virtual bool isVisualizable() { return false; };
+		/**
+		 * @return a list of visualization options.
+		 */
+		virtual std::vector<std::string> visualizations() { return std::vector<std::string>(); };
 
-		virtual void visualize(VisualizationContext& context) { throw uipf::ErrorException("Data Type is not visualizable."); };
+		virtual void visualize(std::string option, VisualizationContext& context) { throw uipf::ErrorException("Data Type is not visualizable."); };
 
 		// serialization, allow reading from files and writing to files
 		// or other string transport

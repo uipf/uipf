@@ -124,8 +124,10 @@ MainWindow::MainWindow(ModuleLoader& ml, QWidget *parent) : QMainWindow(parent),
 
 	visualizationContext_ = new GuiVisualizationContext();
     // Window creation
-    connect(visualizationContext_, SIGNAL (createWindow(const std::string&)),
-				this, SLOT (on_createWindow(const std::string&)));
+    connect(visualizationContext_, SIGNAL (createImageWindow(const std::string&)),
+				this, SLOT (on_createImageWindow(const std::string&)));
+    connect(visualizationContext_, SIGNAL (createTextWindow(const std::string&, const std::string&)),
+				this, SLOT (on_createTextWindow(const std::string&, const std::string&)));
 
     //Filter logwindow
     connect(ui->logFilterLE, SIGNAL (textChanged(const QString &)),
@@ -415,9 +417,9 @@ void MainWindow::resetInputs()
 
 // From here: SLOTS -------------------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::on_createWindow(const std::string& strTitle)
+void MainWindow::on_createImageWindow(const std::string& strTitle)
 {
-	UIPF_LOG_TRACE("on_createWindow()");
+	UIPF_LOG_TRACE("on_createImageWindow()");
 
 	// fetch the image from the visualisation context
 	QImage image = visualizationContext_->image_;
@@ -438,6 +440,26 @@ void MainWindow::on_createWindow(const std::string& strTitle)
 
 	// unlock the mutex with the working thread
 	visualizationContext_->imageRendered.wakeAll();
+}
+
+void MainWindow::on_createTextWindow(const std::string& strTitle, const std::string& text)
+{
+	UIPF_LOG_TRACE("on_createTextWindow()");
+
+	QWidget* textWindow = new QWidget();
+
+	QTextEdit* textEdit = new QTextEdit(textWindow);
+	textEdit->setPlainText(QString::fromStdString(text));
+	textEdit->setReadOnly(true);
+	QVBoxLayout* textWindowLayout = new QVBoxLayout();
+	textWindowLayout->addWidget(textEdit);
+
+	textWindow->setLayout(textWindowLayout);
+	textWindow->setWindowTitle(QString::fromStdString(strTitle));
+	textWindow->setVisible(true);
+
+	createdWindwows_.push_back(textWindow);
+	closeWindowsAct->setEnabled(true);
 }
 
 // append messages from our logger to the log-textview

@@ -19,9 +19,11 @@ class GuiVisualizationContext : public QObject, public VisualizationContext
 
 public:
 	virtual void displayImage(cv::Mat);
+	virtual void displayText(std::string);
 
 signals: //for QT to connect
-	void createWindow(const std::string& strTitle);
+	void createImageWindow(const std::string& strTitle);
+	void createTextWindow(const std::string& strTitle, const std::string& text);
 
 private:
 	// used by triggerCreateWindow to transfer the image into the GUI thread

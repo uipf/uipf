@@ -80,7 +80,8 @@ private slots:
 	void on_paramChanged(std::string, std::string);
 	void on_inputChanged(std::string, std::pair<std::string, std::string>);
 
-	void on_createWindow(const std::string& strTitle);
+	void on_createImageWindow(const std::string& strTitle);
+	void on_createTextWindow(const std::string& strTitle, const std::string& text);
 
 	// menu bar
 	// File
@@ -200,7 +201,7 @@ private:
 	RunControl* runControl;
 
     //keep track of all windows we created so we can close them later
-    std::vector<QGraphicsView* > createdWindwows_;
+    std::vector<QWidget* > createdWindwows_;
 
 	GuiVisualizationContext* visualizationContext_;
 };

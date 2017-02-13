@@ -11,6 +11,8 @@ namespace uipf {
 
 		virtual void displayImage(cv::Mat) = 0;
 
+		virtual void displayText(std::string) = 0;
+
 	};
 
 };

@@ -106,14 +106,22 @@ void uipf::data::OpenCVMat::store(const std::string& f, const std::vector<int>& 
 	filename = f;
 }
 
-bool uipf::data::OpenCVMat::isVisualizable() {
-	return  true;
+void uipf::data::OpenCVMat::visualize(std::string option, VisualizationContext& context) {
+	if (option.compare("Image") == 0) {
+		UIPF_LOG_TRACE("showing opencv mat");
+		context.displayImage(getContent());
+	}
+	if (option.compare("Name") == 0) {
+		UIPF_LOG_TRACE("showing filename");
+		context.displayText(filename);
+	}
 }
 
-
-void uipf::data::OpenCVMat::visualize(VisualizationContext& context) {
-	UIPF_LOG_TRACE("showing opencv mat");
-	context.displayImage(getContent());
+std::vector<std::string> OpenCVMat::visualizations() {
+	return {
+		"Image",
+	    "Name"
+	};
 }
 
 

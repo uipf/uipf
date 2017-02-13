@@ -1,5 +1,6 @@
 #include "logging.hpp"
 #include <unistd.h>
+#include "data/std.hpp"
 #include "data/opencv.hpp"
 
 #define UIPF_MODULE_ID "uipf.dummy.LongRunningDummyModule"
@@ -12,7 +13,8 @@
 		{"image", uipf::DataDescription(uipf::data::OpenCVMat::id(), "an image.")}
 
 #define UIPF_MODULE_OUTPUTS \
-		{"image", uipf::DataDescription(uipf::data::OpenCVMat::id(), "the same image again :)")}
+		{"image", uipf::DataDescription(uipf::data::OpenCVMat::id(), "the same image again :)")}, \
+		{"text", uipf::DataDescription(uipf::data::String::id(), "test string")}
 
 #define UIPF_MODULE_PARAMS \
 		{"steps", uipf::ParamDescription("number of dummy iterations.", true) }
@@ -22,7 +24,6 @@
 
 void LongRunningDummyModule::run() {
 
-	using namespace cv;
 	using namespace uipf;
 	using namespace uipf::data;
 
@@ -50,6 +51,9 @@ void LongRunningDummyModule::run() {
 		}
 
 	}
+
+	String::ptr text(new String("test"));
+	setOutputData<String>("text", text);
 
 	if (hasInputData("image")) {
 		setOutputData<OpenCVMat>("image", image);
