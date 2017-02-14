@@ -57,7 +57,9 @@ public:
 
 };
 
-extern "C" const char* uipf_module_id(void) { return UIPF_MODULE_ID; };
-extern "C" uipf::ModuleInterface* uipf_module(void) { return new UIPF_MODULE_CLASS; }
+extern "C" {
+	const char* uipf_module_id(void) { return UIPF_MODULE_ID; };
+	uipf::ModuleInterface* uipf_module(void) { return new UIPF_MODULE_CLASS; }
+}
 
 // TODO implement an uipf_module_abi_version()

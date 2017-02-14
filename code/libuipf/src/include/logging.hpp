@@ -97,10 +97,6 @@ namespace uipf {
 
 				std::vector<LogCallback*> logCallbacks;
 
-			private:
-
-				void print(const std::stringstream& what);
-
 		};
 
 	}

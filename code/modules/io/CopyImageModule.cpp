@@ -49,7 +49,7 @@ void CopyImageModule::run() {
 		fs::create_directories(target);
 	}
 	if (getParam<bool>("lowercase", false)) {
-		target /= util::str_to_lower(src.filename().string());
+		target /= uipf_str_to_lower(src.filename().string());
 	} else {
 		target /= src.filename();
 	}

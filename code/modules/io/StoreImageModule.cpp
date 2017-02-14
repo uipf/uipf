@@ -35,7 +35,6 @@ void StoreImage::run() {
 	using namespace cv;
 	using namespace uipf;
 	using namespace uipf::data;
-	using namespace uipf::util;
 	namespace fs = boost::filesystem;
 
 	std::string filename = getParam<std::string>("filename", "");
@@ -55,7 +54,7 @@ void StoreImage::run() {
 			}
 			string name = f.stem().string();
 			fs::path path = f.parent_path();
-			filename = (path / fs::path(name + string("_") + getProcessingStepName() + str_to_lower(ext))).string();
+			filename = (path / fs::path(name + string("_") + getProcessingStepName() + uipf_str_to_lower(ext))).string();
 		} else {
 			filename = image->filename;
 		}
@@ -64,7 +63,7 @@ void StoreImage::run() {
 	if (!basePath.empty()) {
 		fs::path f(filename);
 		fs::path bp(basePath);
-		filename = (bp / fs::path(f.stem().string() + str_to_lower(f.extension().string())) ).string();
+		filename = (bp / fs::path(f.stem().string() + uipf_str_to_lower(f.extension().string())) ).string();
 		if (!fs::is_directory(bp)) {
 			// TODO error check and reporting
 			fs::create_directories(bp);
@@ -78,13 +77,13 @@ void StoreImage::run() {
 	// http://docs.opencv.org/2.4/modules/highgui/doc/reading_and_writing_images_and_video.html#imwrite
 	int quality = getParam<int>("quality",-1);
 	if (quality != -1) {
-		std::string fname_lower = str_to_lower(filename);
-		if (str_ends_with(fname_lower, ".jpeg") || str_ends_with(fname_lower, ".jpg")) {
+		std::string fname_lower = uipf_str_to_lower(filename);
+		if (uipf_str_ends_with(fname_lower, ".jpeg") || uipf_str_ends_with(fname_lower, ".jpg")) {
 			params.push_back(CV_IMWRITE_JPEG_QUALITY);
-		} else if (str_ends_with(fname_lower, "png")) {
+		} else if (uipf_str_ends_with(fname_lower, "png")) {
 			params.push_back(CV_IMWRITE_PNG_COMPRESSION);
-		} else if (str_ends_with(fname_lower, "bmp") || str_ends_with(fname_lower, "ppm") ||
-		           str_ends_with(fname_lower, "pgm")) {
+		} else if (uipf_str_ends_with(fname_lower, "bmp") || uipf_str_ends_with(fname_lower, "ppm") ||
+				   uipf_str_ends_with(fname_lower, "pgm")) {
 			params.push_back(CV_IMWRITE_PXM_BINARY);
 		}
 

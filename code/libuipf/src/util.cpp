@@ -8,11 +8,11 @@
 /*
 s	old name, which has to be renamed
 */
-std::string uipf::util::rename(const std::string& s){
-	return rename_postfix(s, "_result");
+std::string uipf_rename(const std::string& s){
+	return uipf_rename_postfix(s, "_result");
 }
 
-std::string uipf::util::rename_postfix(const std::string& s, const std::string& pf) {
+std::string uipf_rename_postfix(const std::string& s, const std::string& pf) {
 
 	std::istringstream iss(s);
 
@@ -52,7 +52,7 @@ std::string uipf::util::rename_postfix(const std::string& s, const std::string& 
 /*
 s	complete string, or only the second part
 */
-std::string uipf::util::secondPart(const std::string& s){
+std::string uipf_split_second(const std::string& s){
 
 	std::istringstream iss(s);
 
@@ -75,7 +75,7 @@ std::string uipf::util::secondPart(const std::string& s){
 /*
 s	complete string
 */
-std::string uipf::util::firstPart(const std::string& s){
+std::string uipf_split_first(const std::string &s){
 
 	std::istringstream iss(s);
 
@@ -89,27 +89,27 @@ std::string uipf::util::firstPart(const std::string& s){
 	return tokens[0];
 }
 
-bool uipf::util::str_begins_with(const std::string& s, const std::string& with) {
+bool uipf_str_begins_with(const std::string& s, const std::string& with) {
 	if (s.length() >= with.length()) {
 		return s.compare(0, with.length(), with) == 0;
 	}
 	return false;
 }
 
-bool uipf::util::str_ends_with(const std::string& s, const std::string& with) {
+bool uipf_str_ends_with(const std::string& s, const std::string& with) {
 	if (s.length() >= with.length()) {
 		return s.compare(s.length() - with.length(), with.length(), with) == 0;
 	}
 	return false;
 }
 
-std::string uipf::util::str_to_upper(const std::string& st) {
+std::string uipf_str_to_upper(const std::string& st) {
 	std::string s(st);
 	std::transform(s.begin(), s.end(), s.begin(), ::toupper);
 	return s;
 }
 
-std::string uipf::util::str_to_lower(const std::string& st) {
+std::string uipf_str_to_lower(const std::string& st) {
 	std::string s(st);
 	std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 	return s;
@@ -126,7 +126,7 @@ std::string uipf::util::str_to_lower(const std::string& st) {
 
 // http://stackoverflow.com/a/478960/1106908
 // TODO Replace popen and pclose with _popen and _pclose for Windows.
-std::string uipf::util::exec(const char* cmd) {
+std::string uipf_exec_stdout(const char *cmd) {
 	char buffer[128];
 	std::string result;
 
@@ -145,7 +145,7 @@ std::string uipf::util::exec(const char* cmd) {
 	}
 	int ret = pclose(pipe);
 	if (ret != 0) {
-		throw new ErrorException(std::string("Command failed with exit code ") + std::to_string(ret) + std::string(" ") + cmd);
+		throw new uipf::ErrorException(std::string("Command failed with exit code ") + std::to_string(ret) + std::string(" ") + cmd);
 	}
 	return result;
 }

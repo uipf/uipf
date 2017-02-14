@@ -30,7 +30,8 @@ class Runner{
 
 	public:
 		// constructor
-		Runner(const ProcessingChain& pc, ModuleLoader& ml, RunContext& ct);
+		Runner(const ProcessingChain &pc, ModuleLoader &ml, RunContext &ct);
+
 		// destructor
 		~Runner(void);
 
@@ -49,6 +50,7 @@ class Runner{
 		 * with given parameters.
 		 */
 		bool run();
+
 		bool runStep();
 
 		/**
@@ -60,6 +62,7 @@ class Runner{
 		 * set pause and resume to enable blocking windows in GUI mode
 		 */
 		void requestPause();
+
 		void resumeChain();
 
 
@@ -67,9 +70,9 @@ class Runner{
 
 		void cleanupData();
 
-		const ProcessingChain& processingChain_;
-		ModuleLoader& moduleLoader_;
-		RunContext& context_;
+		const ProcessingChain &processingChain_;
+		ModuleLoader &moduleLoader_;
+		RunContext &context_;
 
 		std::map<std::string, uipf::ProcessingStep> chain_;
 
@@ -87,19 +90,22 @@ class Runner{
 		int mapDone = 0;
 		int mapItems = 0;
 
-		std::vector<std::string> sortChain(const std::map<std::string, ProcessingStep>&);
+		std::vector<std::string> sortChain(const std::map<std::string, ProcessingStep> &);
 
 	private:
 
 		void stepActive(std::string stepName, int number, int count);
+
 		void dataUpdated(std::string stepName, std::string outputName, Data::ptr data);
+
 		void dataDeleted(std::string stepName, std::string outputName);
+
 		void updateModuleProgress(int done, int max = 100);
 
 		friend class ModuleInterface;
 
 
-};
+	};
 
 } // namespace
 

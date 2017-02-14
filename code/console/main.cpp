@@ -260,7 +260,7 @@ int main(int argc, char** argv){
 				loadModule.name = "loadModule" + to_string(i);
 				loadModule.module = "uipf.opencv.load";
 
-				string source = util::secondPart(inputs[i]);
+				string source = uipf_split_second(inputs[i]);
 
 				loadModule.params.insert (pair<string,string>("filename",source) );
 
@@ -274,7 +274,7 @@ int main(int argc, char** argv){
 					auto it = in.cbegin();
 					name = it->first;
 				} else {
-					name = util::firstPart(inputs[i]);
+					name = uipf_split_first(inputs[i]);
 				}
 				StepInput loadWithValue;
 				loadWithValue.sourceStep = loadModule.name;
@@ -304,7 +304,7 @@ int main(int argc, char** argv){
 					storeModule.inputs.insert (pair<string, StepInput >("image", storeSource));
 
 					// where should it be stored
-					string newName = util::rename(util::secondPart(inputs[0]));
+					string newName = uipf_rename(uipf_split_second(inputs[0]));
 					storeModule.params.insert (pair<string,string>("filename", newName));
 
 					chain.addProcessingStep(storeModule);
@@ -328,7 +328,7 @@ int main(int argc, char** argv){
 					auto it = out.cbegin();
 					outName = it->first;
 				} else {
-					outName = util::firstPart(outputs[i]);
+					outName = uipf_split_first(outputs[i]);
 				}
 
 				StepInput storeSource;
@@ -342,7 +342,7 @@ int main(int argc, char** argv){
 				// where does the image come from
 				storeModule.inputs.insert (pair<string, StepInput >("image",storeSource) );
 				// where should it be stored
-				string storeName = util::secondPart(outputs[i]);
+				string storeName = uipf_split_second(outputs[i]);
 				storeModule.params.insert (pair<string,string>("filename",storeName) );
 
 				chain.addProcessingStep(storeModule);
@@ -357,7 +357,7 @@ int main(int argc, char** argv){
 			// this step is repeated as often, as the number of params is inserted
 			for (unsigned int i=0; i<params.size(); i++){
 
-				processModule.params.insert (pair<string,string>(util::firstPart(params[i]), util::secondPart(params[i])));
+				processModule.params.insert (pair<string,string>(uipf_split_first(params[i]), uipf_split_second(params[i])));
 
 			}
 		}

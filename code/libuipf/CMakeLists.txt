@@ -68,6 +68,7 @@ add_library(libuipf-module SHARED
 	src/ModuleMetaData.cpp
 	src/ModuleInterface.cpp
 	src/data/opencv.cpp
+	src/util.cpp
 )
 set_target_properties(libuipf-module PROPERTIES
 	# name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html

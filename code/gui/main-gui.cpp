@@ -55,19 +55,31 @@ int main(int argc, char *argv[])
 	// add user configured module search paths
 	#include "paths.cpp"
 
+	// handle command line args
+	if (argc > 1) {
+		if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
+			cout << "Usage:" << endl;
+			cout << "  " << argv[0] << "             launch GUI with empty processing chain." << endl;
+			cout << "  " << argv[0] << " [-l|--list] list available modules and exit." << endl;
+			cout << "  " << argv[0] << " <filename>  open processing chain from file." << endl;
+			cout << "  " << argv[0] << " [-h|--help] show this help message" << endl;
+			return 1;
+		}
+		if (strcmp(argv[1], "-l") == 0 || strcmp(argv[1], "--list") == 0) {
+			std::vector<std::string> modules = ml.getModuleIds();
+			for (auto mit = modules.begin(); mit != modules.end(); ++mit) {
+				cout << *mit << endl;
+			}
+			return 0;
+		}
+	}
+
 	// show the main window
 	MainWindow w(ml);
 	w.show();
 
 	// it is possible to give a config file as first argument
 	if (argc > 1) {
-		if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
-			cout << "Usage:" << endl;
-			cout << "  " << argv[0] << "             launch GUI with empty processing chain." << endl;
-			cout << "  " << argv[0] << " <filename>  open processing chain from file." << endl;
-			cout << "  " << argv[0] << " --help      show this help message" << endl;
-			return 1;
-		}
 		w.loadProcessingChain(argv[1]);
 	}
 

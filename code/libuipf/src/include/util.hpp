@@ -11,30 +11,31 @@
 
 // This is a collection of help-methods
 
-namespace uipf {
-	namespace util {
+extern "C" {
 
-		// TODO refactor these to "split()"
-		// gets the first part of the string, which is divided by : , e.g. source:../ball.png -> source
-		std::string firstPart(const std::string& s);
-		// gets the second part of the string, which is divided by : , e.g. source:../ball.png -> ../ball.png
-		std::string secondPart(const std::string& s);
+// TODO refactor these to "split()"
+// gets the first part of the string, which is divided by : , e.g. source:../ball.png -> source
+std::string uipf_split_first(const std::string &s);
 
-		// renames a filename by adding _result before the end, eg. ball.png -> ball_result.png
-		std::string rename(const std::string& s);
-		std::string rename_postfix(const std::string& s, const std::string& pf);
+// gets the second part of the string, which is divided by : , e.g. source:../ball.png -> ../ball.png
+std::string uipf_split_second(const std::string &s);
 
-		bool str_begins_with(const std::string& s, const std::string& with);
-		bool str_ends_with(const std::string& s, const std::string& with);
+// renames a filename by adding _result before the end, eg. ball.png -> ball_result.png
+std::string uipf_rename(const std::string &s);
 
-		std::string str_to_lower(const std::string& st);
-		std::string str_to_upper(const std::string& st);
+std::string uipf_rename_postfix(const std::string &s, const std::string &pf);
 
-		// execute external program and return stdout
-		std::string exec(const char* cmd);
+bool uipf_str_begins_with(const std::string &s, const std::string &with);
 
+bool uipf_str_ends_with(const std::string &s, const std::string &with);
 
-	}
+std::string uipf_str_to_lower(const std::string &st);
+
+std::string uipf_str_to_upper(const std::string &st);
+
+// execute external program and return stdout
+std::string uipf_exec_stdout(const char *cmd);
+
 }
 
 #endif //LIBUIPF_UTIL_HPP
