@@ -231,7 +231,15 @@ void RunControl::on_vizButtonClick(QString outputName)
 
 			UIPF_LOG_TRACE("showing window");
 			VisualizationContext& context = *(mainWindow_->visualizationContext_);
-			d->visualize(option, context);
+
+			try {
+				d->visualize(option, context);
+
+			} catch (const std::exception &e) {
+				UIPF_LOG_ERROR(string("Error in visualization: ") + e.what());
+			} catch(...) {
+				UIPF_LOG_ERROR(string("Unknown error occurred while trying to show visualization."));
+			}
 			return;
 		}
 	}
@@ -391,6 +399,9 @@ void RunControl::on_buttonClear() {
 	mainWindow_->ui->tableOutputs->setEnabled(false);
 	mainWindow_->ui->listRunSteps->setEnabled(true);
 
+	selectedStep_ = "";
+	stepOutputs_.clear();
+	steps_.clear();
 
 	delete workerThread_;
 	workerThread_ = nullptr;
