@@ -2,6 +2,7 @@
 #include "RunControl.hpp"
 #include "MainWindow.hpp"
 #include "ui_mainwindow.h"
+#include "data/list.hpp"
 
 #include <QTimer>
 #include <QWindow>
@@ -56,6 +57,8 @@ RunControl::RunControl(uipf::MainWindow *mw) : mainWindow_(mw), workerThread_(nu
 	// view button signal mapper
 	vizButtonMapper_ = new QSignalMapper(this);
 	connect(vizButtonMapper_, SIGNAL(mapped(QString)), this, SLOT(on_vizButtonClick(QString)));
+	listVizButtonMapper_ = new QSignalMapper(this);
+	connect(listVizButtonMapper_, SIGNAL(mapped(QString)), this, SLOT(on_listVizButtonClick(QString)));
 	// serialize button signal mapper
 	serializeButtonMapper_ = new QSignalMapper(this);
 	connect(serializeButtonMapper_, SIGNAL(mapped(QString)), this, SLOT(on_serializeButtonClick(QString)));
@@ -175,7 +178,15 @@ void RunControl::on_stepSelectionChanged(const QItemSelection& selection){
 					noser->setEditable(false);
 					modelStepOutputs_->setItem(r, 2, noser);
 				}
-				if (output.data->visualizations().size() == 0) {
+				if (output.data->getType() == uipf::data::List::id()) { // TODO map
+					QPushButton *button = new QPushButton("items");
+					connect(button, SIGNAL(clicked()), vizButtonMapper_, SLOT(map()));
+					vizButtonMapper_->setMapping(button, QString::fromStdString(to_string(output.name.size()) + " " + output.name + string("items")));
+					mainWindow_->ui->tableOutputs->setIndexWidget(
+							mainWindow_->ui->tableOutputs->model()->index(r++, 3),
+							button
+					);
+				} else if (output.data->visualizations().size() == 0) {
 					QStandardItem* noviz = new QStandardItem("n/a");
 					noviz->setToolTip("No Visualization options available for this data type.");
 					noviz->setEditable(false);
@@ -227,21 +238,139 @@ void RunControl::on_vizButtonClick(QString outputName)
 
 	for(StepOutput o: stepOutputs_[selectedStep_]) {
 		if (o.name == output) {
-			Data::ptr d = o.data;
-
-			UIPF_LOG_TRACE("showing window");
-			VisualizationContext& context = *(mainWindow_->visualizationContext_);
-
-			try {
-				d->visualize(option, context);
-
-			} catch (const std::exception &e) {
-				UIPF_LOG_ERROR(string("Error in visualization: ") + e.what());
-			} catch(...) {
-				UIPF_LOG_ERROR(string("Unknown error occurred while trying to show visualization."));
-			}
+			vizData(o.data, option, o.name);
 			return;
 		}
+	}
+}
+
+// TODO add support for nested lists
+void RunControl::on_listVizButtonClick(QString outputName)
+{
+	UIPF_LOG_TRACE("List Viz button: ", outputName.toStdString());
+
+	// split string into parts: "<len(output)> <output><vizoption>"
+	string outputAndViz = outputName.toStdString();
+	unsigned long pos = outputAndViz.find(" ");
+	long split = atol(outputAndViz.substr(0, pos).c_str());
+	string output = outputAndViz.substr(pos + 1, (unsigned)split);
+	string vizoption = outputAndViz.substr(pos + 1 + split);
+
+	// split vizoption into parts again: "<len(output)> <output><vizoption>"
+	pos = vizoption.find(" ");
+	split = atol(vizoption.substr(0, pos).c_str());
+	unsigned long itemid = atol(vizoption.substr(pos + 1, (unsigned)split).c_str());
+	string option = vizoption.substr(pos + 1 + split);
+
+	UIPF_LOG_TRACE("List Viz button: split: '", output, "' , '", option, "'");
+
+	for(StepOutput o: stepOutputs_[selectedStep_]) {
+		if (o.name == output) {
+			data::List::ptr list = static_pointer_cast<data::List>(o.data);
+			vizData(list->getContent()[itemid], option, o.name);
+			return;
+		}
+	}
+}
+
+void RunControl::vizData(Data::ptr d, std::string option, std::string outputName)
+{
+	if (d->getType() == uipf::data::List::id()) {
+
+		// TODO subwindow creation should maybe better be in Mainwindow, move this there.
+
+		// visualize list data type
+		QWidget* listWindow = new QWidget();
+		listWindow->setMinimumWidth(500);
+		listWindow->setMinimumHeight(400);
+
+		QTableView* listTable = new QTableView(listWindow);
+		QVBoxLayout* listWindowLayout = new QVBoxLayout();
+		listWindowLayout->addWidget(listTable);
+
+		listWindow->setLayout(listWindowLayout);
+		listWindow->setWindowTitle(QString("List items in output '") + QString::fromStdString(outputName) + QString("' of step '") + QString::fromStdString(selectedStep_) + QString("'"));
+		listWindow->setVisible(true);
+
+		// TODO this code is duplicate with the constructor of this class
+		QStandardItemModel* tableModel = new QStandardItemModel();
+		listTable->setModel(tableModel);
+		tableModel->setColumnCount(3);
+		QStandardItem* item0 = new QStandardItem("Item:");
+		QStandardItem* item1 = new QStandardItem("Type:");
+		QStandardItem* item2 = new QStandardItem("Visualize:");
+		item0->setToolTip(QString("Name of the module output."));
+		item1->setToolTip(QString("Data type of the module output."));
+		tableModel->setHorizontalHeaderItem(0, item0);
+		tableModel->setHorizontalHeaderItem(1, item1);
+		tableModel->setHorizontalHeaderItem(2, item2);
+
+		listTable->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+		listTable->verticalHeader()->setVisible(false);
+		listTable->setSelectionMode(QAbstractItemView::NoSelection);
+		for (int c = 0; c < listTable->horizontalHeader()->count(); ++c) {
+			listTable->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
+		}
+
+
+		data::List::ptr list = static_pointer_cast<data::List>(d);
+		int r = 0;
+		for(Data::ptr item: list->getContent()) {
+			// TODO code in this loop is pretty much duplicate with on_stepSelectionChanged(), refactor?
+
+			QStandardItem* rowId = new QStandardItem(QString::fromStdString(to_string(r)));
+			rowId->setEditable(false);
+			// TODO set tooltip from model data description
+
+			QStandardItem* type = new QStandardItem(item->getType().c_str());
+			type->setToolTip(item->getType().c_str());
+			type->setEditable(false);
+
+			tableModel->setItem(r, 0, rowId);
+			tableModel->setItem(r, 1, type);
+
+			if (item->visualizations().size() == 0) {
+				QStandardItem* noviz = new QStandardItem("n/a");
+				noviz->setToolTip("No Visualization options available for this data type.");
+				noviz->setEditable(false);
+				tableModel->setItem(r, 2, noviz);
+			} else {
+				int a = 0;
+				for (string v: item->visualizations()) {
+					UIPF_LOG_TRACE("add vis option ", v);
+					QPushButton *button = new QPushButton(QString::fromStdString(v));
+
+					connect(button, SIGNAL(clicked()), listVizButtonMapper_, SLOT(map()));
+					string vizoption = to_string(to_string(r).size()) + " " + to_string(r) + v;
+					listVizButtonMapper_->setMapping(button, QString::fromStdString(to_string(outputName.size()) + " " + outputName + vizoption));
+					if (a > 0) {
+						tableModel->setItem(r, 2 + a, new QStandardItem());
+					}
+					listTable->setIndexWidget(
+							listTable->model()->index(r, 2 + a++),
+							button
+					);
+				}
+			}
+			r++;
+		}
+
+		mainWindow_->createdWindwows_.push_back(listWindow);
+		mainWindow_->closeWindowsAct->setEnabled(true);
+
+
+	} else {
+
+		// visualize single data type
+		VisualizationContext& context = *(mainWindow_->visualizationContext_);
+		try {
+			d->visualize(option, context);
+		} catch (const std::exception &e) {
+			UIPF_LOG_ERROR(string("Error in visualization: ") + e.what());
+		} catch(...) {
+			UIPF_LOG_ERROR(string("Unknown error occurred while trying to show visualization."));
+		}
+
 	}
 }
 
@@ -256,6 +385,8 @@ void RunControl::on_serializeButtonClick(QString outputName)
 			ostringstream s;
 			d->serialize(s);
 			UIPF_LOG_INFO("Serialization: ", s.str());
+
+			// TODO this is duplicate with mainwindow, merge it
 
 			QWidget* textWindow = new QWidget();
 

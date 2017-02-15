@@ -11,10 +11,12 @@ namespace uipf {
 	namespace data {
 
 
-		UIPF_DATA_TYPE_BEGIN (List, "list", std::vector<Data::ptr>)
+		UIPF_DATA_TYPE_BEGIN (Map, "map", std::map<std::string, Data::ptr>)
 
 			// TODO getType() in combination
 
+
+			// TODO get subtype? for typechecking
 		UIPF_DATA_TYPE_END
 
 	};

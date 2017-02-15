@@ -54,9 +54,12 @@ namespace uipf {
 		void killWorker();
 
 		void on_vizButtonClick(QString outputName);
+		void on_listVizButtonClick(QString outputName);
 		void on_serializeButtonClick(QString outputName);
 
 	private:
+
+		void vizData(Data::ptr d, std::string option, std::string outputName);
 
 		void runChain();
 		void runStep();
@@ -99,6 +102,7 @@ namespace uipf {
 		QStandardItemModel *modelStepOutputs_;
 
 		QSignalMapper* vizButtonMapper_;
+		QSignalMapper* listVizButtonMapper_;
 		QSignalMapper* serializeButtonMapper_;
 
 	};
