@@ -15,6 +15,9 @@ namespace uipf {
 
 			// TODO getType() in combination
 
+			virtual bool isList() { return true; };
+			virtual std::vector<Data::ptr> getListContent() { return getContent(); };
+
 		UIPF_DATA_TYPE_END
 
 	};

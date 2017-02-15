@@ -50,13 +50,13 @@ link_directories(${Boost_LIBRARY_DIRS})
 ExternalProject_Add(YAML_CPP
 	GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
 	GIT_TAG release-0.5.2
-	CMAKE_ARGS -DYAML_CPP_BUILD_TOOLS=OFF -DYAML_CPP_BUILD_CONTRIB=OFF
+	CMAKE_ARGS -DYAML_CPP_BUILD_TOOLS=OFF -DYAML_CPP_BUILD_CONTRIB=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON
 	TEST_COMMAND ""
 	INSTALL_COMMAND "" # skip install step for yaml-cpp
 )
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP/include)
-set(YAML_CPP_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP-build/libyaml-cpp.a)
-
+set(YAML_CPP_LIBRARY_FILE "${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP-build/libyaml-cpp.a")
+set(YAML_CPP_LIBRARY "-Wl,--whole-archive ${YAML_CPP_LIBRARY_FILE} -Wl,--no-whole-archive")
 
 #
 # libraries
@@ -84,7 +84,7 @@ if (LIBUIPF_WITH_OPENCV)
 endif()
 
 # libuipf
-add_library(libuipf STATIC
+add_library(libuipf SHARED
 
 	src/ModuleLoader.cpp
 	src/ProcessingChain.cpp
@@ -147,6 +147,10 @@ endif()
 install(TARGETS libuipf libuipf-module
         LIBRARY DESTINATION lib
 		ARCHIVE DESTINATION lib
+)
+install(FILES ${YAML_CPP_LIBRARY_FILE}
+	DESTINATION lib
+	RENAME libuipf-yaml-cpp.a
 )
 if(LIBUIPF_WITH_OPENCV)
 	install(DIRECTORY ${libuipf_SOURCE_DIR}/src/include/

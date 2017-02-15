@@ -223,6 +223,9 @@ bool Runner::runStep() {
 			mapDone = 0;
 			mapItems = (int) mapData->getContent().size();
 
+			// make sure progress bar is shown
+			updateModuleProgress(0, 100);
+
 			UIPF_LOG_INFO("Running step '", proSt.name, "' in map() mode on ", mapItems, " items...");
 			uipf_cforeach(mapItem, mapData->getContent()) {
 
@@ -243,6 +246,8 @@ bool Runner::runStep() {
 					}
 
 					pos->second->getContent().push_back(mapOutput->second);
+					Data::ptr list = static_pointer_cast<Data>(pos->second);
+					context_.dataUpdated(proSt.name, pos->first, list);
 					mapOutput = module->output_.erase(mapOutput);
 				}
 
@@ -351,7 +356,11 @@ void Runner::stepActive(std::string stepName, int number, int count)
 }
 void Runner::dataUpdated(std::string stepName, std::string outputName, Data::ptr data)
 {
-	context_.dataUpdated(stepName, outputName, data);
+	// do not update context if map data is updated
+	// the update is handled inside of run in that case.
+	if (mapItems == 0) {
+		context_.dataUpdated(stepName, outputName, data);
+	}
 }
 void Runner::dataDeleted(std::string stepName, std::string outputName)
 {

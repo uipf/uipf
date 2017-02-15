@@ -9,11 +9,11 @@ namespace uipf {
 
 		virtual void updateModuleProgress(int done, int max) {};
 
-		virtual void stepActive(std::string stepName, int number, int count) {};
+		virtual void stepActive(const std::string& stepName, int number, int count) {};
 
-		virtual void dataUpdated(std::string stepName, std::string outputName, Data::ptr &data) {};
+		virtual void dataUpdated(const std::string& stepName, const std::string& outputName, Data::ptr &data) {};
 
-		virtual void dataDeleted(std::string stepName, std::string outputName) {};
+		virtual void dataDeleted(const std::string& stepName, const std::string& outputName) {};
 
 		bool stopRequested = false;
 		bool pauseRequested = false;

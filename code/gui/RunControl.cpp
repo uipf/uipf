@@ -178,7 +178,7 @@ void RunControl::on_stepSelectionChanged(const QItemSelection& selection){
 					noser->setEditable(false);
 					modelStepOutputs_->setItem(r, 2, noser);
 				}
-				if (output.data->getType() == uipf::data::List::id()) { // TODO map
+				if (output.data->isList()) { // TODO map
 					QPushButton *button = new QPushButton("items");
 					connect(button, SIGNAL(clicked()), vizButtonMapper_, SLOT(map()));
 					vizButtonMapper_->setMapping(button, QString::fromStdString(to_string(output.name.size()) + " " + output.name + string("items")));
@@ -275,7 +275,7 @@ void RunControl::on_listVizButtonClick(QString outputName)
 
 void RunControl::vizData(Data::ptr d, std::string option, std::string outputName)
 {
-	if (d->getType() == uipf::data::List::id()) {
+	if (d->isList()) {
 
 		// TODO subwindow creation should maybe better be in Mainwindow, move this there.
 
@@ -313,9 +313,8 @@ void RunControl::vizData(Data::ptr d, std::string option, std::string outputName
 		}
 
 
-		data::List::ptr list = static_pointer_cast<data::List>(d);
 		int r = 0;
-		for(Data::ptr item: list->getContent()) {
+		for(Data::ptr item: d->getListContent()) {
 			// TODO code in this loop is pretty much duplicate with on_stepSelectionChanged(), refactor?
 
 			QStandardItem* rowId = new QStandardItem(QString::fromStdString(to_string(r)));

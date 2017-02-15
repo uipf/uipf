@@ -48,17 +48,17 @@ void RunWorkerThread::updateModuleProgress(int done, int max)
 	emit eventUpdateModuleProgress(done, max);
 }
 
-void RunWorkerThread::stepActive(std::string stepName, int number, int count)
+void RunWorkerThread::stepActive(const std::string& stepName, int number, int count)
 {
 	emit eventStepActive(stepName, number, count);
 }
 
-void RunWorkerThread::dataUpdated(std::string stepName, std::string outputName, Data::ptr& data)
+void RunWorkerThread::dataUpdated(const std::string& stepName, const std::string& outputName, Data::ptr& data)
 {
 	emit eventDataUpdated(stepName, outputName, data);
 }
 
-void RunWorkerThread::dataDeleted(std::string stepName, std::string outputName)
+void RunWorkerThread::dataDeleted(const std::string& stepName, const std::string& outputName)
 {
 	emit eventDataDeleted(stepName, outputName);
 }

@@ -46,6 +46,9 @@ namespace uipf {
 		// this is a virtual method, which has to be overwritten in the class, which derives from Data
 		virtual std::string getType() const = 0;
 
+		virtual bool isList() { return false; };
+		virtual std::vector<Data::ptr> getListContent() { return {}; };
+
 		virtual bool isSerializable() { return false; };
 		/**
 		 * @return a list of visualization options.
