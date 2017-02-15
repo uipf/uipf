@@ -178,6 +178,7 @@ void RunControl::on_stepSelectionChanged(const QItemSelection& selection){
 					noser->setEditable(false);
 					modelStepOutputs_->setItem(r, 2, noser);
 				}
+				int a = r;
 				if (output.data->isList()) { // TODO map
 					QPushButton *button = new QPushButton("items");
 					connect(button, SIGNAL(clicked()), vizButtonMapper_, SLOT(map()));
@@ -186,13 +187,13 @@ void RunControl::on_stepSelectionChanged(const QItemSelection& selection){
 							mainWindow_->ui->tableOutputs->model()->index(r++, 3),
 							button
 					);
-				} else if (output.data->visualizations().size() == 0) {
+				}
+				if (!output.data->isList() && output.data->visualizations().size() == 0) {
 					QStandardItem* noviz = new QStandardItem("n/a");
 					noviz->setToolTip("No Visualization options available for this data type.");
 					noviz->setEditable(false);
 					modelStepOutputs_->setItem(r, 3, noviz);
 				} else {
-					int a = r;
 					for (string v: output.data->visualizations()) {
 						if (r > a) {
 							QStandardItem* dummyItem0 = new QStandardItem();
@@ -275,7 +276,7 @@ void RunControl::on_listVizButtonClick(QString outputName)
 
 void RunControl::vizData(Data::ptr d, std::string option, std::string outputName)
 {
-	if (d->isList()) {
+	if (d->isList() && option.compare("items") == 0) {
 
 		// TODO subwindow creation should maybe better be in Mainwindow, move this there.
 
