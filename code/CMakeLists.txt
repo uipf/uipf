@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(UIPFramework)
 
+set(CMAKE_MODULE_PATH ${UIPFramework_SOURCE_DIR}/cmake)
+
 #
 # FLAGS
 #
@@ -51,6 +53,8 @@ configure_file (
 
 
 add_subdirectory(libuipf)
+# TODO extract libuipf-module from libuipf
+add_subdirectory(libuipf-geomview)
 
 add_subdirectory(modules)
 

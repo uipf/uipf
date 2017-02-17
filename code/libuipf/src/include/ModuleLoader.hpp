@@ -35,6 +35,12 @@ namespace uipf {
 		~ModuleLoader(void) { reset(); };
 
 		/**
+		 * @return returns true if any errors had occured while loading modules.
+		 * The errors should have been logged to the logger before.
+		 */
+		bool hasErrors();
+
+		/**
 		 * Reset the module loader.
 		 *
 		 * Unloads all loaded modules and clears the search paths.
@@ -108,6 +114,7 @@ namespace uipf {
 
 
 		bool loaded_ = false;
+		bool hasErrors_ = false;
 	};
 };
 

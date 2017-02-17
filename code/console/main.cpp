@@ -150,7 +150,8 @@ int main(int argc, char** argv){
 			cout << *mit << endl;
 		}
 
-		return 0;
+		return ml.hasErrors() ? 1 : 0;
+
 	} else if (vm.count("info")){
 	// list information about a specific module
 	// ./uipf --info moduleId
@@ -211,7 +212,7 @@ int main(int argc, char** argv){
 			}
 		}
 
-		return 0;
+		return ml.hasErrors() ? 1 : 0;
 	} else{
 	// run a single module.
 	// ./uipf <moduleName> ...options...

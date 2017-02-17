@@ -8,7 +8,6 @@
 using namespace std;
 using namespace uipf;
 
-#ifndef NDEBUG
 class GuiConsoleLogger : public log::Logger::LogCallback {
 public:
 	void log(log::Logger::LogLevel lvl, const string& msg) {
@@ -36,7 +35,6 @@ public:
 	}
 
 };
-#endif
 
 int main(int argc, char *argv[])
 {
@@ -63,14 +61,18 @@ int main(int argc, char *argv[])
 			cout << "  " << argv[0] << " [-l|--list] list available modules and exit." << endl;
 			cout << "  " << argv[0] << " <filename>  open processing chain from file." << endl;
 			cout << "  " << argv[0] << " [-h|--help] show this help message" << endl;
-			return 1;
+			return 0;
 		}
 		if (strcmp(argv[1], "-l") == 0 || strcmp(argv[1], "--list") == 0) {
+
+			UIPF_LOG_LEVEL = log::Logger::LogLevel::WARNING;
+			UIPF_REGISTER_LOGGER(new GuiConsoleLogger());
+
 			std::vector<std::string> modules = ml.getModuleIds();
 			for (auto mit = modules.begin(); mit != modules.end(); ++mit) {
 				cout << *mit << endl;
 			}
-			return 0;
+			return ml.hasErrors() ? 1 : 0;
 		}
 	}
 

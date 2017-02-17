@@ -208,6 +208,7 @@ void uipf::ModuleLoader::load() {
 
 	if (!Glib::Module::get_supported()) {
 		UIPF_LOG_ERROR("Loading dynamic libraries is not supported on your platform.");
+		hasErrors_ = true;
 		return;
 	}
 
@@ -253,6 +254,7 @@ void uipf::ModuleLoader::loadFromPath(const std::string& sPath) {
 	}
 	catch (const filesystem_error& ex) {
 		UIPF_LOG_ERROR("Failed to read module search path: ", ex.what());
+		hasErrors_ = true;
 	}
 }
 
@@ -307,5 +309,10 @@ void uipf::ModuleLoader::loadLibrary(const std::string& file) {
 	} else {
 		UIPF_LOG_ERROR("Failed to load module: ", file, " - ", Glib::Module::get_last_error());
 		delete libModule;
+		hasErrors_ = true;
 	}
+}
+
+bool uipf::ModuleLoader::hasErrors() {
+	return hasErrors_;
 }

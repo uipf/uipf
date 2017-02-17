@@ -106,7 +106,7 @@ void uipf::data::OpenCVMat::store(const std::string& f, const std::vector<int>& 
 	filename = f;
 }
 
-void uipf::data::OpenCVMat::visualize(std::string option, VisualizationContext& context) {
+void uipf::data::OpenCVMat::visualize(std::string option, VisualizationContext& context) const {
 	if (option.compare("Image") == 0) {
 		UIPF_LOG_TRACE("showing opencv mat");
 		context.displayImage(getContent());
@@ -117,7 +117,7 @@ void uipf::data::OpenCVMat::visualize(std::string option, VisualizationContext& 
 	}
 }
 
-std::vector<std::string> OpenCVMat::visualizations() {
+std::vector<std::string> OpenCVMat::visualizations() const {
 	return {
 		"Image",
 	    "Name"
