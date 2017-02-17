@@ -126,6 +126,8 @@ std::string uipf_str_to_lower(const std::string& st) {
 
 // http://stackoverflow.com/a/478960/1106908
 // TODO Replace popen and pclose with _popen and _pclose for Windows.
+// TODO add shell args vector and implement proper escaping!
+// http://stackoverflow.com/questions/5510343/escape-command-line-arguments-in-c-sharp
 std::string uipf_exec_stdout(const char *cmd) {
 	char buffer[128];
 	std::string result;
