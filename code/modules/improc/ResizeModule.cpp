@@ -29,6 +29,8 @@
 
 // TODO write tests for this
 
+// TODO NOTE that this does not scale meta data like focal length, which may be wrong after scaling!
+
 void ResizeImage::run() {
 
 	using namespace cv;

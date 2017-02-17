@@ -115,6 +115,44 @@ std::string uipf_str_to_lower(const std::string& st) {
 	return s;
 }
 
+// http://stackoverflow.com/a/236803/1106908
+void split_string_into(const std::string &s, char delim, std::back_insert_iterator<std::vector<std::string>> result) {
+	std::stringstream ss;
+	ss.str(s);
+	std::string item;
+	while (std::getline(ss, item, delim)) {
+		*(result++) = item;
+	}
+}
+std::vector<std::string> split_string(const std::string &s, char delim) {
+	std::vector<std::string> elems;
+	split_string_into(s, delim, std::back_inserter(elems));
+	return elems;
+}
+
+// http://stackoverflow.com/a/29892589/1106908
+std::string & ltrim(std::string & str)
+{
+	auto it2 =  std::find_if( str.begin() , str.end() , [](char ch){ return !std::isspace<char>(ch , std::locale::classic() ) ; } );
+	str.erase( str.begin() , it2);
+	return str;
+}
+std::string & rtrim(std::string & str)
+{
+	auto it1 =  std::find_if( str.rbegin() , str.rend() , [](char ch){ return !std::isspace<char>(ch , std::locale::classic() ) ; } );
+	str.erase( it1.base() , str.end() );
+	return str;
+}
+std::string & trim(std::string & str)
+{
+	return ltrim(rtrim(str));
+}
+std::string trim_copy(std::string const & str)
+{
+	auto s = str;
+	return ltrim(rtrim(s));
+}
+
 
 #include <cstdio>
 #include <iostream>

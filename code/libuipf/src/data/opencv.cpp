@@ -5,10 +5,12 @@
 
 #include <opencv2/highgui/highgui.hpp>
 #include <boost/filesystem.hpp>
+#include <map>
 
 #include "logging.hpp"
 #include "util.hpp"
 
+using namespace std;
 using namespace cv;
 using namespace uipf;
 using namespace uipf::data;
@@ -24,6 +26,8 @@ OpenCVMat::ptr uipf::data::load_image_color(const std::string& filename) {
 	OpenCVMat::ptr mat(new OpenCVMat(image));
 	mat->filename = filename;
 
+	mat->exif = load_image_exif_data(filename);
+
 	return mat;
 }
 
@@ -37,6 +41,8 @@ OpenCVMat::ptr uipf::data::load_image_greyscale(const std::string& filename) {
 	}
 	OpenCVMat::ptr mat(new OpenCVMat(image));
 	mat->filename = filename;
+
+	mat->exif = load_image_exif_data(filename);
 
 	return mat;
 }
@@ -95,6 +101,54 @@ std::vector<std::string> uipf::data::load_image_names(const std::string& path) {
 		throw ErrorException(std::string("Failed to read search path: ") + p.string() + std::string(" : ") + ex.what());
 	}
 	return list;
+}
+
+std::map<std::string, std::string> uipf::data::load_image_exif_data(const std::string& filename)
+{
+	std::map<std::string, std::string> exif;
+
+	string output;
+	try {
+		output = uipf_exec_stdout((string("jhead ") + filename).c_str());
+	} catch(uipf::ErrorException& e) {
+		UIPF_LOG_WARNING("Failed to load EXIF information for image ", filename, ": ", e.what());
+		return exif;
+	}
+	// output should contain something like:
+//	File name    : kermit000.jpg
+//	File size    : 165140 bytes
+//	File date    : 2017:01:14 07:39:31
+//	Camera make  : Canon
+//	Camera model : Canon PowerShot A10
+//	Date/Time    : 2004:11:03 21:10:01
+//	Resolution   : 640 x 480
+//	Flash used   : No
+//	Focal length :  5.4mm  (35mm equivalent: 37mm)
+//	CCD width    : 5.23mm
+//	Exposure time: 0.050 s  (1/20)
+//	Aperture     : f/2.8
+//	Focus dist.  : 0.62m
+//	Light Source : Fluorescent
+//	Metering Mode: pattern
+//	JPEG Quality : 97
+
+	for(string line: split_string(output, '\n')) {
+		if (line.empty()) {
+			continue;
+		}
+		vector<string> parts = split_string(line, ':');
+		string name = parts[0];
+		trim(name);
+		if (name.empty()) {
+			continue;
+		}
+		string value;
+		for(size_t i = 1; i < parts.size(); ++i) {
+			value += parts[i];
+		}
+		exif.insert(pair<string, string>(name, trim(value)));
+	}
+	return exif;
 }
 
 bool uipf::data::OpenCVMat::getIsStored() const {

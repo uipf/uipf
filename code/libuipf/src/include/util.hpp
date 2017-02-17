@@ -3,6 +3,7 @@
 
 #include <string>
 #include <sstream>
+#include <vector>
 
 // a macro to simply simple for loops
 #define uipf_cforeach(i, set) for(auto i = set.cbegin(); i != set.end(); ++i)
@@ -32,6 +33,16 @@ bool uipf_str_ends_with(const std::string &s, const std::string &with);
 std::string uipf_str_to_lower(const std::string &st);
 
 std::string uipf_str_to_upper(const std::string &st);
+
+// http://stackoverflow.com/a/236803/1106908
+void split_string_into(const std::string &s, char delim, std::back_insert_iterator<std::vector<std::string>> result);
+std::vector<std::string> split_string(const std::string &s, char delim);
+
+// http://stackoverflow.com/a/29892589/1106908
+std::string & ltrim(std::string & str);
+std::string & rtrim(std::string & str);
+std::string & trim(std::string & str);
+std::string trim_copy(std::string const & str);
 
 // execute external program and return stdout
 std::string uipf_exec_stdout(const char *cmd);
