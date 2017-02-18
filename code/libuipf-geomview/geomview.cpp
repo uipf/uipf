@@ -31,7 +31,7 @@ void GeomView::start()
 
 	gv_->set_line_width(4);
 	// gv.set_trace(true);
-	gv_->set_bg_color(CGAL::Color(0, 200, 200));
+	gv_->set_bg_color(CGAL::Color(200, 200, 200));
 	gv_->clear();
 }
 
@@ -116,6 +116,83 @@ void GeomView::print_polyhedron(Polyhedron &mesh, bool wired, const std::string&
 		gv << 0; // without color.
 	}
 	// Footer.
+	gv << "}})";
+
+	gv.set_raw(raw_bak);
+	gv.set_ascii_mode(ascii_bak);
+}
+
+void GeomView::print_pointcloud(
+		std::vector<Point_3> &points,
+		const std::string &name,
+        const Color& color
+) {
+	std::vector<std::tuple<Point_3, Direction_3, Color> > directedPoints;
+	for(auto p: points) {
+		directedPoints.push_back(std::tuple<Point_3, Direction_3, Color>(p, Direction_3(0, 0, 1), color));
+	}
+	print_colored_directed_pointcloud(directedPoints, name);
+}
+
+void GeomView::print_colored_pointcloud(
+		std::vector<std::tuple<Point_3, Color> > &points,
+		const std::string &name
+) {
+	std::vector<std::tuple<Point_3, Direction_3, Color> > directedPoints;
+	for(auto p: points) {
+		directedPoints.push_back(std::tuple<Point_3, Direction_3, Color>(std::get<0>(p), Direction_3(0, 0, 1), std::get<1>(p)));
+	}
+	print_colored_directed_pointcloud(directedPoints, name);
+}
+
+void GeomView::print_colored_directed_pointcloud(
+		std::vector<std::tuple<Point_3, Direction_3, Color> > &points,
+        const std::string &name
+) {
+
+	if (!started_) {
+		start();
+	}
+
+	CGAL::Geomview_stream& gv = this->gv();
+
+	bool ascii_bak = gv.get_ascii_mode();
+	bool raw_bak = gv.set_raw(true);
+
+	// Header.
+	gv.set_binary_mode();
+	gv << "(geometry " << gv.get_new_id(name);
+	// http://www.geom.uiuc.edu/software/geomview/ooglman.html#SEC30
+	gv << " {appearance { +face +keepcolor +bbox }{ OFF BINARY\n";
+	gv << (points.size() * 4) << points.size() << 0;
+
+	// create polyhedron of quads, each quad represents a point
+	double psize = .01;
+	// write points
+	for(size_t i = 0; i < points.size(); ++i) {
+		Point_3 p = std::get<0>(points[i]);
+
+		// TODO include direction into the plane
+		gv << (p.x() - psize) << (p.y() + psize) << (p.z());
+		gv << (p.x() - psize) << (p.y() - psize) << (p.z());
+		gv << (p.x() + psize) << (p.y() - psize) << (p.z());
+		gv << (p.x() + psize) << (p.y() + psize) << (p.z());
+	}
+	// write facets with color
+	for(size_t i = 0; i < points.size(); ++i) {
+		Color c = std::get<2>(points[i]);
+
+		// define a facet
+		gv << 4 << (i * 4) << (i * 4 + 1) << (i * 4 + 2) << (i * 4 + 3);
+		// define its color
+//		std::cout << "col: " << ((int) c.r()) << " " << ((int) c.g()) << " " << ((int) c.b()) << std::endl;
+		float r = ((int) c.r()) / 255.0f;
+		float g = ((int) c.g()) / 255.0f;
+		float b = ((int) c.b()) / 255.0f;
+//		std::cout << "trc: " << r << " " << g << " " << b << std::endl;
+		gv << 3 << r << g << b;
+	}
+
 	gv << "}})";
 
 	gv.set_raw(raw_bak);

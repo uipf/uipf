@@ -4,6 +4,7 @@
 #include <CGAL/Aff_transformation_3.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/IO/Geomview_stream.h>
+#include <CGAL/IO/Color.h>
 #include <CGAL/Polyhedron_3.h>
 
 // geomview stream imports
@@ -47,6 +48,8 @@ namespace uipf {
 
 		typedef Kernel::Aff_transformation_3 Transformation_3;
 		typedef Kernel::Aff_transformation_2 Transformation_2;
+
+		typedef CGAL::Color Color;
 	}
 
 	class GeomView
@@ -99,7 +102,27 @@ namespace uipf {
 //			return CGAL::Geomview_stream::get_new_id(s);
 //		}
 
-		void print_polyhedron(geomview::Polyhedron& mesh, bool wired = false, const std::string& name = std::string("Polyhedron"));
+		void print_polyhedron(
+				geomview::Polyhedron& mesh,
+				bool wired = false,
+				const std::string& name = std::string("Polyhedron")
+		);
+
+		void print_pointcloud(
+				std::vector<geomview::Point_3> &points,
+				const std::string& name = std::string("PointCloud"),
+		        const geomview::Color& color = geomview::Color(50, 50, 50)
+		);
+
+		void print_colored_pointcloud(
+				std::vector<std::tuple<geomview::Point_3, geomview::Color> > &points,
+				const std::string& name = std::string("PointCloud")
+		);
+
+		void print_colored_directed_pointcloud(
+				std::vector<std::tuple<geomview::Point_3, geomview::Direction_3, geomview::Color> > &points,
+				const std::string& name = std::string("PointCloud")
+		);
 
 
 	private:
