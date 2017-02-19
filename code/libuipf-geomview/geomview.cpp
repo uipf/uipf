@@ -163,7 +163,7 @@ void GeomView::print_colored_directed_pointcloud(
 	gv.set_binary_mode();
 	gv << "(geometry " << gv.get_new_id(name);
 	// http://www.geom.uiuc.edu/software/geomview/ooglman.html#SEC30
-	gv << " {appearance { +face +keepcolor +bbox }{ OFF BINARY\n";
+	gv << " {appearance { +face +keepcolor }{ OFF BINARY\n";
 	gv << (points.size() * 4) << points.size() << 0;
 
 	// create polyhedron of quads, each quad represents a point

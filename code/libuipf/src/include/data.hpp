@@ -49,13 +49,14 @@ namespace uipf {
 		virtual bool isList() const { return false; };
 		virtual std::vector<Data::ptr> getListContent() const { return {}; };
 
-		virtual bool isSerializable() const { return false; };
 		/**
 		 * @return a list of visualization options.
 		 */
 		virtual std::vector<std::string> visualizations() const { return std::vector<std::string>(); };
 
 		virtual void visualize(std::string option, VisualizationContext& context) const { throw uipf::ErrorException("Data Type is not visualizable."); };
+
+		virtual bool isSerializable() const { return false; };
 
 		// serialization, allow reading from files and writing to files
 		// or other string transport
