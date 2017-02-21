@@ -48,11 +48,7 @@ add_executable(uipf-gui
 	GuiVisualizationContext.cpp
 )
 
-if (WITH_OPENCV)
-	target_link_libraries (uipf-gui boost_graph libuipf opencv_core opencv_highgui opencv_imgproc)
-else()
-	target_link_libraries (uipf-gui boost_graph libuipf)
-endif()
+target_link_libraries (uipf-gui boost_graph libuipf opencv_core opencv_highgui opencv_imgproc)
 qt5_use_modules(uipf-gui Core Gui Widgets)
 
 
