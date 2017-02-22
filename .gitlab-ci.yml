@@ -79,4 +79,4 @@ preview_packages:
     - packaging
   artifacts:
     paths:
-     - *.deb
+     - '*.deb'
