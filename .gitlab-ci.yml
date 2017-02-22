@@ -62,7 +62,7 @@ variables:
 preview_packages:
   stage: deploy
   script:
-    - debootstrap --variant=buildd jessie /tmp/${CI_BUILD_ID}-deb
+    - sudo debootstrap --variant=buildd jessie /tmp/${CI_BUILD_ID}-deb
     - mkdir -p /tmp/${CI_BUILD_ID}-deb/src/uipf
     - rsync -ar . /tmp/${CI_BUILD_ID}-deb/src/uipf
     - git clone git@gitlab.cebe.cc:master/packaging.git packaging
