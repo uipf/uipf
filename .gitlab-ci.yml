@@ -66,7 +66,7 @@ preview_packages:
 #    - mkdir -p /tmp/${CI_BUILD_ID}-deb/src/uipf
 #    - rsync -ar . /tmp/${CI_BUILD_ID}-deb/src/uipf
     - git clone git@gitlab.cebe.cc:master/packaging.git packaging
-    - rsync -ar packaging/debian debian
+    - rsync -ar packaging/debian/ debian/
 #    - sudo chroot /tmp/${CI_BUILD_ID}-deb "cd src/uipf && dpkg-buildpackage -us -uc"
     - dpkg-buildpackage -us -uc
   environment:
