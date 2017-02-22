@@ -69,6 +69,7 @@ preview_packages:
     - rsync -ar packaging/debian/ /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0/debian/
     - cd /tmp/${CI_BUILD_ID}-deb/src/ && tar --exclude-vcs -czf uipf-2.0.tar.gz uipf-2.0
 #    - sudo chroot /tmp/${CI_BUILD_ID}-deb "cd src/uipf && dpkg-buildpackage -us -uc"
+    - cd /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0 && dh_make -C=m -y -n
     - cd /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0 && dpkg-buildpackage -us -uc
   environment:
     name: preview_packages
