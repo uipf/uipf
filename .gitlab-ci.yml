@@ -76,6 +76,9 @@ preview_packages:
 #    url: https://example.com
   when: manual
   only:
-  - master
-  - improved-data-model
-  - packaging
+    - master
+    - improved-data-model
+    - packaging
+  artifacts:
+    paths:
+     - /tmp/${CI_BUILD_ID}-deb/src/*.deb
