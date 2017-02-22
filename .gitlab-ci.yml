@@ -57,3 +57,22 @@ deploy:
 
 variables:
   GIT_STRATEGY: clone
+
+# build .deb packages
+preview_packages:
+  stage: deploy
+  script:
+    - debootstrap --variant=buildd jessie /tmp/${CI_BUILD_ID}-deb
+    - mkdir -p /tmp/${CI_BUILD_ID}-deb/src/uipf
+    - rsync -ar . /tmp/${CI_BUILD_ID}-deb/src/uipf
+    - git clone git@gitlab.cebe.cc:master/packaging.git packaging
+    - rsync -ar packaging/debian /tmp/${CI_BUILD_ID}-deb/src/uipf/debian
+    - sudo chroot /tmp/${CI_BUILD_ID}-deb "cd src/uipf && dpkg-buildpackage -us -uc"
+  environment:
+    name: preview_packages
+#    url: https://example.com
+  when: manual
+  only:
+  - master
+  - improved-data-model
+  - packaging
