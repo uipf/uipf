@@ -59,19 +59,19 @@ variables:
   GIT_STRATEGY: clone
 
 # build .deb packages
-preview_packages:
+pkg_debian_jessie:
+  image: debian:jessie
   stage: deploy
   script:
-    - mkdir -p /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0
-    - rsync -ar . /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0
+#    - mkdir -p /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0
+#    - rsync -ar . /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0
     - git clone git@gitlab.cebe.cc:master/packaging.git packaging
-    - rsync -ar packaging/debian/ /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0/debian/
+    - rsync -ar packaging/debian/ debian/
 #    - cd /tmp/${CI_BUILD_ID}-deb/src/ && tar --exclude-vcs -czf uipf-2.0.tar.gz uipf-2.0
-    - cd /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0 && dpkg-buildpackage -us -uc -b
-    - cp /tmp/${CI_BUILD_ID}-deb/src/*.deb .
+    - dpkg-buildpackage -us -uc -b
+    - cp ../*.deb .
   environment:
     name: preview_packages
-#    url: https://example.com
   when: manual
   only:
     - master
