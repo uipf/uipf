@@ -52,6 +52,10 @@ if ( NOT CGAL_DIR )
 		/usr/local/lib/CGAL
 		/usr/lib/CGAL
 
+		# special path on Ubuntu
+		/usr/lib/x86_64-linux-gnu/cmake/CGAL
+		/usr/lib/i386-linux-gnu/cmake/CGAL
+
 		# Read from the CMakeSetup registry entries.  It is likely that
 		# CGAL will have been recently built.
 		[HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\Settings\\StartPath;WhereBuild1]
