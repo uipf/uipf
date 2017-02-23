@@ -13,6 +13,8 @@ stages:
 # https://docs.gitlab.com/ee/ci/yaml/README.html#special-yaml-features
 .job_template: &job_definition
   stage: build
+  tags:
+   - nodocker
   script:
     - if [ -d build/ ]; then rm -rf build/ ; fi
     - mkdir build/ && cd build/
