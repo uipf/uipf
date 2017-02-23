@@ -99,6 +99,7 @@ variables:
     - improved-data-model
     - packaging
   artifacts:
+    name: "$CI_BUILD_NAME"
     paths:
      - '*.deb'
 
@@ -111,12 +112,12 @@ pkg_debian_jessie:
 #  <<: *pkg_definition
 #  image: ubuntu:14.04
 
-pkg_ubuntu_16.04:
-  <<: *pkg_definition
-  image: ubuntu:16.04
-  before_script:
-   # cgal dev packaging is broken, so this package is needed to build it with cmake...
-   - apt-get -y --no-install-recommends install libcgal-qt5-dev
+# cgal dev packaging is broken, so this package is needed to build it with cmake...
+#pkg_ubuntu_16.04:
+#  <<: *pkg_definition
+#  image: ubuntu:16.04
+#  before_script:
+#   - apt-get -y --no-install-recommends install libcgal-qt5-dev
 
 pkg_ubuntu_16.10:
   <<: *pkg_definition
