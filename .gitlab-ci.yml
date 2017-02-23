@@ -76,21 +76,19 @@ artifact-packaging:
 variables:
   GIT_STRATEGY: clone
 
+#
 # build .deb packages
-pkg_debian_jessie:
-  image: debian:jessie
+#
+
+# https://docs.gitlab.com/ee/ci/yaml/README.html#special-yaml-features
+.pkg_template: &pkg_definition
   tags:
    - docker
   stage: package
   dependencies:
    - artifact-packaging
   script:
-#    - mkdir -p /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0
-#    - rsync -ar . /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0
-#    - mkdir ~/.ssh && ssh-keyscan -t rsa gitlab.cebe.cc >> ~/.ssh/known_hosts
-#    - git clone git@gitlab.cebe.cc:master/packaging.git packaging
     - rsync -ar packaging/debian/ debian/
-#    - cd /tmp/${CI_BUILD_ID}-deb/src/ && tar --exclude-vcs -czf uipf-2.0.tar.gz uipf-2.0
     - dpkg-buildpackage -us -uc -b
     - cp ../*.deb .
   environment:
@@ -103,3 +101,20 @@ pkg_debian_jessie:
   artifacts:
     paths:
      - '*.deb'
+
+pkg_debian_jessie:
+  <<: *pkg_definition
+  image: debian:jessie
+
+pkg_ubuntu_14.04:
+  <<: *pkg_definition
+  image: ubuntu:14.04
+
+pkg_ubuntu_16.04:
+  <<: *pkg_definition
+  image: ubuntu:16.04
+
+pkg_ubuntu_16.10:
+  <<: *pkg_definition
+  image: ubuntu:16.10
+
