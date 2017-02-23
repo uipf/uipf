@@ -8,6 +8,7 @@ stages:
   # TODO add tests
   #- test
   - deploy
+  - package
 
 # https://docs.gitlab.com/ee/ci/yaml/README.html#special-yaml-features
 .job_template: &job_definition
@@ -59,6 +60,17 @@ deploy:
   dependencies:
     - build-uipf-with-cv
 
+artifact-packaging:
+  stage: deploy
+  tags:
+   - nodocker
+  script:
+    - git clone git@gitlab.cebe.cc:master/packaging.git packaging
+  artifacts:
+    paths:
+     - packaging/
+
+
 variables:
   GIT_STRATEGY: clone
 
@@ -67,12 +79,14 @@ pkg_debian_jessie:
   image: debian:jessie
   tags:
    - docker
-  stage: deploy
+  stage: package
+  dependencies:
+   - artifact-packaging
   script:
 #    - mkdir -p /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0
 #    - rsync -ar . /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0
-    - mkdir ~/.ssh && ssh-keyscan -t rsa gitlab.cebe.cc >> ~/.ssh/known_hosts
-    - git clone git@gitlab.cebe.cc:master/packaging.git packaging
+#    - mkdir ~/.ssh && ssh-keyscan -t rsa gitlab.cebe.cc >> ~/.ssh/known_hosts
+#    - git clone git@gitlab.cebe.cc:master/packaging.git packaging
     - rsync -ar packaging/debian/ debian/
 #    - cd /tmp/${CI_BUILD_ID}-deb/src/ && tar --exclude-vcs -czf uipf-2.0.tar.gz uipf-2.0
     - dpkg-buildpackage -us -uc -b
