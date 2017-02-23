@@ -1,6 +1,6 @@
 before_script:
   - which sudo || (echo 'Acquire::http::Proxy "http://172.17.0.1:3128/";' >> /etc/apt/apt.conf && export HTTP_PROXY=172.17.0.1:3128 && apt-get update && apt-get -y install sudo)
-  - sudo apt-get -y install git rsync curl wget
+  - sudo apt-get -y install git rsync curl wget debootstrap db-make dpkg-dev
   - sudo apt-get -y install build-essential cmake pkg-config libboost-serialization-dev libboost-program-options-dev libboost-filesystem-dev libboost-graph-dev libopencv-dev qtbase5-dev qtbase5-dev-tools libglibmm-2.4-dev libcgal-dev geomview
 
 stages:
