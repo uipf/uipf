@@ -106,9 +106,10 @@ pkg_debian_jessie:
   <<: *pkg_definition
   image: debian:jessie
 
-pkg_ubuntu_14.04:
-  <<: *pkg_definition
-  image: ubuntu:14.04
+# needs cmake 2.8
+#pkg_ubuntu_14.04:
+#  <<: *pkg_definition
+#  image: ubuntu:14.04
 
 pkg_ubuntu_16.04:
   <<: *pkg_definition
