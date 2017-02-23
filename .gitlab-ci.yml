@@ -1,3 +1,7 @@
+variables:
+ - http_proxy: 172.17.0.1:3128/
+ - https_proxy: 172.17.0.1:3128/
+
 before_script:
   - which sudo || (apt-get update && apt-get -y install sudo)
   - sudo apt-get -y install git rsync curl wget
@@ -49,6 +53,8 @@ build-uipf-gui-without-cv:
 
 deploy:
   stage: deploy
+  tags:
+   - nodocker
   script:
     # temporary solution for sharing uipf artifacts
     - rm -rf /tmp/uipf-prefix
