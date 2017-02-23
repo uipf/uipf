@@ -63,6 +63,8 @@ variables:
 # build .deb packages
 pkg_debian_jessie:
   image: debian:jessie
+  tags:
+   - docker
   stage: deploy
   script:
 #    - mkdir -p /tmp/${CI_BUILD_ID}-deb/src/uipf-2.0
