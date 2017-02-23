@@ -1,6 +1,6 @@
 before_script:
-  - which sudo || (apt-get update && apt-get install sudo)
-  - sudo apt-get install git rsync curl wget
+  - which sudo || (apt-get update && apt-get -y install sudo)
+  - sudo apt-get -y install git rsync curl wget
   - sudo apt-get -y install build-essential cmake pkg-config libboost-serialization-dev libboost-program-options-dev libboost-filesystem-dev libboost-graph-dev libopencv-dev qtbase5-dev qtbase5-dev-tools libglibmm-2.4-dev libcgal-dev geomview
 
 stages:
