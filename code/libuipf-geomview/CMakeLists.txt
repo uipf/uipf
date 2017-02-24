@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 2.8.8)
 project(libuipf-geomview)
 
 #
@@ -37,7 +37,7 @@ set_target_properties(libuipf-geomview PROPERTIES
 	# name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html
 	OUTPUT_NAME uipf-geomview
 	SOVERSION ${UIPFramework_VERSION_MAJOR}.${UIPFramework_VERSION_MINOR}
-	VERSION ${UIPFramework_VERSION}
+	VERSION   ${UIPFramework_VERSION_MAJOR}.${UIPFramework_VERSION_MINOR}.${UIPFramework_VERSION_PATCH}
 )
 
 target_link_libraries(libuipf-geomview ${CGAL_LIBRARY} ${CGAL_Core_LIBRARY})

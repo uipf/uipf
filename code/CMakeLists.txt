@@ -1,15 +1,17 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 2.8.8)
 project(UIPFramework)
 
 set(CMAKE_MODULE_PATH ${UIPFramework_SOURCE_DIR}/cmake)
+include(cmake/BoostHelper.cmake)
 
 #
 # FLAGS
 #
 
 option(WITH_TESTS "Build test binaries and enable `make test` target" ON)
-option(WITH_OPENCV "Build with openCV, enable openCV types" OFF)
+option(WITH_OPENCV "Build with openCV, enable openCV types" ON)
 option(WITH_GUI "Build with graphical user interface (requires Qt)" ON)
+option(WITH_MODULES "Build with basic modules" ON)
 
 message("Build options:")
 message("With Tests: ${WITH_TESTS}")
@@ -56,7 +58,6 @@ add_subdirectory(libuipf)
 # TODO extract libuipf-module from libuipf
 add_subdirectory(libuipf-geomview)
 
-add_subdirectory(modules)
 
 include_directories("${UIPFramework_BINARY_DIR}")
 configure_file(paths.cpp.in ${UIPFramework_BINARY_DIR}/paths.cpp)
@@ -67,62 +68,6 @@ add_subdirectory(console)
 if (WITH_GUI)
 	add_subdirectory(gui)
 endif()
-
-
-##
-## installation targets
-##
-
-#install(TARGETS libuipf uipf-module
-#        LIBRARY DESTINATION lib
-#		ARCHIVE DESTINATION lib
-#)
-#install(TARGETS uipf uipf-gui
-#		RUNTIME DESTINATION bin
-#)
-#install(TARGETS
-#			AddListItemModule
-#			ConvolutionModule
-#			DummyModule
-#			GaussianModule
-#			LoadImageModule
-#			LongRunningDummyModule
-#			MergeChannelsModule
-#			SelectListItemModule
-#			ShowImageListModule
-#			ShowImageModule
-#			SplitChannelsModule
-#			StoreImageModule
-#
-#        LIBRARY DESTINATION lib/uipf
-#)
-
-#install header files
-#file(GLOB headerFilesUipf "${libuipf_SOURCE_DIR}/src/include/*.hpp")
-#file(GLOB headerFilesData "${libuipf_SOURCE_DIR}/src/include/data/*.hpp")
-#install(FILES
-#	${headerFilesUipf}
-#	DESTINATION include/uipf
-#)
-#install(FILES
-#	${headerFilesData}
-#	DESTINATION include/uipf/data
-#)
-
-if(UNIX)
-	# install desktop files
-
-	include(GNUInstallDirs)
-
-	install(FILES
-		${UIPFramework_SOURCE_DIR}/uipf-gui.desktop
-		${UIPFramework_SOURCE_DIR}/uipf.desktop
-		DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications"
-	)
-
-# TODO write a manpage
-#	install(FILES
-#		uipf.1
-#		DESTINATION "${CMAKE_INSTALL_MANDIR}/man1"
-#	)
+if (WITH_MODULES)
+	add_subdirectory(modules)
 endif()
