@@ -1,0 +1,5 @@
+usr/lib/uipf/libCopyImageModule.so
+usr/lib/uipf/libLoadImageModule.so
+usr/lib/uipf/libLoadImagesModule.so
+usr/lib/uipf/libStoreImageModule.so
+usr/lib/uipf/libResizeModule.so

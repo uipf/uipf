@@ -65,3 +65,10 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, libuipf-geomview
 Description: Unified Image Processing Framework (Geomview visualization, development headers)
  TBD
 
+Package: uipf-modules-base
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Unified Image Processing Framework (Basic Image Modules)
+ TBD
+
+

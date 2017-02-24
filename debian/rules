@@ -34,6 +34,9 @@ override_dh_auto_install:
 # debmake generated override targets
 # This is example for Cmake (See http://bugs.debian.org/641051 )
 override_dh_auto_configure:
+	sed -i 's/ml.addSearchPath("@uipf-modules/\/\/ /' code/paths.cpp.in
+	sed -i 's/@CMAKE_INSTALL_PREFIX@/\/usr/' code/paths.cpp.in
+	cat code/paths.cpp.in
 	dh_auto_configure -D code/ -- \
 	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH) \
 	-DWITH_TESTS=OFF \

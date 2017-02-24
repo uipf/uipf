@@ -9,7 +9,17 @@ chains and modules.
 Installation
 ------------
 
-We currently do not have precompiled binaries so you have to build it on your own.
+Precompiled binaries are available for debian and ubuntu:
+
+- https://gitlab.cebe.cc/master/uipf/pipelines
+
+1. Download the zip file with the packages for your system.
+2. unzip them into an empty directory.
+3. run `sudo dpkg -i *.deb` to start the installation and then `sudo apt-get install -f`
+   to install dependencies and finish the installation.
+
+
+On other systems you need to compile UIPF yourself.
 See the ["How to build"-section](#how-to-build) on how to do this.
 
 Usage
@@ -81,6 +91,17 @@ When running the uipf binary after compiling you may see the following error:
     uipf: error while loading shared libraries: libuipf-module.so.2.0: cannot open shared object file: No such file or directory
 
 Solution: run `sudo ldconfig` to make the linker aware of the newly installed library.
+
+##### libdc1394 error: Failed to initialize libdc1394
+
+When you run UIPF you might see the following error:
+
+    libdc1394 error: Failed to initialize libdc1394
+
+This is caused by opencv and in most cases can be savely ignored.
+See [this question on stackoverflow] for more details.
+
+[this question on stackoverflow]: http://stackoverflow.com/questions/29274638/opencv-libdc1394-error-failed-to-initialize-libdc1394#34820475
 
 ### Building with CMake on Windows
 
