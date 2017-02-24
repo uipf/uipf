@@ -1,0 +1,67 @@
+Source: uipf
+Section: science
+Priority: optional
+Maintainer: Carsten Brandt <mail@cebe.cc>
+Build-Depends: debhelper (>= 9), cmake, libboost-serialization-dev, libboost-program-options-dev, libboost-filesystem-dev, libboost-graph-dev, libopencv-dev, qtbase5-dev, qtbase5-dev-tools, libglibmm-2.4-dev, libcgal-dev, geomview
+Standards-Version: 3.9.5
+Homepage: https://gitlab.cebe.cc/master/uipf
+Vcs-Git: https://gitlab.cebe.cc:master/uipf.git
+Vcs-Browser: https://gitlab.cebe.cc/master/uipf/tree/improved-data-model
+
+#
+# Package definitions
+#
+# some information on libary building
+# https://www.debian.org/doc/manuals/maint-guide/dother.en.html#symbols
+# https://www.debian.org/doc/debian-policy/ch-sharedlibs.html#s-sharedlibs-symbols
+
+
+# main library
+Package: libuipf
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Unified Image Processing Framework (library)
+ This is the library package used by the different frontends.
+ .
+ TBD
+
+# dev headers for libuipf
+Package: libuipf-dev
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libuipf
+Description: Unified Image Processing Framework (library)
+ This is the library package used by the different frontends.
+ .
+ TBD
+
+# cli program
+Package: uipf
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Unified Image Processing Framework
+ TBD
+
+# gui program
+Package: uipf-gui
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Unified Image Processing Framework (GUI)
+ TBD
+
+#
+# extra/optional
+#
+
+# visualization library for geomview
+Package: libuipf-geomview1
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Unified Image Processing Framework (Geomview visualization)
+ TBD
+
+Package: libuipf-geomview-dev
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libuipf-geomview
+Description: Unified Image Processing Framework (Geomview visualization, development headers)
+ TBD
+

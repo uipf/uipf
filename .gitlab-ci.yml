@@ -1,7 +1,5 @@
-before_script:
-  - (which sudo && ! lsb_release -i |grep -i ubuntu) || (echo 'Acquire::http::Proxy "http://172.17.0.1:3128/";' >> /etc/apt/apt.conf && export HTTP_PROXY=172.17.0.1:3128 && apt-get update && apt-get -y install sudo)
-  - sudo apt-get -y --no-install-recommends install git rsync curl wget debootstrap dh-make dpkg-dev
-  - sudo apt-get -y --no-install-recommends install build-essential cmake pkg-config libboost-serialization-dev libboost-program-options-dev libboost-filesystem-dev libboost-graph-dev libopencv-dev qtbase5-dev qtbase5-dev-tools libglibmm-2.4-dev libcgal-dev geomview
+variables:
+  GIT_STRATEGY: clone
 
 stages:
   - build
@@ -9,6 +7,13 @@ stages:
   #- test
   - deploy
   - package
+
+
+before_script:
+  - (which sudo && ! lsb_release -i |grep -i ubuntu) || (echo 'Acquire::http::Proxy "http://172.17.0.1:3128/";' >> /etc/apt/apt.conf && export HTTP_PROXY=172.17.0.1:3128 && apt-get update && apt-get -y install sudo)
+  - sudo apt-get -y --no-install-recommends install git rsync curl wget debootstrap dh-make dpkg-dev
+  - sudo apt-get -y --no-install-recommends install build-essential cmake pkg-config libboost-serialization-dev libboost-program-options-dev libboost-filesystem-dev libboost-graph-dev libopencv-dev qtbase5-dev qtbase5-dev-tools libglibmm-2.4-dev libcgal-dev geomview
+
 
 # https://docs.gitlab.com/ee/ci/yaml/README.html#special-yaml-features
 .job_template: &job_definition
@@ -62,19 +67,6 @@ deploy:
   dependencies:
     - build-uipf-with-cv
 
-artifact-packaging:
-  stage: deploy
-  tags:
-   - nodocker
-  script:
-    - git clone git@gitlab.cebe.cc:master/packaging.git packaging
-  artifacts:
-    paths:
-     - packaging/
-
-
-variables:
-  GIT_STRATEGY: clone
 
 #
 # build .deb packages
@@ -88,7 +80,6 @@ variables:
   dependencies:
    - artifact-packaging
   script:
-    - rsync -ar packaging/debian/ debian/
     - dpkg-buildpackage -us -uc -b
     - cp ../*.deb .
   environment:
@@ -108,16 +99,18 @@ pkg_debian_jessie:
   image: debian:jessie
 
 # needs cmake 2.8
-#pkg_ubuntu_14.04:
-#  <<: *pkg_definition
-#  image: ubuntu:14.04
+pkg_ubuntu_14.04:
+  <<: *pkg_definition
+  image: ubuntu:14.04
 
-# cgal dev packaging is broken, so this package is needed to build it with cmake...
-#pkg_ubuntu_16.04:
-#  <<: *pkg_definition
-#  image: ubuntu:16.04
-#  before_script:
-#   - apt-get -y --no-install-recommends install libcgal-qt5-dev
+pkg_ubuntu_16.04:
+  <<: *pkg_definition
+  image: ubuntu:16.04
+  script:
+    # cgal dev packaging is broken, so this package is needed to build it with cmake...
+    - apt-get -y --no-install-recommends install libcgal-qt5-dev
+    - dpkg-buildpackage -us -uc -b
+    - cp ../*.deb .
 
 pkg_ubuntu_16.10:
   <<: *pkg_definition

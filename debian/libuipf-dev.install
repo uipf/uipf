@@ -1,0 +1,16 @@
+usr/include/uipf/data.hpp
+usr/include/uipf/data/list.hpp
+usr/include/uipf/data/map.hpp
+usr/include/uipf/data/opencv.hpp
+usr/include/uipf/data/std.hpp
+usr/include/uipf/exceptions.hpp
+usr/include/uipf/logging.hpp
+usr/include/uipf/Module.hpp
+usr/include/uipf/ModuleInterface.hpp
+usr/include/uipf/ModuleLoader.hpp
+usr/include/uipf/ModuleMetaData.hpp
+usr/include/uipf/ProcessingChain.hpp
+usr/include/uipf/RunContext.hpp
+usr/include/uipf/Runner.hpp
+usr/include/uipf/util.hpp
+usr/include/uipf/VisualizationContext.hpp
