@@ -77,8 +77,6 @@ deploy:
   tags:
    - docker
   stage: package
-  dependencies:
-   - artifact-packaging
   script:
     - dpkg-buildpackage -us -uc -b
     - cp ../*.deb .
