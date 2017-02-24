@@ -34,6 +34,8 @@ add_library(libuipf-geomview SHARED
 	geomview.cpp
 )
 set_target_properties(libuipf-geomview PROPERTIES
+	# CGAL complains if not compiled with this flag
+	COMPILE_FLAGS -frounding-math
 	# name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html
 	OUTPUT_NAME uipf-geomview
 	SOVERSION ${UIPFramework_VERSION_MAJOR}.${UIPFramework_VERSION_MINOR}
