@@ -39,6 +39,7 @@ override_dh_auto_configure:
 	cat code/paths.cpp.in
 	dh_auto_configure -D code/ -- \
 	-DCMAKE_LIBRARY_PATH=$(DEB_HOST_MULTIARCH) \
+	-DCMAKE_BUILD_TYPE=Release \
 	-DWITH_TESTS=OFF \
 	-DLIBUIPF_WITH_TESTS=OFF \
 	-DLIBUIPF_GEOMVIEW_WITH_TESTS=OFF \

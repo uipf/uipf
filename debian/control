@@ -65,6 +65,7 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, libuipf-geomview
 Description: Unified Image Processing Framework (Geomview visualization, development headers)
  TBD
 
+# TODO rename this to  uipf-modules-opencv ?
 Package: uipf-modules-base
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
