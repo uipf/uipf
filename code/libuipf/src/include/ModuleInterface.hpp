@@ -111,8 +111,11 @@ const typename T::ptr ModuleInterface::getInputData( const std::string& strName)
 	if (it != input_.end())
 	{
 		//do downcasting..
-		Data::ptr ptr = it->second;
-		return std::dynamic_pointer_cast<T>(ptr);
+		typename T::ptr ptr = std::dynamic_pointer_cast<T>(it->second);
+		if (ptr.get() == nullptr) {
+			throw ErrorException(std::string("Trying to get input data from null pointer for input '") + strName + std::string("'. Make sure you pass the correct data type."));
+		}
+		return ptr;
 	}
 	else
 	{
