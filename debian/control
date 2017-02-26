@@ -28,7 +28,7 @@ Description: Unified Image Processing Framework (library)
 # dev headers for libuipf
 Package: libuipf-dev
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libuipf
+Depends: ${shlibs:Depends}, ${misc:Depends}, libuipf (= ${binary:Version})
 Description: Unified Image Processing Framework (library)
  This is the library package used by the different frontends.
  .
@@ -37,14 +37,14 @@ Description: Unified Image Processing Framework (library)
 # cli program
 Package: uipf
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, libuipf (= ${binary:Version})
 Description: Unified Image Processing Framework
  TBD
 
 # gui program
 Package: uipf-gui
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, libuipf (= ${binary:Version})
 Description: Unified Image Processing Framework (GUI)
  TBD
 
@@ -61,7 +61,7 @@ Description: Unified Image Processing Framework (Geomview visualization)
 
 Package: libuipf-geomview-dev
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libuipf-geomview
+Depends: ${shlibs:Depends}, ${misc:Depends}, libuipf-geomview (= ${binary:Version})
 Description: Unified Image Processing Framework (Geomview visualization, development headers)
  TBD
 
