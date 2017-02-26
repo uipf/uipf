@@ -13,13 +13,17 @@
 #include "logging.hpp"
 
 
+uipf::ModuleLoader::~ModuleLoader(void) {
+
+	reset();
+}
+
 void uipf::ModuleLoader::reset() {
 	UIPF_LOG_TRACE("Reset module loader.");
 	searchPaths_.clear();
 	// delete all the pluginloaders
-	for (auto it = plugins_.begin(); it!=plugins_.end(); ++it) {
-		Glib::Module* p = (Glib::Module*) it->second.module;
-		delete p;
+	for(auto p: plugins_) {
+		delete (Glib::Module*)p.second.module;
 	}
 	plugins_.clear();
 	loaded_ = false;
@@ -303,6 +307,7 @@ void uipf::ModuleLoader::loadLibrary(const std::string& file) {
 			plugins_.insert(std::pair<std::string, Plugin>(moduleId, p));
 		} else {
 			UIPF_LOG_TRACE("module '", instance->getId(), "' is already loaded, skipping.");
+			delete libModule;
 		}
 
 		delete instance;

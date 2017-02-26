@@ -110,8 +110,8 @@ int main(int argc, char** argv){
 	}
 
 	// set log level
-	log::Logger::LogCallback* logger = new ConsoleLogger();
-	UIPF_REGISTER_LOGGER(logger);
+	ConsoleLogger logger;
+	UIPF_REGISTER_LOGGER((log::Logger::LogCallback*) &logger);
 	if (vm.count("trace")) {
 		UIPF_LOG_LEVEL = log::Logger::LogLevel::TRACE;
 	} else if (vm.count("verbose")) {

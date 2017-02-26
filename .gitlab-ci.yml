@@ -1,15 +1,25 @@
-before_script:
-  - sudo apt-get -y install build-essential cmake pkg-config libboost-serialization-dev libboost-program-options-dev libboost-filesystem-dev libboost-graph-dev libopencv-dev qtbase5-dev qtbase5-dev-tools libglibmm-2.4-dev libcgal-dev geomview
+variables:
+  GIT_STRATEGY: clone
 
 stages:
   - build
   # TODO add tests
   #- test
   - deploy
+  - package
+
+
+before_script:
+  - (which sudo && ! lsb_release -i |grep -i ubuntu) || (echo 'Acquire::http::Proxy "http://172.17.0.1:3128/";' >> /etc/apt/apt.conf && export HTTP_PROXY=172.17.0.1:3128 && apt-get update && apt-get -y install sudo)
+  - sudo apt-get -y --no-install-recommends install git rsync curl wget debootstrap dh-make dpkg-dev ca-certificates
+  - sudo apt-get -y --no-install-recommends install build-essential cmake pkg-config libboost-serialization-dev libboost-program-options-dev libboost-filesystem-dev libboost-graph-dev libopencv-dev qtbase5-dev qtbase5-dev-tools libglibmm-2.4-dev libcgal-dev geomview
+
 
 # https://docs.gitlab.com/ee/ci/yaml/README.html#special-yaml-features
 .job_template: &job_definition
   stage: build
+  tags:
+   - nodocker
   script:
     - if [ -d build/ ]; then rm -rf build/ ; fi
     - mkdir build/ && cd build/
@@ -47,6 +57,8 @@ build-uipf-gui-without-cv:
 
 deploy:
   stage: deploy
+  tags:
+   - nodocker
   script:
     # temporary solution for sharing uipf artifacts
     - rm -rf /tmp/uipf-prefix
@@ -55,5 +67,50 @@ deploy:
   dependencies:
     - build-uipf-with-cv
 
-variables:
-  GIT_STRATEGY: clone
+
+#
+# build .deb packages
+#
+
+# https://docs.gitlab.com/ee/ci/yaml/README.html#special-yaml-features
+.pkg_template: &pkg_definition
+  tags:
+   - docker
+  stage: package
+  script:
+    - dpkg-buildpackage -us -uc -b
+    - cp ../*.deb .
+  environment:
+    name: preview_packages
+  when: manual
+  only:
+    - master
+    - improved-data-model
+    - packaging
+  artifacts:
+    name: "$CI_BUILD_NAME"
+    paths:
+     - '*.deb'
+
+pkg_debian_jessie:
+  <<: *pkg_definition
+  image: debian:jessie
+
+# needs cmake 2.8
+pkg_ubuntu_14.04:
+  <<: *pkg_definition
+  image: ubuntu:14.04
+
+pkg_ubuntu_16.04:
+  <<: *pkg_definition
+  image: ubuntu:16.04
+  script:
+    # cgal dev packaging is broken, so this package is needed to build it with cmake...
+    - apt-get -y --no-install-recommends install libcgal-qt5-dev
+    - dpkg-buildpackage -us -uc -b
+    - cp ../*.deb .
+
+pkg_ubuntu_16.10:
+  <<: *pkg_definition
+  image: ubuntu:16.10
+

@@ -16,34 +16,30 @@ message("libuipf Build options:")
 message("With Tests: ${LIBUIPF_WITH_TESTS}")
 message("With OpenCV: ${LIBUIPF_WITH_OPENCV}")
 
-# load CMake modules
-include(ExternalProject)
-include(FindPkgConfig)
-
 
 # include header files
 include_directories("${libuipf_SOURCE_DIR}/src/include")
-include_directories("${libuipf_SOURCE_DIR}/src")
 
 
 #
 # find external libraries
 #
 
-# glibmm (c++ wrapper for glib2
-#pkg_search_module (GLIB2  REQUIRED glib-2.0)
+# load CMake modules
+include(ExternalProject)
+include(FindPkgConfig)
+
+# glibmm (c++ wrapper for glib2)
 pkg_search_module (GLIBMM REQUIRED glibmm-2.4)
 include_directories(${GLIBMM_INCLUDE_DIRS})
 link_directories(${GLIBMM_LIBRARY_DIRS})
 
 # find Boost
-# http://cpprocks.com/using-cmake-to-build-a-cross-platform-project-with-a-boost-dependency/
-find_package(Boost 1.55 COMPONENTS filesystem unit_test_framework system REQUIRED)
-message(status "** Boost Include: ${Boost_INCLUDE_DIR}")
-message(status "** Boost Libraries: ${Boost_LIBRARY_DIRS}")
-message(status "** Boost Libraries: ${Boost_LIBRARIES}")
-include_directories(${Boost_INCLUDE_DIR})
-link_directories(${Boost_LIBRARY_DIRS})
+if(LIBUIPF_WITH_TESTS)
+	FindBoost(filesystem unit_test_framework system)
+else()
+	FindBoost(filesystem system)
+endif()
 
 # yaml-cpp
 # http://www.cmake.org/cmake/help/v2.8.8/cmake.html#module%3aExternalProject
@@ -57,6 +53,7 @@ ExternalProject_Add(YAML_CPP
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP/include)
 set(YAML_CPP_LIBRARY_FILE "${CMAKE_CURRENT_BINARY_DIR}/YAML_CPP-prefix/src/YAML_CPP-build/libyaml-cpp.a")
 set(YAML_CPP_LIBRARY "-Wl,--whole-archive ${YAML_CPP_LIBRARY_FILE} -Wl,--no-whole-archive")
+
 
 #
 # libraries
@@ -74,7 +71,7 @@ set_target_properties(libuipf-module PROPERTIES
 	# name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html
 	OUTPUT_NAME uipf-module
 	SOVERSION ${UIPFramework_VERSION_MAJOR}.${UIPFramework_VERSION_MINOR}
-	VERSION ${UIPFramework_VERSION}
+	VERSION   ${UIPFramework_VERSION_MAJOR}.${UIPFramework_VERSION_MINOR}.${UIPFramework_VERSION_PATCH}
 )
 if (LIBUIPF_WITH_OPENCV)
 	target_compile_definitions(libuipf-module PRIVATE WITH_OPENCV)
@@ -96,7 +93,7 @@ set_target_properties(libuipf PROPERTIES
 	# name of lib vs. executeable: https://cmake.org/pipermail/cmake/2007-November/017697.html
 	OUTPUT_NAME uipf
 	SOVERSION ${UIPFramework_VERSION_MAJOR}.${UIPFramework_VERSION_MINOR}
-	VERSION ${UIPFramework_VERSION}
+	VERSION   ${UIPFramework_VERSION_MAJOR}.${UIPFramework_VERSION_MINOR}.${UIPFramework_VERSION_PATCH}
 )
 target_link_libraries(libuipf libuipf-module ${YAML_CPP_LIBRARY} ${GLIBMM_LIBRARIES} ${Boost_LIBRARIES})
 add_dependencies(libuipf YAML_CPP)
@@ -145,13 +142,13 @@ endif()
 
 # installation targets
 install(TARGETS libuipf libuipf-module
-        LIBRARY DESTINATION lib
-		ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib
 )
-install(FILES ${YAML_CPP_LIBRARY_FILE}
-	DESTINATION lib
-	RENAME libuipf-yaml-cpp.a
-)
+#install(FILES ${YAML_CPP_LIBRARY_FILE}
+#	DESTINATION lib
+#	RENAME libuipf-yaml-cpp.a
+#)
 if(LIBUIPF_WITH_OPENCV)
 	install(DIRECTORY ${libuipf_SOURCE_DIR}/src/include/
 			DESTINATION include/uipf
