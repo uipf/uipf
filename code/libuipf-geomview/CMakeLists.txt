@@ -42,7 +42,9 @@ set_target_properties(libuipf-geomview PROPERTIES
 	VERSION   ${UIPFramework_VERSION_MAJOR}.${UIPFramework_VERSION_MINOR}.${UIPFramework_VERSION_PATCH}
 )
 
-target_link_libraries(libuipf-geomview ${CGAL_LIBRARY} ${CGAL_Core_LIBRARY})
+# include GMP to avoid problem with missing symbols on Ubuntu
+# http://doc.cgal.org/4.8/Manual/installation.html#title11
+target_link_libraries(libuipf-geomview ${CGAL_LIBRARY} ${CGAL_Core_LIBRARY} gmp)
 
 
 #
@@ -51,7 +53,7 @@ target_link_libraries(libuipf-geomview ${CGAL_LIBRARY} ${CGAL_Core_LIBRARY})
 
 if(LIBUIPF_GEOMVIEW_WITH_TESTS)
 	add_executable(geomview-demo tests/demo.cpp)
-	target_link_libraries(geomview-demo    libuipf libuipf-module ${CGAL_LIBRARY} ${CGAL_Core_LIBRARY})
+	target_link_libraries(geomview-demo    libuipf libuipf-module ${CGAL_LIBRARY} ${CGAL_Core_LIBRARY} gmp)
 
 #	add_test(NAME test-libuipf-processing_chain COMMAND test-libuipf-processing_chain)
 endif()
