@@ -32,7 +32,7 @@ namespace uipf {
 		ModuleLoader() { loaded_ = false; };
 
 		// destructor
-		~ModuleLoader(void) { reset(); };
+		~ModuleLoader(void);
 
 		/**
 		 * @return returns true if any errors had occured while loading modules.
