@@ -103,6 +103,15 @@ See [this question on stackoverflow] for more details.
 
 [this question on stackoverflow]: http://stackoverflow.com/questions/29274638/opencv-libdc1394-error-failed-to-initialize-libdc1394#34820475
 
+##### Some modules could not be loaded
+
+If you are seening errors when modules could not be loaded there is most likely a problem with linking, i.e. missing symbols because some libraries are missing. To get more information on which symbols cause problems you can enable the linker debugging via `LD_DEBUG`.
+
+    LD_DEBUG=bindings uipf -l 2>&1  | grep -v "binding file" 
+
+This will run `uipf -l` to list all modules available to uipf, and print debug information about library loading via the environment variable `LD_DEBUG=bindings`. It will also redirect `stderr` to `stdout` (`2>&1`) and filter out irrelevant information to make it easier to see the error: `grep -v "binding file"`.
+
+
 ### Building with CMake on Windows
 
 TBD.
