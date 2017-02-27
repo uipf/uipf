@@ -619,4 +619,13 @@ void ProcessingChain::setProcessingStepParams(string name, map<string, string> p
 // sets the inputs for a named processing step
 void ProcessingChain::setProcessingStepInputs(string name, map<string, StepInput > inputs){
 	chain_[name].inputs = inputs;
+
+	// update isMapping status
+	chain_[name].isMapping = false;
+	for(auto input: inputs) {
+		if (input.second.map) {
+			chain_[name].isMapping = true;
+			return;
+		}
+	}
 }

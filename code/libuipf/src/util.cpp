@@ -185,7 +185,7 @@ std::string uipf_exec_stdout(const char *cmd) {
 	}
 	int ret = pclose(pipe);
 	if (ret != 0) {
-		throw new uipf::ErrorException(std::string("Command failed with exit code ") + std::to_string(ret) + std::string(" ") + cmd);
+		throw uipf::ErrorException(std::string("Command failed with exit code ") + std::to_string(ret) + std::string(" ") + cmd);
 	}
 	return result;
 }

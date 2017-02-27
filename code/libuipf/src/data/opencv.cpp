@@ -109,7 +109,7 @@ std::map<std::string, std::string> uipf::data::load_image_exif_data(const std::s
 
 	string output;
 	try {
-		output = uipf_exec_stdout((string("jhead ") + filename).c_str());
+		output = uipf_exec_stdout((string("jhead \"") + filename + string("\"")).c_str());
 	} catch(uipf::ErrorException& e) {
 		UIPF_LOG_WARNING("Failed to load EXIF information for image ", filename, ": ", e.what());
 		return exif;

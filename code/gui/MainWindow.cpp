@@ -351,8 +351,7 @@ void MainWindow::refreshInputs()
 		modelTableInputs->setVerticalHeaderItem(row, item);
 		inputNames[row] = it->first;
 		modelTableInputs->setItem(row, 0, new QStandardItem((it->second.sourceStep).c_str()));
-		modelTableInputs->setItem(row, 1, new QStandardItem((it->second.outputName).c_str()));
-		// TODO support mapping
+		modelTableInputs->setItem(row, 1, new QStandardItem((it->second.outputName + (it->second.map ? ".map()" : "")).c_str()));
 		row++;
 	}
 
@@ -728,10 +727,20 @@ void MainWindow::on_inputChanged(std::string inputName, std::pair<std::string, s
 	if (!currentStepName.empty() && conf_.hasProcessingStep(currentStepName)) {
 		beforeConfigChange();
 		map<string, StepInput> inputs = conf_.getProcessingStep(currentStepName).inputs;
-		// TODO support map()
 		StepInput svalue;
 		svalue.sourceStep = value.first;
 		svalue.outputName = value.second;
+
+		// extract map() feature
+		if (svalue.outputName.length() >= 6) {
+			svalue.map = svalue.outputName.compare(svalue.outputName.length() - 6, 6, ".map()") == 0;
+		} else {
+			svalue.map = false;
+		}
+		if (svalue.map) {
+			svalue.outputName = svalue.outputName.substr(0, svalue.outputName.length()-6);
+		}
+
 		inputs[inputName] = svalue;
 		conf_.setProcessingStepInputs(currentStepName, inputs);
 
