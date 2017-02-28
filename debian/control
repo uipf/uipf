@@ -19,7 +19,7 @@ Vcs-Browser: https://gitlab.cebe.cc/master/uipf/tree/improved-data-model
 # main library
 Package: libuipf
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, jhead
 Description: Unified Image Processing Framework (library)
  This is the library package used by the different frontends.
  .
@@ -55,7 +55,7 @@ Description: Unified Image Processing Framework (GUI)
 # visualization library for geomview
 Package: libuipf-geomview
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, geomview
 Description: Unified Image Processing Framework (Geomview visualization)
  TBD
 
