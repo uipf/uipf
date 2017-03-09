@@ -103,6 +103,8 @@ See [this question on stackoverflow] for more details.
 
 [this question on stackoverflow]: http://stackoverflow.com/questions/29274638/opencv-libdc1394-error-failed-to-initialize-libdc1394#34820475
 
+It seems to be fixed in `libdc1394-22` version `2.2.5` which is included in Debian stretch.
+
 ##### Some modules could not be loaded
 
 If you are seening errors when modules could not be loaded there is most likely a problem with linking, i.e. missing symbols because some libraries are missing. To get more information on which symbols cause problems you can enable the linker debugging via `LD_DEBUG`.
