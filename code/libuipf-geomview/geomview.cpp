@@ -49,7 +49,7 @@ CGAL::Geomview_stream& GeomView::gv() {
 	return *gv_;
 }
 
-void GeomView::print_polyhedron(Polyhedron &mesh, bool wired, const std::string& name) {
+void GeomView::print_polyhedron(Polyhedron &mesh, bool wired, const std::string& name, const std::string& texture) {
 
 	if (!started_) {
 		start();
@@ -93,7 +93,12 @@ void GeomView::print_polyhedron(Polyhedron &mesh, bool wired, const std::string&
 	if (wired) {
 		gv << " {appearance { +edge -face }{ OFF BINARY\n";
 	} else {
-		gv << " {appearance { +face }{ OFF BINARY\n";
+		if (texture.empty()) {
+			gv << " {appearance { +face }{ OFF BINARY\n";
+		} else {
+			// TODO this does not work, bug in geomview? https://sourceforge.net/p/geomview/mailman/geomview-users/?viewmonth=200707
+			gv << " {appearance { +face +texturing  texture{ image { data AUTO {<\"" << texture << "\"} } apply decal } }{ OFF BINARY\n";
+		}
 	}
 	gv << points.size() << triangles.size() << 0;
 
@@ -122,6 +127,7 @@ void GeomView::print_polyhedron(Polyhedron &mesh, bool wired, const std::string&
 	gv.set_ascii_mode(ascii_bak);
 }
 
+// TODO different way of printing points without normals http://www.geomview.org/FAQ/answers.shtml#points
 void GeomView::print_pointcloud(
 		std::vector<Point_3> &points,
 		const std::string &name,
@@ -134,6 +140,7 @@ void GeomView::print_pointcloud(
 	print_colored_directed_pointcloud(directedPoints, name);
 }
 
+// TODO different way of printing points without normals http://www.geomview.org/FAQ/answers.shtml#points
 void GeomView::print_colored_pointcloud(
 		std::vector<std::tuple<Point_3, Color> > &points,
 		const std::string &name

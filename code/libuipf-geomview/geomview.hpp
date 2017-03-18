@@ -105,7 +105,8 @@ namespace uipf {
 		void print_polyhedron(
 				geomview::Polyhedron& mesh,
 				bool wired = false,
-				const std::string& name = std::string("Polyhedron")
+				const std::string& name = std::string("Polyhedron"),
+				const std::string& texture = std::string()
 		);
 
 		void print_pointcloud(
