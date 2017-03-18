@@ -17,7 +17,8 @@
 
 #define UIPF_MODULE_PARAMS \
 		{"filename", uipf::ParamDescription("file name of the file to load from.") }, \
-		{"mode", uipf::ParamDescription("can be either 'color' or 'grayscale' for whether to load the image in color or grayscale mode. Defaults to 'color'.", true) }
+		{"mode", uipf::ParamDescription("can be either 'color' or 'grayscale' for whether to load the image in color or grayscale mode. Defaults to 'color'.", true) }, \
+		{"exif", uipf::ParamDescription("whether to load EXIF data. Defaults to 'yes'.", true) }
 
 #include "Module.hpp"
 
@@ -36,6 +37,9 @@ void LoadImage::run() {
 		mat = load_image_greyscale(strFilename.c_str());
 	} else {
 		mat = load_image_color(strFilename.c_str());
+	}
+	if (getParam<bool>("exif", true)) {
+		mat->exif = load_image_exif_data(strFilename);
 	}
 	setOutputData<OpenCVMat>("image", mat);
 	UIPF_LOG_INFO("loaded image" + mat->filename);

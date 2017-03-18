@@ -164,18 +164,32 @@ void uipf::data::OpenCVMat::visualize(std::string option, VisualizationContext& 
 	if (option.compare("Image") == 0) {
 		UIPF_LOG_TRACE("showing opencv mat");
 		context.displayImage(getContent());
+		return;
 	}
 	if (option.compare("Name") == 0) {
 		UIPF_LOG_TRACE("showing filename");
 		context.displayText(filename);
+		return;
+	}
+	if (option.compare("EXIF") == 0) {
+		std::ostringstream s;
+		for(auto exifItem: exif) {
+			s << exifItem.first << " : " << exifItem.second << "\n";
+		}
+		context.displayText(s.str());
+		return;
 	}
 }
 
 std::vector<std::string> OpenCVMat::visualizations() const {
-	return {
+	std::vector<std::string> options = {
 		"Image",
 	    "Name"
 	};
+	if (!exif.empty()) {
+		options.push_back("EXIF");
+	}
+	return options;
 }
 
 

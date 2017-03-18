@@ -23,7 +23,8 @@
 		{"width", uipf::ParamDescription("new width, optional, will be determines by height using aspect ratio.", true) }, \
 		{"height", uipf::ParamDescription("new height, optional, will be determines by width using aspect ratio.", true) }, \
 		{"max_width", uipf::ParamDescription("max width, image will only be resized if it is bigger than this.", true) }, \
-		{"max_height", uipf::ParamDescription("max height, image will only be resized if it is bigger than this.", true) }
+		{"max_height", uipf::ParamDescription("max height, image will only be resized if it is bigger than this.", true) }, \
+		{"write_file", uipf::ParamDescription("whether to write to file. Defaults to false.", true) }
 
 #include "Module.hpp"
 
@@ -44,6 +45,7 @@ void ResizeImage::run() {
 	int height = getParam<int>("height", -1);
 	int max_width = getParam<int>("max_width", -1);
 	int max_height = getParam<int>("max_height", -1);
+	bool write_file = getParam<bool>("write_file", false);
 	bool do_resize = false;
 
 	// set parameters that where not given, calculate by aspect ration
@@ -94,7 +96,11 @@ void ResizeImage::run() {
 		// set the result (image) on the datamanager
 		OpenCVMat::ptr newImage(new OpenCVMat(m));
 		newImage->filename = image->filename;
+		newImage->exif = image->exif;
 		setOutputData<OpenCVMat>("image", newImage);
+		if (write_file) {
+			newImage->store(newImage->filename);
+		}
 	} else {
 		UIPF_LOG_DEBUG("not resizing image to");
 		setOutputData<OpenCVMat>("image", image);

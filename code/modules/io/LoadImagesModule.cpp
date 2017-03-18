@@ -20,7 +20,8 @@
 
 #define UIPF_MODULE_PARAMS \
 		{"path", uipf::ParamDescription("name of the directory to load from.") }, \
-		{"mode", uipf::ParamDescription("can be either 'color' or 'grayscale' for whether to load the image in color or grayscale mode. Defaults to 'color'.", true) }
+		{"mode", uipf::ParamDescription("can be either 'color' or 'grayscale' for whether to load the image in color or grayscale mode. Defaults to 'color'.", true) }, \
+		{"exif", uipf::ParamDescription("whether to load EXIF data. Defaults to 'yes'.", true) }
 
 #include "Module.hpp"
 
@@ -76,16 +77,23 @@ void LoadImages::run() {
 					if (mat.data) {
 						OpenCVMat::ptr image(new OpenCVMat(mat));
 						image->filename = itr->path().string();
+						if (getParam<bool>("exif", true)) {
+							image->exif = load_image_exif_data(image->filename);
+						}
 						list->getContent().push_back(image);
 					}
 				}
 			}
+			// TODO two loops for progess report
 
 		} else if (is_regular_file(p)) {
 			Mat mat = loadimage(p.string(), mode);
 			if (mat.data) {
 				OpenCVMat::ptr image(new OpenCVMat(mat));
 				image->filename = p.string();
+				if (getParam<bool>("exif", true)) {
+					image->exif = load_image_exif_data(image->filename);
+				}
 				list->getContent().push_back(image);
 			}
 		} else {
