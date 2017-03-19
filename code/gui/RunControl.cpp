@@ -367,8 +367,10 @@ void RunControl::vizData(Data::ptr d, std::string option, std::string outputName
 			d->visualize(option, context);
 		} catch (const std::exception &e) {
 			UIPF_LOG_ERROR(string("Error in visualization: ") + e.what());
+			return;
 		} catch(...) {
 			UIPF_LOG_ERROR(string("Unknown error occurred while trying to show visualization."));
+			return;
 		}
 
 	}
@@ -383,8 +385,15 @@ void RunControl::on_serializeButtonClick(QString outputName)
 			Data::ptr d = o.data;
 
 			ostringstream s;
-			d->serialize(s);
-			UIPF_LOG_INFO("Serialization: ", s.str());
+			try {
+				d->serialize(s);
+			} catch (const std::exception &e) {
+				UIPF_LOG_ERROR(string("Error in serialisation: ") + e.what());
+				return;
+			} catch(...) {
+				UIPF_LOG_ERROR(string("Unknown error occurred while trying to serialize data."));
+				return;
+			}
 
 			// TODO this is duplicate with mainwindow, merge it
 
