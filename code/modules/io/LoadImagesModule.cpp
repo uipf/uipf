@@ -49,8 +49,7 @@ cv::Mat loadimage(const std::string& strFilename, const std::string& mode) {
 void LoadImages::run() {
 
 	using namespace boost::filesystem;
-
-	// TODO refactor
+	using namespace std;
 
 	List::ptr list(new List());
 
@@ -69,22 +68,31 @@ void LoadImages::run() {
 			throw ErrorException(std::string("Image search path does not exist: ") + p.string());
 		} else if (is_directory(p)) {
 
+			vector<string> fileNames;
+
 			directory_iterator end_itr;
 			for (directory_iterator itr( p ); itr != end_itr; ++itr) {
 				// try to load library if it is a file ending with system specific name, .so/.dll
 				if (is_regular_file(itr->path())) {
-					Mat mat = loadimage(itr->path().string(), mode);
-					if (mat.data) {
-						OpenCVMat::ptr image(new OpenCVMat(mat));
-						image->filename = itr->path().string();
-						if (getParam<bool>("exif", true)) {
-							image->exif = load_image_exif_data(image->filename);
-						}
-						list->getContent().push_back(image);
-					}
+					fileNames.push_back(itr->path().string());
 				}
 			}
-			// TODO two loops for progess report
+
+			// two loops to allow progess report
+			updateProgress(0, (int) fileNames.size());
+			int i = 0;
+			for(string file: fileNames) {
+				Mat mat = loadimage(file, mode);
+				if (mat.data) {
+					OpenCVMat::ptr image(new OpenCVMat(mat));
+					image->filename = file;
+					if (getParam<bool>("exif", true)) {
+						image->exif = load_image_exif_data(image->filename);
+					}
+					list->getContent().push_back(image);
+				}
+				updateProgress(++i, (int) fileNames.size());
+			}
 
 		} else if (is_regular_file(p)) {
 			Mat mat = loadimage(p.string(), mode);
