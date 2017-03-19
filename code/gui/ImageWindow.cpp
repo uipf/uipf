@@ -16,3 +16,11 @@ void ImageWindow::keyReleaseEvent(QKeyEvent *)
 	// resume a paused chain on key press
 //	mm_.resumeChain();
 }
+
+void ImageWindow::resizeEvent(QResizeEvent *event) {
+
+	// make sure image is visible in the window
+	fitInView(sceneRect(), Qt::KeepAspectRatio);
+
+	QGraphicsView::resizeEvent(event);
+}

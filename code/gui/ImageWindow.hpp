@@ -23,6 +23,7 @@ protected:
 	void closeEvent(QCloseEvent *event);
 	void keyReleaseEvent(QKeyEvent *event);
 
+	void resizeEvent ( QResizeEvent * event );
 private:
 
 	ModuleLoader& mm_;
