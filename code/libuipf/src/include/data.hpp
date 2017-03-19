@@ -50,6 +50,14 @@ namespace uipf {
 		virtual std::vector<Data::ptr> getListContent() const { return {}; };
 
 		/**
+		 * @return A name identifying this data item. This can be used for automatically generating file names,
+		 * or to recognize a certain item when inspeciting it in visualization.
+		 * Defaults to return an empty string.
+		 */
+		virtual std::string getName() const { return ""; };
+
+
+		/**
 		 * @return a list of visualization options.
 		 */
 		virtual std::vector<std::string> visualizations() const { return std::vector<std::string>(); };

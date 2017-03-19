@@ -318,9 +318,13 @@ void RunControl::vizData(Data::ptr d, std::string option, std::string outputName
 		for(Data::ptr item: d->getListContent()) {
 			// TODO code in this loop is pretty much duplicate with on_stepSelectionChanged(), refactor?
 
-			QStandardItem* rowId = new QStandardItem(QString::fromStdString(to_string(r)));
+			std::string name = item->getName();
+			if (name.empty()) {
+				name = to_string(r);
+			}
+			QStandardItem* rowId = new QStandardItem(QString::fromStdString(name));
+			rowId->setToolTip(name.c_str());
 			rowId->setEditable(false);
-			// TODO set tooltip from model data description
 
 			QStandardItem* type = new QStandardItem(item->getType().c_str());
 			type->setToolTip(item->getType().c_str());
