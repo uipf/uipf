@@ -2,6 +2,7 @@
 #define IMAGEWINDOW_H
 
 #include <QGraphicsView>
+#include <QWheelEvent>
 
 #include "ModuleInterface.hpp"
 #include "ModuleLoader.hpp"
@@ -24,9 +25,14 @@ protected:
 	void keyReleaseEvent(QKeyEvent *event);
 
 	void resizeEvent ( QResizeEvent * event );
+	void wheelEvent(QWheelEvent *event);
 private:
 
 	ModuleLoader& mm_;
+
+	bool zoomed_ = false;
+
+	void zoom(qreal factor);
 
 };
 
