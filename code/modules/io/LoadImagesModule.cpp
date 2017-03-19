@@ -10,7 +10,7 @@
 #include "data/list.hpp"
 
 
-#define UIPF_MODULE_ID "uipf.opencv.loadImages"
+#define UIPF_MODULE_ID "uipf.opencv.load_images"
 #define UIPF_MODULE_NAME "openCV Load Images from folder"
 #define UIPF_MODULE_CATEGORY "opencv"
 #define UIPF_MODULE_CLASS LoadImages

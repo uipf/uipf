@@ -9,7 +9,7 @@
 #include "util.hpp"
 
 
-#define UIPF_MODULE_ID "uipf.opencv.storeimage"
+#define UIPF_MODULE_ID "uipf.opencv.store_image"
 #define UIPF_MODULE_NAME "openCV Store Image"
 #define UIPF_MODULE_CATEGORY "opencv"
 #define UIPF_MODULE_CLASS StoreImage

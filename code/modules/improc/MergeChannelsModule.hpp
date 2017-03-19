@@ -1,3 +1,6 @@
+
+// TODO re-implement on new API
+
 #ifndef _MERGECHANNELSMODULE_
 #define _MERGECHANNELSMODULE_
 

@@ -9,7 +9,7 @@
 #include "util.hpp"
 
 
-#define UIPF_MODULE_ID "uipf.opencv.imgproc.copy"
+#define UIPF_MODULE_ID "uipf.opencv.copy"
 #define UIPF_MODULE_NAME "openCV Copy Image"
 #define UIPF_MODULE_CATEGORY "opencv"
 #define UIPF_MODULE_CLASS CopyImageModule

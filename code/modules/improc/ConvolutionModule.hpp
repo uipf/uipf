@@ -1,3 +1,6 @@
+
+// TODO re-implement on new API
+
 #ifndef _CONVOLUTIONMODULE_
 #define _CONVOLUTIONMODULE_
 

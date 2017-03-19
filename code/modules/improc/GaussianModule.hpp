@@ -1,3 +1,6 @@
+
+// TODO re-implement on new API
+
 #ifndef _GAUSSIANMODULE_
 #define _GAUSSIANMODULE_
 

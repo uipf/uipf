@@ -10,7 +10,7 @@
 
 #define UIPF_MODULE_ID "uipf.opencv.imgproc.resize"
 #define UIPF_MODULE_NAME "openCV Resize Image"
-#define UIPF_MODULE_CATEGORY "opencv"
+#define UIPF_MODULE_CATEGORY "opencv.imgproc"
 #define UIPF_MODULE_CLASS ResizeImage
 
 #define UIPF_MODULE_INPUTS \
