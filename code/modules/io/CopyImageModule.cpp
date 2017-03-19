@@ -29,8 +29,6 @@
 
 #include "Module.hpp"
 
-// TODO write tests for this
-
 void CopyImageModule::run() {
 
 	using namespace std;
