@@ -208,6 +208,8 @@ bool Runner::runStep() {
 			mapDone = 0;
 			mapItems = 0;
 
+			updateModuleProgress(0, 0);
+
 			UIPF_LOG_INFO("Running step '", proSt.name, "'...");
 			module->run();
 			UIPF_LOG_INFO("Done with step '", proSt.name, "'.");

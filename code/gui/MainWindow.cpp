@@ -510,8 +510,8 @@ void MainWindow::on_reportGlobalProgress(int done, int max)
 void MainWindow::on_reportModuleProgress(int done, int max)
 {
 	if (max == 0) {
-		ui->progressBarModule->setHidden(true);
-		return;
+		ui->progressBarModule->setHidden(false);
+		//return;
 	} else {
 		ui->progressBarModule->setHidden(false);
 	}
