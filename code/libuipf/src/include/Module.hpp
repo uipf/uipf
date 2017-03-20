@@ -15,6 +15,8 @@
 #include <string>
 #include <map>
 #include "ModuleInterface.hpp"
+#include "exceptions.hpp"
+#include "logging.hpp"
 
 
 class UIPF_MODULE_CLASS : public uipf::ModuleInterface {

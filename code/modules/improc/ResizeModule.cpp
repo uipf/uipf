@@ -50,8 +50,7 @@ void ResizeImage::run() {
 
 	// set parameters that where not given, calculate by aspect ration
 	if (width > 0 || height > 0) {
-		// TODO do not fail hard!
-		assert(max_width == -1 && max_height == -1);
+		UIPF_ASSERT(max_width == -1 && max_height == -1);
 
 		// calculate aspect ratio
 		if (width <= 0) {
@@ -64,7 +63,7 @@ void ResizeImage::run() {
 		do_resize = true;
 	} else {
 		// at least one of these should be given
-		assert(max_width > 0 || max_height > 0);
+		UIPF_ASSERT(max_width > 0 || max_height > 0);
 
 		width = image->getContent().cols;
 		height = image->getContent().rows;
