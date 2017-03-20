@@ -235,8 +235,8 @@ bool Runner::runStep() {
 				module->run();
 				module->input_.erase(mapInput);
 
-				mapDone++;
 				updateModuleProgress(100, 100);
+				mapDone++;
 
 				for (auto mapOutput = module->output_.begin(); mapOutput != module->output_.end(); /*no ++ here*/) {
 
