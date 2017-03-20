@@ -100,7 +100,7 @@ void RunControl::on_workerStepActive(std::string stepName, int number, int count
 
 void RunControl::on_workerDataUpdated(std::string stepName, std::string outputName, Data::ptr data)
 {
-	UIPF_LOG_DEBUG("on_workerDataUpdated: ", stepName, outputName);
+	UIPF_LOG_TRACE("on_workerDataUpdated: ", stepName, outputName);
 
 	auto pos = stepOutputs_.find(stepName);
 	if (pos != stepOutputs_.end()) {
@@ -125,7 +125,7 @@ void RunControl::on_workerDataUpdated(std::string stepName, std::string outputNa
 
 void RunControl::on_workerDataDeleted(std::string stepName, std::string outputName)
 {
-	UIPF_LOG_DEBUG("on_workerDataDeleted: ", stepName, outputName);
+	UIPF_LOG_TRACE("on_workerDataDeleted: ", stepName, outputName);
 
 	// TODO add name to list of deleted data
 

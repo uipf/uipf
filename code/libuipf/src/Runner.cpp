@@ -176,7 +176,7 @@ bool Runner::runStep() {
 
 			map<string, Data::ptr> moduleOutputs = stepsOutputs_[input->second.sourceStep];
 			uipf_cforeach(debug, moduleOutputs) {
-				UIPF_LOG_WARNING(debug->first, ": ", debug->second.use_count());
+				UIPF_LOG_TRACE(debug->first, ": refcount ", debug->second.use_count());
 			}
 			auto outputElement = moduleOutputs.find(input->second.outputName);
 			if (outputElement == moduleOutputs.end()) {
