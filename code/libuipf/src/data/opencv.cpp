@@ -107,6 +107,10 @@ std::map<std::string, std::string> uipf::data::load_image_exif_data(const std::s
 {
 	std::map<std::string, std::string> exif;
 
+	if (uipf_str_ends_with(uipf_str_to_lower(filename), "png") || uipf_str_ends_with(uipf_str_to_lower(filename), "pgm")) {
+		return exif;
+	}
+
 	string output;
 	try {
 		output = uipf_exec_stdout((string("jhead \"") + filename + string("\"")).c_str());

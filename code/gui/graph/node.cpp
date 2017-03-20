@@ -128,18 +128,18 @@ void Node::select(uipf::gui::GraphViewSelectionType eType)
 	updateEdges();
 }
 
-void Node::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
-{
-	graph->triggerNodeSelected(this);
-	select(uipf::gui::CURRENT);
-	graph->setDragMode(QGraphicsView::NoDrag);
-}
-
-void Node::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
-{
-	unselect();
-	graph->setDragMode(QGraphicsView::ScrollHandDrag);
-}
+//void Node::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+//{
+//	graph->triggerNodeSelected(this);
+//	select(uipf::gui::CURRENT);
+//	graph->setDragMode(QGraphicsView::NoDrag);
+//}
+//
+//void Node::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
+//{
+//	unselect();
+//	graph->setDragMode(QGraphicsView::ScrollHandDrag);
+//}
 
 void Node::mousePressEvent(QGraphicsSceneMouseEvent * event)
 {

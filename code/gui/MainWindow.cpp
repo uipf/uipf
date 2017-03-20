@@ -680,7 +680,7 @@ void MainWindow::on_comboCategory_currentIndexChanged(int index)
 		vector<string> modulesOfSameCategory = categories_[category];
 		for (unsigned int i = 0; i < modulesOfSameCategory.size() ; i++) {
 			ui->comboModule->insertItem(i, QString(modulesOfSameCategory[i].c_str()), QString(modulesOfSameCategory[i].c_str()));
-			string str = mm_.getModuleMetaData(modulesOfSameCategory[i]).getDescription();
+			string str = mm_.getModuleMetaData(modulesOfSameCategory[i]).getName() + " " + mm_.getModuleMetaData(modulesOfSameCategory[i]).getDescription();
 			ui->comboModule->setItemData(i, QVariant(str.c_str()) , Qt::ToolTipRole);
 		}
 		ui->comboModule->setCurrentIndex(-1);
