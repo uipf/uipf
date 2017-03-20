@@ -43,7 +43,10 @@ namespace uipf {
 
 }; // namespace
 
+#define _UIPF_ASSERT_S1(x) #x
+#define _UIPF_ASSERT_S2(x) _UIPF_ASSERT_S1(x)
 #define UIPF_ASSERT(expr) \
-   if (!(expr)) throw uipf::ErrorException( "Assertation failed: (" #expr ") in " __STRING(__FILE__) ":" __STRING(__LINE__));
+   if (!(expr)) throw uipf::ErrorException( "Assertation failed: (" #expr ") in " __FILE__ ":" _UIPF_ASSERT_S2(__LINE__) );
+
 
 #endif // LIBUIPF_EXCEPTIONS_HPP
