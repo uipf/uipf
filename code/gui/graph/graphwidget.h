@@ -25,12 +25,12 @@ public:
 
    void triggerNodeSelected(const uipf::gui::Node*);
 
-   signals: //for QT to connect
-   		void nodeSelected(const uipf::gui::Node*);
+	void selectNodesInGraphView(const std::vector<std::string>& vcNodeNames,uipf::gui::GraphViewSelectionType eType,bool bUnselectOthers);
+	void clearSelectionInGraphView();
 
-private slots:
-	void on_selectNodesInGraphView(const std::vector<std::string>& vcNodeNames,uipf::gui::GraphViewSelectionType eType,bool bUnselectOthers);
-	void on_clearSelectionInGraphView();
+
+signals: //for QT to connect
+    void nodeSelected(const uipf::gui::Node*);
 
 private:
    void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;

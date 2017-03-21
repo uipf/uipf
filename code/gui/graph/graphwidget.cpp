@@ -73,7 +73,7 @@ GraphWidget::GraphWidget(QWidget *parent)
 //    		this, SLOT (on_clearSelectionInGraphView()),Qt::DirectConnection);
 }
 
-void GraphWidget::on_clearSelectionInGraphView()
+void GraphWidget::clearSelectionInGraphView()
 {
 	for (auto pair : nodes_)
 	{
@@ -82,7 +82,7 @@ void GraphWidget::on_clearSelectionInGraphView()
 	}
 }
 
-void GraphWidget::on_selectNodesInGraphView(const std::vector<std::string>& vcNodeNames,uipf::gui::GraphViewSelectionType eType,bool bUnselectOthers)
+void GraphWidget::selectNodesInGraphView(const std::vector<std::string>& vcNodeNames,uipf::gui::GraphViewSelectionType eType,bool bUnselectOthers)
 {
 	for (auto pair : nodes_)
 	{

@@ -93,8 +93,6 @@ bool Runner::run()
 {
 	UIPF_LOG_INFO( "Starting processing chain." );
 
-// TODO	GUIEventDispatcher::instance()->clearSelectionInGraphView();
-
 	// iterate over the sortedChain and run the modules in the order given by the chain
 	while(currentStep_ < sortedChain_.size()) {
 
@@ -151,6 +149,7 @@ bool Runner::runStep() {
 
 	} else {
 		UIPF_LOG_ERROR("Module '", moduleName, "' could not be found.");
+		context_.stepFinished(proSt.name, false);
 		return false;
 	}
 
@@ -180,6 +179,7 @@ bool Runner::runStep() {
 			}
 			auto outputElement = moduleOutputs.find(input->second.outputName);
 			if (outputElement == moduleOutputs.end()) {
+				context_.stepFinished(proSt.name, false);
 				throw ErrorException(
 						string("Output '") + input->second.sourceStep + string(".") + input->second.outputName +
 						string("' requested by step '") + proSt.name + string("' for input '") + input->first +
@@ -268,14 +268,17 @@ bool Runner::runStep() {
 	} catch (const ErrorException &e) {
 		// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
 		UIPF_LOG_ERROR(string("Error: ") + e.what());
+		context_.stepFinished(proSt.name, false);
 		return false;
 	} catch (const InvalidConfigException &e) {
 		// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
 		UIPF_LOG_ERROR(string("Invalid config: ") + e.what());
+		context_.stepFinished(proSt.name, false);
 		return false;
 	} catch (const std::exception &e) {
 		// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::ERROR,false);
 		UIPF_LOG_ERROR(string("Error: module threw exception: ") + e.what());
+		context_.stepFinished(proSt.name, false);
 		return false;
 	}
 
@@ -287,8 +290,7 @@ bool Runner::runStep() {
 	modulesDone++;
 	currentStep_++;
 	context_.updateGlobalProgress(modulesDone * 100, moduleCount * 100);
-	// TODO GUIEventDispatcher::instance()->triggerReportProgress(static_cast<float>(i+1)/static_cast<float>(sortedChain_.size())*100.0f);
-	// TODO GUIEventDispatcher::instance()->triggerSelectSingleNodeInGraphView(proSt.name,gui::GOOD,false);
+	context_.stepFinished(proSt.name, true);
 
 	return true;
 }

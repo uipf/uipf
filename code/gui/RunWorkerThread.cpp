@@ -66,3 +66,8 @@ void RunWorkerThread::dataDeleted(const std::string& stepName, const std::string
 void RunWorkerThread::setMode(RunWorkerThread::ExecutionMode mode) {
 	mode_ = mode;
 }
+
+void RunWorkerThread::stepFinished(const std::string &stepName, bool success)
+{
+	emit eventStepFinished(stepName, success);
+}

@@ -37,6 +37,7 @@ public:
 	void updateGlobalProgress(int done, int max);
 	void updateModuleProgress(int done, int max);
 	void stepActive(const std::string& stepName, int number, int count);
+	void stepFinished(const std::string& stepName, bool success);
 	void dataUpdated(const std::string& stepName, const std::string& outputName, Data::ptr& data);
 	void dataDeleted(const std::string& stepName, const std::string& outputName);
 
@@ -44,6 +45,7 @@ signals: //for QT to connect
 	void eventUpdateGlobalProgress(int done, int max);
 	void eventUpdateModuleProgress(int done, int max);
 	void eventStepActive(std::string stepName, int number, int count);
+	void eventStepFinished(std::string stepName, bool success);
 	void eventDataUpdated(std::string stepName, std::string outputName, Data::ptr data);
 	void eventDataDeleted(std::string stepName, std::string outputName);
 

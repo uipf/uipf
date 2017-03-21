@@ -36,6 +36,7 @@ namespace uipf {
 
 		// worker data updates
 		void on_workerStepActive(std::string, int, int);
+		void on_workerStepFinished(std::string, bool);
 		void on_workerDataUpdated(std::string, std::string, Data::ptr);
 		void on_workerDataDeleted(std::string, std::string);
 

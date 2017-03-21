@@ -69,6 +69,8 @@ void RunControl::registerWorkerSlots(RunWorkerThread *wt)
 {
 	connect(wt, SIGNAL(eventStepActive(std::string, int, int)),
 	        this, SLOT (on_workerStepActive(std::string, int, int)));
+	connect(wt, SIGNAL(eventStepFinished(std::string, bool)),
+	        this, SLOT (on_workerStepFinished(std::string, bool)));
 	connect(wt, SIGNAL(eventDataUpdated(std::string, std::string, Data::ptr)),
 	        this, SLOT (on_workerDataUpdated(std::string, std::string, Data::ptr)));
 	connect(wt, SIGNAL(eventDataDeleted(std::string, std::string)),
@@ -94,8 +96,20 @@ void RunControl::on_workerStepActive(std::string stepName, int number, int count
 	mainWindow_->ui->progressBar->setFormat(QString::fromStdString(string("Chain: %p% (") + to_string(number) + string("/") + to_string(count) + string(")")));
 	currentStep = number;
 	stepCount = count;
-	// select newly inserted item
+	// select newly inserted item TODO
 //	mainWindow_->ui->listRunSteps->setCurrentIndex(index);
+}
+
+void RunControl::on_workerStepFinished(std::string stepName, bool success)
+{
+	std::vector<std::string> names;
+	names.push_back(stepName);
+	if (success) {
+		mainWindow_->graphView_->selectNodesInGraphView(names, gui::GOOD, false);
+	} else {
+		mainWindow_->graphView_->selectNodesInGraphView(names, gui::ERROR, false);
+	}
+
 }
 
 void RunControl::on_workerDataUpdated(std::string stepName, std::string outputName, Data::ptr data)
@@ -546,6 +560,8 @@ void RunControl::on_buttonClear() {
 	selectedStep_ = "";
 	stepOutputs_.clear();
 	steps_.clear();
+
+	mainWindow_->graphView_->clearSelectionInGraphView();
 
 	delete workerThread_;
 	workerThread_ = nullptr;
