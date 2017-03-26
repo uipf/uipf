@@ -12,7 +12,7 @@ namespace uipf {
 
 		// define default types that ship with UIPF
 
-		UIPF_DATA_TYPE_BEGIN (String, "de.tu-berlin.uipf.String", std::string)
+		UIPF_DATA_TYPE_BEGIN (String, "uipf.String", std::string)
 
 			bool isSerializable() const { return true; };
 
@@ -26,22 +26,22 @@ namespace uipf {
 			}
 		UIPF_DATA_TYPE_END
 
-		UIPF_DATA_TYPE_BEGIN (Bool, "de.tu-berlin.uipf.Bool", bool)
+		UIPF_DATA_TYPE_BEGIN (Bool, "uipf.Bool", bool)
 		UIPF_DATA_TYPE_END
 
-		UIPF_DATA_TYPE_BEGIN (Int, "de.tu-berlin.uipf.Int", int)
+		UIPF_DATA_TYPE_BEGIN (Int, "uipf.Int", int)
 		UIPF_DATA_TYPE_END
 
-		UIPF_DATA_TYPE_BEGIN (Float, "de.tu-berlin.uipf.Float", float)
+		UIPF_DATA_TYPE_BEGIN (Float, "uipf.Float", float)
 		UIPF_DATA_TYPE_END
 
-		UIPF_DATA_TYPE_BEGIN (Double, "de.tu-berlin.uipf.Double", double)
+		UIPF_DATA_TYPE_BEGIN (Double, "uipf.Double", double)
 		UIPF_DATA_TYPE_END
 
-		UIPF_DATA_TYPE_BEGIN (StringList, "de.tu-berlin.uipf.StringList", std::vector<std::string>)
+		UIPF_DATA_TYPE_BEGIN (StringList, "uipf.StringList", std::vector<std::string>)
 		UIPF_DATA_TYPE_END
 
-		UIPF_DATA_TYPE_BEGIN (IntList, "de.tu-berlin.uipf.StringList", std::vector<int>)
+		UIPF_DATA_TYPE_BEGIN (IntList, "uipf.StringList", std::vector<int>)
 		UIPF_DATA_TYPE_END
 
 	};

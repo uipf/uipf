@@ -11,7 +11,7 @@ namespace uipf {
 	namespace data {
 
 
-		UIPF_DATA_TYPE_BEGIN (List, "list", std::vector<Data::ptr>)
+		UIPF_DATA_TYPE_BEGIN (List, "uipf.list", std::vector<Data::ptr>)
 
 			// TODO getType() in combination
 

@@ -97,7 +97,28 @@ void ProcessingChain::load(std::string filename){
 
 								step.inputs.insert( pair<string, StepInput >(inputName, dependsOn) );
 							}
+						}
+						else if (key == "params")
+						{
+							// input is a map of input dependencies
+							if (!confIt->second.IsMap()) {
+								throw InvalidConfigException("check if you provided valid keys and a values for 'params' in step '" + it->first.as<string>() + "'");
+							}
+
+							try
+							{
+								YAML::const_iterator paramIt = confIt->second.begin();
+								for(; paramIt != confIt->second.end(); ++paramIt) {
+									step.params.insert( pair<string,string>(paramIt->first.as<string>(), paramIt->second.as<string>()) );
+								}
+							}
+							catch(YAML::TypedBadConversion<std::string>& ex)
+							{
+								throw InvalidConfigException("check if you provided valid keys and a values for 'params' in step '" + it->first.as<string>() + "'");
+							}
 						} else {
+							// TODO this code is for reading old config file format, remove on stable release
+
 							// otherwise it is a parameter of the module
 							try
 							{
@@ -484,11 +505,17 @@ string ProcessingChain::getYAML(){
 				out << YAML::EndMap;
 			}
 
-			// add parameters to the list
-			map<string, string>::iterator paramIt = it->second.params.begin();
-			for (; paramIt!=it->second.params.end(); ++paramIt) {
-				out << YAML::Key << paramIt->first;
-				out << YAML::Value << paramIt->second;
+			if (! it->second.params.empty()) {
+				out << YAML::Key << "params";
+				out << YAML::Value << YAML::BeginMap;
+
+				// add parameters to the list
+				map<string, string>::iterator paramIt = it->second.params.begin();
+				for (; paramIt != it->second.params.end(); ++paramIt) {
+					out << YAML::Key << paramIt->first;
+					out << YAML::Value << paramIt->second;
+				}
+				out << YAML::EndMap;
 			}
 		out << YAML::EndMap;
 	}

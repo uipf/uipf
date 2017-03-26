@@ -11,7 +11,7 @@ namespace uipf {
 	namespace data {
 
 
-		UIPF_DATA_TYPE_BEGIN (Map, "map", std::map<std::string, Data::ptr>)
+		UIPF_DATA_TYPE_BEGIN (Map, "uipf.map", std::map<std::string, Data::ptr>)
 
 			// TODO getType() in combination
 
