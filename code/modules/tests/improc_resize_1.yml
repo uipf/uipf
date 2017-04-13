@@ -1,0 +1,14 @@
+chain:
+  load:
+    module: uipf.opencv.load
+    filename: test.jpg
+  resize:
+    module: uipf.opencv.imgproc.resize
+    max_width: 800
+    input:
+      image: load.image
+  store:
+    module: uipf.opencv.storeimage
+    filename: test_resize.jpg
+    input:
+      image: resize.image

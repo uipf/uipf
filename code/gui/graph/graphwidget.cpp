@@ -1,8 +1,6 @@
 #include "graphwidget.h"
 #include "edge.h"
 #include "node.h"
-#include "../../framework/StdIncl.hpp"
-#include "../../framework/Logger.hpp"
 
 #include <math.h>
 #include <random>
@@ -55,7 +53,7 @@ GraphWidget::GraphWidget(QWidget *parent)
     setRenderHint(QPainter::Antialiasing);
     setTransformationAnchor(AnchorUnderMouse);
     scale(currentScale_,currentScale_);
-    setMinimumSize(600, 400);
+    setMinimumSize(200, 400);
     setDragMode(ScrollHandDrag);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -64,16 +62,9 @@ GraphWidget::GraphWidget(QWidget *parent)
     //setInteractive(false);
     this->mapToScene( this->viewport()->geometry() );
 
-    // react to selections from framework
-    connect(GUIEventDispatcher::instance(), SIGNAL (selectNodesInGraphView(const std::vector<std::string>&,uipf::gui::GraphViewSelectionType,bool)),
-    		this, SLOT (on_selectNodesInGraphView(const std::vector<std::string>&,uipf::gui::GraphViewSelectionType,bool)),Qt::DirectConnection);
-
-    // react to clear selections from framework
-    connect(GUIEventDispatcher::instance(), SIGNAL (clearSelectionInGraphView()),
-    		this, SLOT (on_clearSelectionInGraphView()),Qt::DirectConnection);
 }
 
-void GraphWidget::on_clearSelectionInGraphView()
+void GraphWidget::clearSelectionInGraphView()
 {
 	for (auto pair : nodes_)
 	{
@@ -82,7 +73,7 @@ void GraphWidget::on_clearSelectionInGraphView()
 	}
 }
 
-void GraphWidget::on_selectNodesInGraphView(const std::vector<std::string>& vcNodeNames,uipf::gui::GraphViewSelectionType eType,bool bUnselectOthers)
+void GraphWidget::selectNodesInGraphView(const std::vector<std::string>& vcNodeNames,uipf::gui::GraphViewSelectionType eType,bool bUnselectOthers)
 {
 	for (auto pair : nodes_)
 	{
@@ -116,7 +107,7 @@ void GraphWidget::triggerNodeSelected(const uipf::gui::Node* node)
 }
 
 //takes a configuration and outputs a graph layout
-void GraphWidget::renderConfig(uipf::Configuration& config)
+void GraphWidget::renderConfig(uipf::ProcessingChain& config)
 {
 	QGraphicsScene* scene = this->scene();
 	scene->clear();
@@ -124,7 +115,7 @@ void GraphWidget::renderConfig(uipf::Configuration& config)
 
 	using namespace std;
 	using namespace uipf;
-	map<string, ProcessingStep> chain = config.getProcessingChain();
+	map<string, ProcessingStep> chain = config.getProcessingSteps();
 
 	double width = this->width();//scene->width();
 	double height = this->height();//scene->height();
@@ -151,7 +142,7 @@ void GraphWidget::renderConfig(uipf::Configuration& config)
 		std::string thisname = it->first;
 		for (auto inputIt = inputs.begin();inputIt!=inputs.end();++inputIt)
 		{
-			std::string othername = inputIt->second.first;
+			std::string othername = inputIt->second.sourceStep;
 			if (nodes_.count(othername) != 0) { // only create edge if referenced node exists
 				auto edge =new Edge(nodes_[it->first], nodes_[othername]);
 				scene->addItem(edge);

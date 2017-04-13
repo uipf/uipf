@@ -23,32 +23,35 @@
 
 #include "RunWorkerThread.h"
 
-#include "../framework/Configuration.hpp"
-#include "../framework/Logger.hpp"
-#include "../framework/ProcessingStep.hpp"
-#include "../framework/ModuleManager.hpp"
-#include "../framework/GUIEventDispatcher.hpp"
+#include "ProcessingChain.hpp"
+#include "logging.hpp"
 
 #include "graph/graphwidget.h"
 #include "graph/node.h"
+#include "RunControl.hpp"
+#include "GuiVisualizationContext.hpp"
 
 
 namespace Ui {
-class MainWindow;
+	class MainWindow;
 }
 
 namespace uipf {
+
+class GuiLogger;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(ModuleLoader& ml, QWidget *parent = 0);
     ~MainWindow();
 
 	// loads a new configuration from file
-	void loadDataFlow(std::string);
+	void loadProcessingChain(std::string);
+
+	bool validateChain();
 
 private slots:
 	// Buttons addStep/deleteStep
@@ -61,12 +64,11 @@ private slots:
     void on_stepSelectionChanged(const QItemSelection&);
 
     // append messages from our logger to the log-textview
-    void on_appendToLog(const Logger::LogType&, const std::string& );
-    // moves the progressbar on every step of the processing chain
-    void on_reportProgress(const float& );
+    void on_appendToLog(log::Logger::LogLevel, const std::string& );
 
-    //this gets called from Backgroundthread when its work is finished or when it gets terminated by stop()
-    void on_backgroundWorkerFinished();
+    // moves the progressbar on every step of the processing chain
+    void on_reportModuleProgress(int done, int max);
+    void on_reportGlobalProgress(int done, int max);
 
 	// change of module dropdown
 	void on_comboModule_currentIndexChanged(int);
@@ -78,9 +80,9 @@ private slots:
 	void on_paramChanged(std::string, std::string);
 	void on_inputChanged(std::string, std::pair<std::string, std::string>);
 
-	void on_createWindow(const std::string& strTitle);
+	void on_createImageWindow(const std::string& strTitle);
+	void on_createTextWindow(const std::string& strTitle, const std::string& text);
 
-	void on_closeWindow(const std::string& strTitle);
 	// menu bar
 	// File
 	void new_Data_Flow();
@@ -93,9 +95,6 @@ private slots:
 	// Edit
 	void undo();
 	void redo();
-	// Configuration
-	void run();
-	void stop();
 
 	void closeAllCreatedWindows();
 
@@ -114,9 +113,10 @@ private:
 	const std::string WINDOW_TITLE = "uipf";
 
     Ui::MainWindow *ui;
+	friend class RunControl;
 
 	// the module manager instance
-	ModuleManager mm_;
+	ModuleLoader& mm_;
 
 	// model for the listView of processing steps
     QStringListModel *modelStep;
@@ -132,7 +132,7 @@ private:
 	// asks the user, whether he wants to save the file
 	bool okToContinue();
 	// the currently loaded configuration represented in the window
-   	Configuration conf_;
+   	ProcessingChain conf_;
 
 	// map of all available categories
 	std::map<std::string, std::vector<std::string> > categories_;
@@ -146,8 +146,8 @@ private:
 	std::string currentStepName;
 
    	// Redo and Undo stacks, which store configurations
-   	std::stack<Configuration> undoStack;
-   	std::stack<Configuration> redoStack;
+   	std::stack<ProcessingChain> undoStack;
+   	std::stack<ProcessingChain> redoStack;
 	// fills the undo and redo stacks
 	void beforeConfigChange();
 
@@ -198,11 +198,12 @@ private:
     //the view, that displays the graph
     gui::GraphWidget* graphView_;
 
-    //our current backgroundworker or a nullptr
-    RunWorkerThread* workerThread_;
+	RunControl* runControl;
 
     //keep track of all windows we created so we can close them later
-    std::vector<QGraphicsView* > createdWindwows_;
+    std::vector<QWidget* > createdWindwows_;
+
+	GuiVisualizationContext* visualizationContext_;
 };
 
 } // namespace

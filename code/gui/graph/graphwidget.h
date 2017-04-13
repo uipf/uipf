@@ -2,8 +2,8 @@
 #define GRAPHWIDGET_H
 
 #include <QGraphicsView>
-#include "../../framework/Configuration.hpp"
-#include "../framework/GUIEventDispatcher.hpp"
+#include "ProcessingChain.hpp"
+#include "../GUIEventDispatcher.hpp"
 
 namespace uipf{
 namespace gui{
@@ -19,18 +19,18 @@ class GraphWidget : public QGraphicsView
 public:
     GraphWidget(QWidget *parent = 0);
 
-   void renderConfig(uipf::Configuration& config);
+   void renderConfig(uipf::ProcessingChain& config);
 
    void selectNodeByName(const QString name, bool bUnselectOthers=true);
 
    void triggerNodeSelected(const uipf::gui::Node*);
 
-   signals: //for QT to connect
-   		void nodeSelected(const uipf::gui::Node*);
+	void selectNodesInGraphView(const std::vector<std::string>& vcNodeNames,uipf::gui::GraphViewSelectionType eType,bool bUnselectOthers);
+	void clearSelectionInGraphView();
 
-private slots:
-	void on_selectNodesInGraphView(const std::vector<std::string>& vcNodeNames,uipf::gui::GraphViewSelectionType eType,bool bUnselectOthers);
-	void on_clearSelectionInGraphView();
+
+signals: //for QT to connect
+    void nodeSelected(const uipf::gui::Node*);
 
 private:
    void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;

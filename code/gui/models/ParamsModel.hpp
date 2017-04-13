@@ -4,9 +4,9 @@
 #include <QAbstractTableModel>
 #include <QStyleOptionViewItem>
 
-#include "../framework/ProcessingStep.hpp"
-#include <../framework/ModuleManager.hpp>
-#include <../framework/MetaData.hpp>
+#include "ModuleLoader.hpp"
+#include "ProcessingChain.hpp"
+
 
 namespace uipf {
 
@@ -16,7 +16,7 @@ class ParamsModel : public QAbstractTableModel
 
 public:
 	// constructor
-    ParamsModel(ModuleManager&, QObject *parent);
+    ParamsModel(ModuleLoader&, QObject *parent);
 
     // sets the number of rows for the widget
     int rowCount(const QModelIndex &parent = QModelIndex()) const ;
@@ -42,7 +42,7 @@ signals:
     void paramChanged(std::string, std::string);
 
 private:
-	ModuleManager& mm_;
+	ModuleLoader& mm_;
 
 	// the processing step represented by this widget
 	ProcessingStep step_;

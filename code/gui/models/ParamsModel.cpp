@@ -1,10 +1,11 @@
+#include "ModuleInterface.hpp"
 #include "ParamsModel.hpp"
 
 using namespace std;
 using namespace uipf;
 
 // constructor
-ParamsModel::ParamsModel(ModuleManager& mm, QObject *parent) : QAbstractTableModel(parent),  mm_(mm) {
+ParamsModel::ParamsModel(ModuleLoader& mm, QObject *parent) : QAbstractTableModel(parent),  mm_(mm) {
 
 }
 
@@ -67,7 +68,7 @@ QVariant ParamsModel::headerData(int section, Qt::Orientation orientation, int r
 		}
 	} else if (role == Qt::ToolTipRole && mm_.hasModule(step_.module)) {
 		// show param description as tooltip info
-		MetaData meta = mm_.getModuleMetaData(step_.module);
+		ModuleMetaData meta = mm_.getModuleMetaData(step_.module);
 		if(orientation == Qt::Vertical && meta.getParams().count(paramNames_[section]) > 0) {
 			string descr = meta.getParam(paramNames_[section]).getDescription();
 			return QString::fromStdString(descr);

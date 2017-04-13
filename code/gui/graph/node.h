@@ -5,8 +5,9 @@
 #include <QGraphicsTextItem>
 #include <QList>
 #include <QPen>
-#include "../../framework/ProcessingStep.hpp"
-#include "../framework/GUIEventDispatcher.hpp"
+
+#include "GUIEventDispatcher.hpp"
+#include "ProcessingChain.hpp"
 
 namespace uipf{
 namespace gui{
@@ -43,8 +44,8 @@ public:
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value) Q_DECL_OVERRIDE;
-    void hoverEnterEvent(QGraphicsSceneHoverEvent* event) Q_DECL_OVERRIDE;
-    void hoverLeaveEvent(QGraphicsSceneHoverEvent * event) Q_DECL_OVERRIDE;
+//    void hoverEnterEvent(QGraphicsSceneHoverEvent* event) Q_DECL_OVERRIDE;
+//    void hoverLeaveEvent(QGraphicsSceneHoverEvent * event) Q_DECL_OVERRIDE;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent * event) Q_DECL_OVERRIDE;
     void mousePressEvent(QGraphicsSceneMouseEvent * event) Q_DECL_OVERRIDE;
 

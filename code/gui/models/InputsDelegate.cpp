@@ -1,31 +1,35 @@
+#include "ModuleInterface.hpp"
 #include "InputsDelegate.hpp"
 
-#include <QComboBox>
 #include <QWidget>
+#include <QComboBox>
+#include <QCheckBox>
 #include <QModelIndex>
 #include <QApplication>
 #include <QString>
 
 #include <iostream>
+#include <data/list.hpp>
 
 using namespace std;
 using namespace uipf;
 
-InputsDelegate::InputsDelegate(ModuleManager& mm, QObject *parent) : QItemDelegate(parent) , mm_(mm) {
+InputsDelegate::InputsDelegate(ModuleLoader& mm, QObject *parent) : QItemDelegate(parent) , mm_(mm) {
 
 }
 
-void InputsDelegate::setConfiguration(const Configuration& conf, const std::string& currentStepName, std::vector<std::string> inputNames) {
+void InputsDelegate::setConfiguration(const ProcessingChain& conf, const std::string& currentStepName, std::vector<std::string> inputNames) {
 
+	// populate names of the current modules inputs
 	inputNames_ = inputNames;
 
 	stepItems_.clear();
 	outputItems_.clear();
 
-	map<string, MetaData> moduleMetaData = mm_.getAllModuleMetaData();
+	map<string, ModuleMetaData> moduleMetaData = mm_.getAllMetaData();
 
 	// fill vector of possible reference steps
-	map<string, ProcessingStep> chain = conf.getProcessingChain();
+	map<string, ProcessingStep> chain = conf.getProcessingSteps();
 	for (auto it = chain.begin(); it!=chain.end(); ++it) {
 		// the current step can not depend on itself
 		if (it->first.compare(currentStepName) == 0) {
@@ -40,6 +44,7 @@ void InputsDelegate::setConfiguration(const Configuration& conf, const std::stri
 		stepItems_.push_back(it->first.c_str());
 	}
 
+	// populate outputs for selection
 	ProcessingStep step = conf.getProcessingStep(currentStepName);
 	for(auto it = step.inputs.cbegin(); it != step.inputs.end(); ++it) {
 
@@ -56,9 +61,9 @@ void InputsDelegate::setConfiguration(const Configuration& conf, const std::stri
 
 		// fill vector of possible outputs for each referenced module
 		vector<string> subItems;
-		if (conf.hasProcessingStep(it->second.first)) {
+		if (conf.hasProcessingStep(it->second.sourceStep)) {
 			// only possible to add items if the referenced step exists and we can get its module
-			ProcessingStep referencedStep = conf.getProcessingStep(it->second.first);
+			ProcessingStep referencedStep = conf.getProcessingStep(it->second.sourceStep);
 
 			// fill vector of possible output selections if module exists
 			auto metaIt = moduleMetaData.find(referencedStep.module);
@@ -66,6 +71,10 @@ void InputsDelegate::setConfiguration(const Configuration& conf, const std::stri
 				map<string, DataDescription> out = metaIt->second.getOutputs();
 				for (auto oit = out.cbegin(); oit!=out.end(); ++oit) {
 					subItems.push_back(oit->first);
+					// add a .map() version of the output, if it is a list
+					if (oit->second.getType() == uipf::data::List::id() || referencedStep.isMapping) {
+						subItems.push_back(oit->first + string(".map()"));
+					}
 				}
 			}
 		}
@@ -80,19 +89,17 @@ QWidget *InputsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIte
 
 	// first column is the processing step
 	if (index.column() == 0) {
+
+		int k = 0;
+		// add a selection that is empty for optional inputs
 		string inputName = inputNames_[index.row()];
-		bool isOptional = false;
 		for (unsigned int i = 0; i < optionalInputs_.size(); ++i) {
 			if (inputName.compare(optionalInputs_[i]) == 0) {
-				isOptional = true;
+				editor->insertItem(k++, QString(""), QString(""));
 				break;
 			}
 		}
-		int k = 0;
-		// add a selection that is empty for optional inputs
-		if (isOptional) {
-			editor->insertItem(k++, QString(""), QString(""));
-		}
+		// fill list with available steps
 		for(unsigned int i = 0; i < stepItems_.size(); ++i) {
 			editor->insertItem(k++, QString(stepItems_[i].c_str()), QString(stepItems_[i].c_str()));
 		}

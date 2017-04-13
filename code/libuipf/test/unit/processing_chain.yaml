@@ -1,0 +1,5 @@
+chain:
+  step1:
+    module: producer
+  step2:
+    module: consumer

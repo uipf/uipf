@@ -1,3 +1,6 @@
+
+// TODO re-implement on new API
+
 #ifndef _SPLITCHANNELSMODULE_
 #define _SPLITCHANNELSMODULE_
 

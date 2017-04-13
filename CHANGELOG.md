@@ -1,14 +1,11 @@
 CHANGELOG of the Unified Image Processing Framework
 ===================================================
 
-Currently under development
----------------------------
+Version 2.0.0-alpha, April 14, 2017
+-----------------------------------
 
-- Bug: It was not possible to compile and use external modules
-- Bug: Relative paths did not work in a configuration file, when it was called from another directory
-- Enhancement: Added a command to allow listing of all loaded modules `uipf --list`
-- Enhancement: Added Default and Copy Constructors to the Data types
-
+General rewrite and redesign of the whole software.
+This version is incompatible with version 1.0.0.
 
 Version 1.0.0-beta, July 11, 2015
 ---------------------------------

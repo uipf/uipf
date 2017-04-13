@@ -1,0 +1,10 @@
+
+// add default search paths for modules
+ml.addSearchPath("@uipf-modules_BINARY_DIR@"); // TODO these should only apply if testing is enabled
+ml.addSearchPath(".");
+ml.addSearchPath("@CMAKE_INSTALL_PREFIX@/lib/uipf");
+
+// add user configured module search paths
+ml.addSearchPathsFromConfig("./modules.yaml");
+ml.addSearchPathsFromConfig("~/.uipf-modules.yaml");
+//	ml.addSearchPathsFromConfig("/etc/uipf/modules.yaml");

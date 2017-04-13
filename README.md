@@ -9,7 +9,17 @@ chains and modules.
 Installation
 ------------
 
-We currently do not have precompiled binaries so you have to build it on your own.
+Precompiled binaries are available for debian and ubuntu:
+
+- https://gitlab.cebe.cc/master/uipf/pipelines
+
+1. Download the zip file with the packages for your system.
+2. unzip them into an empty directory.
+3. run `sudo dpkg -i *.deb` to start the installation and then `sudo apt-get install -f`
+   to install dependencies and finish the installation.
+
+
+On other systems you need to compile UIPF yourself.
 See the ["How to build"-section](#how-to-build) on how to do this.
 
 Usage
@@ -31,12 +41,14 @@ The following dependencies are needed to build:
   - [Boost serialisation](http://www.boost.org/doc/libs/release/libs/serialization/), needs to be available on the system
 - [Boost program-options](http://www.boost.org/doc/libs/release/libs/program_options/)
 - [Boost graph](http://www.boost.org/doc/libs/release/libs/graph/)
+- [Boost filesystem](http://www.boost.org/doc/libs/release/libs/filesystem/)
 - [OpenCV](http://opencv.org/), version 2.3 or higher (currently untested with the 3.x branch)
 - [Qt 5](http://doc.qt.io/qt-5/index.html), at least 5.3
+- libglibmm-2.4
 
 On Debian/Ubuntu you can install the above packages by running the following command:
 
-	sudo apt-get install libboost-serialization-dev libboost-program-options-dev libboost-graph-dev libopencv-dev qtbase5-dev qtbase5-dev-tools
+	sudo apt-get install libboost-serialization-dev libboost-program-options-dev libboost-filesystem-dev libboost-graph-dev libopencv-dev qtbase5-dev qtbase5-dev-tools libglibmm-2.4-dev
 
 The following additional packages may be needed for building C++ code:
 
@@ -68,6 +80,39 @@ If something goes wrong you may run `make VERBOSE=1` for more detailed output.
 
 For a fast build you can run `make -j 4` where 4 is the number of parallel executions to use. Be careful though, as
 this may take a lot of RAM and make the system unstable.
+
+#### Troubleshooting
+
+##### error while loading shared libraries
+
+When running the uipf binary after compiling you may see the following error:
+    
+    $ uipf
+    uipf: error while loading shared libraries: libuipf-module.so.2.0: cannot open shared object file: No such file or directory
+
+Solution: run `sudo ldconfig` to make the linker aware of the newly installed library.
+
+##### libdc1394 error: Failed to initialize libdc1394
+
+When you run UIPF you might see the following error:
+
+    libdc1394 error: Failed to initialize libdc1394
+
+This is caused by opencv and in most cases can be savely ignored.
+See [this question on stackoverflow] for more details.
+
+[this question on stackoverflow]: http://stackoverflow.com/questions/29274638/opencv-libdc1394-error-failed-to-initialize-libdc1394#34820475
+
+It seems to be fixed in `libdc1394-22` version `2.2.5` which is included in Debian stretch.
+
+##### Some modules could not be loaded
+
+If you are seening errors when modules could not be loaded there is most likely a problem with linking, i.e. missing symbols because some libraries are missing. To get more information on which symbols cause problems you can enable the linker debugging via `LD_DEBUG`.
+
+    LD_DEBUG=bindings uipf -l 2>&1  | grep -v "binding file" 
+
+This will run `uipf -l` to list all modules available to uipf, and print debug information about library loading via the environment variable `LD_DEBUG=bindings`. It will also redirect `stderr` to `stdout` (`2>&1`) and filter out irrelevant information to make it easier to see the error: `grep -v "binding file"`.
+
 
 ### Building with CMake on Windows
 

@@ -20,21 +20,25 @@
 #include <libgen.h>
 #include <unistd.h>
 
+#include "ModuleInterface.hpp"
 #include "MainWindow.hpp"
 #include "ImageWindow.hpp"
 #include "ui_mainwindow.h"
-#include "../framework/GUIEventDispatcher.hpp"
+#include "GUIEventDispatcher.hpp"
 #include "RunWorkerThread.h"
+#include "GuiLogger.hpp"
 
 using namespace std;
 using namespace uipf;
 
 // constructor
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), workerThread_(nullptr) {
+MainWindow::MainWindow(ModuleLoader& ml, QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), mm_(ml) {
 
     ui->setupUi(this);
 
-    mm_.setHaveGUI();
+
+	runControl = new RunControl(this);
+
 
     // Create models
 
@@ -43,7 +47,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     // create model for params list
     modelTableParams = new ParamsModel(mm_,this);
 
-    // create model for inputs list
+
+	// create model for inputs list
     modelTableInputs = new QStandardItemModel(this);
 	modelTableInputs->setColumnCount(2);
 	QStandardItem* item0 = new QStandardItem("From Step:");
@@ -60,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->tableInputs->setModel(modelTableInputs);
 	ui->tableInputs->setItemDelegateForColumn(0, delegateTableInputs);
 	ui->tableInputs->setItemDelegateForColumn(1, delegateTableInputs);
+	ui->tableInputs->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
 	// ensure size of the columns match the widget
 	for (int c = 0; c < ui->tableInputs->horizontalHeader()->count(); ++c) {
 		ui->tableInputs->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
@@ -68,14 +74,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 	//create and add the graphwidget to the gui
 	graphView_ = new gui::GraphWidget();
-	ui->verticalLayoutRight->addWidget(graphView_);//add graphview
+	ui->verticalLayoutCenter->addWidget(graphView_);//add graphview
 
 	// Processing Step Names: allow to manually modify the data
     // -> It may be triggered by hitting any key or double-click etc.
     ui->listProcessingSteps-> setEditTriggers(QAbstractItemView::AnyKeyPressed | QAbstractItemView::DoubleClicked);
 
-    ui->progressBar->setValue(0.0f);
+    ui->progressBar->setValue(0);
     ui->progressBar->setHidden(true);
+    ui->progressBarModule->setValue(0);
+    ui->progressBarModule->setHidden(true);
 	// set up slots for signals
 
 	// react to selection of the entries
@@ -106,25 +114,20 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     connect(delegateTableInputs, SIGNAL(inputChanged(std::string, std::pair<std::string, std::string>)),
 			this, SLOT(on_inputChanged(std::string, std::pair<std::string, std::string>)));
     // logger
-    connect(GUIEventDispatcher::instance(), SIGNAL (logEvent(const Logger::LogType&,const std::string&)),
-			this, SLOT (on_appendToLog(const Logger::LogType&,const std::string&)));
-
-    // progressbar
-    connect(GUIEventDispatcher::instance(), SIGNAL (reportProgressEvent(const float&)),
-    			this, SLOT (on_reportProgress(const float&)));
+    connect(GuiLogger::instance(), SIGNAL (logEvent(log::Logger::LogLevel, const std::string&)),
+			this, SLOT (on_appendToLog(log::Logger::LogLevel, const std::string&)));
 
     //synchronize selection in graph and combobox
     connect(graphView_, SIGNAL (nodeSelected(const uipf::gui::Node*)),
        			this, SLOT (on_graphNodeSelected(const uipf::gui::Node*)));
 
 
+	visualizationContext_ = new GuiVisualizationContext();
     // Window creation
-    connect(GUIEventDispatcher::instance(), SIGNAL (createWindow(const std::string&)),
-				this, SLOT (on_createWindow(const std::string&)));
-
-    // Window deletion
-    connect(GUIEventDispatcher::instance(), SIGNAL (closeWindow(const std::string&)),
-    			this, SLOT (on_closeWindow(const std::string&)));
+    connect(visualizationContext_, SIGNAL (createImageWindow(const std::string&)),
+				this, SLOT (on_createImageWindow(const std::string&)));
+    connect(visualizationContext_, SIGNAL (createTextWindow(const std::string&, const std::string&)),
+				this, SLOT (on_createTextWindow(const std::string&, const std::string&)));
 
     //Filter logwindow
     connect(ui->logFilterLE, SIGNAL (textChanged(const QString &)),
@@ -132,7 +135,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 
 	// fill module categories dropdown
-	map<string, MetaData> modules = mm_.getAllModuleMetaData();
+	map<string, ModuleMetaData> modules = mm_.getAllMetaData();
 	for (auto it = modules.begin(); it!=modules.end(); ++it) {
 		if(categories_.count(it->second.getCategory()) == 0){
 			vector<string> temp;
@@ -215,7 +218,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 }
 
 // loads a new configuration from file
-void MainWindow::loadDataFlow(string filename)
+void MainWindow::loadProcessingChain(string filename)
 {
 
 	ui->deleteButton->setEnabled(false);
@@ -232,6 +235,8 @@ void MainWindow::loadDataFlow(string filename)
 	}
 	redoAct->setEnabled(false);
 	undoAct->setEnabled(false);
+
+	// TODO fail if file does not exist
 
 	currentFileName = filename;
     setWindowTitle(tr((currentFileName + string(" - ") + WINDOW_TITLE).c_str()));
@@ -252,7 +257,7 @@ void MainWindow::loadDataFlow(string filename)
 
 	// set the names of the processing steps:
 	QStringList list;
-	map<string, ProcessingStep> chain = conf_.getProcessingChain();
+	map<string, ProcessingStep> chain = conf_.getProcessingSteps();
 	for (auto it = chain.begin(); it!=chain.end(); ++it) {
 		list << it->first.c_str();
 	}
@@ -331,22 +336,22 @@ void MainWindow::refreshInputs()
 	// clear all data rows
 	modelTableInputs->setRowCount(0);
 
-	map<string, pair<string, string> > inputs = step.inputs;
+	map<string, StepInput> inputs = step.inputs;
 	vector<string> inputNames(inputs.size());
 	int row = 0;
 	for (auto it = inputs.begin(); it!=inputs.end(); ++it) {
 		QStandardItem* item = new QStandardItem((it->first).c_str());
 		if (mm_.hasModule(step.module)) {
-			map<string, DataDescription> inputs = mm_.getModuleMetaData(step.module).getInputs();
-			if (inputs.count(it->first) > 0) {
-				string str = inputs[it->first].getDescription();
+			map<string, DataDescription> minputs = mm_.getModuleMetaData(step.module).getInputs();
+			if (minputs.count(it->first) > 0) {
+				string str = minputs[it->first].getDescription();
 				item->setToolTip(QString(str.c_str()));
 			}
 		}
 		modelTableInputs->setVerticalHeaderItem(row, item);
 		inputNames[row] = it->first;
-		modelTableInputs->setItem(row, 0, new QStandardItem((it->second.first).c_str()));
-		modelTableInputs->setItem(row, 1, new QStandardItem((it->second.second).c_str()));
+		modelTableInputs->setItem(row, 0, new QStandardItem((it->second.sourceStep).c_str()));
+		modelTableInputs->setItem(row, 1, new QStandardItem((it->second.outputName + (it->second.map ? ".map()" : "")).c_str()));
 		row++;
 	}
 
@@ -411,10 +416,12 @@ void MainWindow::resetInputs()
 
 // From here: SLOTS -------------------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::on_createWindow(const std::string& strTitle)
+void MainWindow::on_createImageWindow(const std::string& strTitle)
 {
-	// fetch the image from the GUIEventDispatcher
-	QImage image = GUIEventDispatcher::instance()->image_;
+	UIPF_LOG_TRACE("on_createImageWindow()");
+
+	// fetch the image from the visualisation context
+	QImage image = visualizationContext_->image_;
 
 	//simple view that contains an Image
 	QPointer<QGraphicsScene> scene = new QGraphicsScene;
@@ -428,34 +435,51 @@ void MainWindow::on_createWindow(const std::string& strTitle)
 
 	closeWindowsAct->setEnabled(true);
 
+	UIPF_LOG_TRACE("on_createWindow() -> wakeAll");
+
 	// unlock the mutex with the working thread
-	GUIEventDispatcher::instance()->imageRendered.wakeAll();
+	visualizationContext_->imageRendered.wakeAll();
 }
 
-void MainWindow::on_closeWindow(const std::string& strTitle)
+void MainWindow::on_createTextWindow(const std::string& strTitle, const std::string& text)
 {
-	auto qTitle = QString::fromStdString(strTitle);
-	for (auto v : createdWindwows_)
-	{
-		if (v->windowTitle() == qTitle)
-			v->close();
-	}
+	UIPF_LOG_TRACE("on_createTextWindow()");
+
+	QWidget* textWindow = new QWidget();
+
+	QTextEdit* textEdit = new QTextEdit(textWindow);
+	textEdit->setPlainText(QString::fromStdString(text));
+	textEdit->setReadOnly(true);
+	QVBoxLayout* textWindowLayout = new QVBoxLayout();
+	textWindowLayout->addWidget(textEdit);
+
+	textWindow->setLayout(textWindowLayout);
+	textWindow->setWindowTitle(QString::fromStdString(strTitle));
+	textWindow->setVisible(true);
+
+	createdWindwows_.push_back(textWindow);
+	closeWindowsAct->setEnabled(true);
 }
 
 // append messages from our logger to the log-textview
-void MainWindow::on_appendToLog(const Logger::LogType& eType,const std::string& strText) {
+void MainWindow::on_appendToLog(log::Logger::LogLevel lvl, const std::string& msg)
+{
+	if (lvl == log::Logger::TRACE) {
+		return;
+	}
 
-	if (!ui->logWarnCheckbox->isChecked() && eType == Logger::WARNING )return;
-	if (!ui->logInfoCheckbox->isChecked() && eType == Logger::INFO )return;
-	if (!ui->logErrorCheckbox->isChecked() && eType == Logger::ERROR )return;
+// TODO filter
+//	if (!ui->logWarnCheckbox->isChecked() && eType == Logger::WARNING )return;
+//	if (!ui->logInfoCheckbox->isChecked() && eType == Logger::INFO )return;
+//	if (!ui->logErrorCheckbox->isChecked() && eType == Logger::ERROR )return;
 
-	QString qText = QString(strText.c_str());
+	QString qText = QString(msg.c_str());
 
 	//filter
 	if (!qText.toLower().contains(ui->logFilterLE->text().toLower()))return;
 
 	// For colored Messages we need html :-/
-	QString strColor = (eType == Logger::WARNING ? "Blue" : eType == Logger::ERROR ? "Red" : "Green");
+	QString strColor = (lvl == log::Logger::WARNING ? "Blue" : lvl == log::Logger::ERROR ? "Red" : "Green");
 	QString alertHtml = "<font color=\""+strColor+"\">" + qText + "</font>";
 	ui->tbLog->appendHtml(alertHtml);
 	//autoscroll
@@ -475,9 +499,26 @@ void MainWindow::on_logFiltertextChanged(const QString& text)
 }
 
 // moves the progressbar on every step of the processing chain
-void MainWindow::on_reportProgress(const float& fValue)
+void MainWindow::on_reportGlobalProgress(int done, int max)
 {
-	ui->progressBar->setValue(fValue);
+	ui->progressBar->setMinimum(0);
+	ui->progressBar->setMaximum(max);
+	ui->progressBar->setValue(done);
+	ui->progressBar->update();
+}
+
+void MainWindow::on_reportModuleProgress(int done, int max)
+{
+	if (max == 0) {
+		ui->progressBarModule->setHidden(false);
+		//return;
+	} else {
+		ui->progressBarModule->setHidden(false);
+	}
+	ui->progressBarModule->setMinimum(0);
+	ui->progressBarModule->setMaximum(max);
+	ui->progressBarModule->setValue(done);
+	ui->progressBarModule->update();
 }
 
 
@@ -503,7 +544,7 @@ void MainWindow::on_addButton_clicked() {
 	bool nameAlreadyExists = true;
 	int i=1;
     string name = "new step " + std::to_string(i);
-	map<string, ProcessingStep> chain = conf_.getProcessingChain();
+	map<string, ProcessingStep> chain = conf_.getProcessingSteps();
 	while(nameAlreadyExists){
 		if (chain.count(name)){
 			i++;
@@ -631,7 +672,7 @@ void MainWindow::on_comboCategory_currentIndexChanged(int index)
 
 		string category = ui->comboCategory->itemData(index).toString().toStdString();
 
-		map<string, MetaData> modules = mm_.getAllModuleMetaData();
+		map<string, ModuleMetaData> modules = mm_.getAllMetaData();
 
 		// fill module dropdown
 		ui->comboModule->setEnabled(false);
@@ -639,7 +680,7 @@ void MainWindow::on_comboCategory_currentIndexChanged(int index)
 		vector<string> modulesOfSameCategory = categories_[category];
 		for (unsigned int i = 0; i < modulesOfSameCategory.size() ; i++) {
 			ui->comboModule->insertItem(i, QString(modulesOfSameCategory[i].c_str()), QString(modulesOfSameCategory[i].c_str()));
-			string str = mm_.getModuleMetaData(modulesOfSameCategory[i]).getDescription();
+			string str = mm_.getModuleMetaData(modulesOfSameCategory[i]).getName() + " " + mm_.getModuleMetaData(modulesOfSameCategory[i]).getDescription();
 			ui->comboModule->setItemData(i, QVariant(str.c_str()) , Qt::ToolTipRole);
 		}
 		ui->comboModule->setCurrentIndex(-1);
@@ -685,8 +726,22 @@ void MainWindow::on_inputChanged(std::string inputName, std::pair<std::string, s
 {
 	if (!currentStepName.empty() && conf_.hasProcessingStep(currentStepName)) {
 		beforeConfigChange();
-		map<string, pair<string, string> > inputs = conf_.getProcessingStep(currentStepName).inputs;
-		inputs[inputName] = value;
+		map<string, StepInput> inputs = conf_.getProcessingStep(currentStepName).inputs;
+		StepInput svalue;
+		svalue.sourceStep = value.first;
+		svalue.outputName = value.second;
+
+		// extract map() feature
+		if (svalue.outputName.length() >= 6) {
+			svalue.map = svalue.outputName.compare(svalue.outputName.length() - 6, 6, ".map()") == 0;
+		} else {
+			svalue.map = false;
+		}
+		if (svalue.map) {
+			svalue.outputName = svalue.outputName.substr(0, svalue.outputName.length()-6);
+		}
+
+		inputs[inputName] = svalue;
 		conf_.setProcessingStepInputs(currentStepName, inputs);
 
 		refreshInputs();
@@ -731,7 +786,7 @@ void MainWindow::new_Data_Flow() {
 	currentFileName = "newFile";
 	setWindowTitle(tr((currentFileName + string(" - ") + WINDOW_TITLE).c_str()));
 
-	Configuration conf;
+	ProcessingChain conf;
 	conf_ = conf;
 
 	QStringList list;
@@ -751,14 +806,14 @@ void MainWindow::load_Data_Flow()
 	//check whether there are unsaved changes, and ask the user, whether he wants to save them
 	if (!okToContinue()) return;
 
-	QString fn = QFileDialog::getOpenFileName(this, tr("Open File..."), QString(), tr("YAML-Files (*.yaml);;All Files (*)"));
+	QString fn = QFileDialog::getOpenFileName(this, tr("Open File..."), QString(), tr("YAML-Files (*.yaml *.yml);;All Files (*)"));
 
 	// if abort button has been pressed
 	if (fn.isEmpty()) {
 		return;
 	}
 
-	loadDataFlow(fn.toStdString());
+	loadProcessingChain(fn.toStdString());
 }
 
 // when unsaved changes occure, give the user the possibility to save them
@@ -806,8 +861,9 @@ void MainWindow::save_Data_Flow_as() {
 	}
 
 
-    if (! (fn.endsWith(".yaml", Qt::CaseInsensitive)) )
-        fn += ".yaml"; // default
+    if (! (fn.endsWith(".yaml", Qt::CaseInsensitive)) && ! (fn.endsWith(".yml", Qt::CaseInsensitive))) {
+	    fn += ".yaml"; // default
+    }
   	currentFileName = fn.toStdString();
     setWindowTitle(tr((currentFileName + string(" - ") + WINDOW_TITLE).c_str()));
 
@@ -849,7 +905,7 @@ void MainWindow::undo() {
 
 		// set the names of the processing steps:
 		QStringList list;
-		map<string, ProcessingStep> chain = conf_.getProcessingChain();
+		map<string, ProcessingStep> chain = conf_.getProcessingSteps();
 		for (auto it = chain.begin(); it!=chain.end(); ++it) {
 			list << it->first.c_str();
 		}
@@ -902,7 +958,7 @@ void MainWindow::redo() {
 
 		// set the names of the processing steps:
 		QStringList list;
-		map<string, ProcessingStep> chain = conf_.getProcessingChain();
+		map<string, ProcessingStep> chain = conf_.getProcessingSteps();
 		for (auto it = chain.begin(); it!=chain.end(); ++it) {
 			list << it->first.c_str();
 		}
@@ -952,69 +1008,29 @@ void MainWindow::beforeConfigChange(){
 }
 
 
-
-
-// run the current configuration
-void MainWindow::run() {
-
+bool MainWindow::validateChain()
+{
 	// validate configuration and show errors
-	pair< vector<string>, vector<string> > errors = conf_.validate(mm_.getAllModuleMetaData());
-	if (!errors.first.empty()) {
-		LOG_E("There are configuration errors!");
-		for(unsigned int i = 0; i < errors.first.size(); ++i) {
-			LOG_E( errors.first[i]);
-		}
-		GUIEventDispatcher::instance()->triggerSelectNodesInGraphView(errors.second,gui::ERROR,false);
-		return;
+	pair< vector<string>, vector<string> > errors = conf_.validate(mm_.getAllMetaData());
+	if (errors.first.empty()) {
+		return true;
 	}
 
-	// stop is now activated and run unactivated
-	stopAct->setEnabled(true);
-	runAct->setEnabled(false);
-	ui->progressBar->setHidden(false);
-	ui->progressBar->update();
+	UIPF_LOG_ERROR("There are configuration errors!");
+	for(unsigned int i = 0; i < errors.first.size(); ++i) {
+		UIPF_LOG_ERROR( errors.first[i]);
+	}
 
-	if (workerThread_ != nullptr) return; //should not happen, because GUI prevents it. we only allow one chain to be processed by a thread
-
-	workerThread_ = new RunWorkerThread(mm_,conf_);
-
-	// Setup callback for cleanup when it finishes
-	connect(workerThread_, SIGNAL(finished()),  this, SLOT(on_backgroundWorkerFinished()));
-
-	// Run, Forest, run!
-	workerThread_->start(); // This invokes WorkerThread::run in a new thread
-}
-
-//this gets called from Backgroundthread when its work is finished or when it gets terminated by stop()
-void MainWindow::on_backgroundWorkerFinished()
-{
-	// run is now activated and stop unactivated
-	stopAct->setEnabled(false);
-	runAct->setEnabled(true);
-	ui->progressBar->setHidden(true);
-	ui->progressBar->update();
-	delete workerThread_;
-	workerThread_ = nullptr;
-}
-
-void MainWindow::stop() {
-
-	if (workerThread_ == nullptr) return;
-
-	//signal modules to stop
-	workerThread_->stop();
-	//give them some time
-	workerThread_->wait(1000);
-	//kill if not ready yet
-	workerThread_->terminate();
-	//not need to delete -> finished()
-
+// TODO
+//	GUIEventDispatcher::instance()->triggerSelectNodesInGraphView(errors.second,gui::ERROR,false);
+	return false;
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent *)
 {
 	// resume a paused chain on key press
-	mm_.resumeChain();
+// TODO
+//	mm_.resumeChain();
 }
 
 // Up to here: SLOTS -------------------------------------------------------------------------------------------------------------------------------
@@ -1068,13 +1084,13 @@ void MainWindow::createActions() {
     runAct = new QAction(tr("&Run"), this);
     runAct->setShortcut(QKeySequence(tr("Ctrl+R")));
     runAct->setStatusTip(tr("Run the configuration"));
-    connect(runAct, SIGNAL(triggered()), this, SLOT(run()));
+    connect(runAct, SIGNAL(triggered()), runControl, SLOT(on_buttonRun()));
 
     stopAct = new QAction(tr("&Stop"), this);
 	stopAct->setShortcut(QKeySequence(tr("Shift+Ctrl+R")));
     stopAct->setStatusTip(tr("Stop the execution of the configuration"));
     stopAct->setEnabled(false); // initially inactive
-    connect(stopAct, SIGNAL(triggered()), this, SLOT(stop()));
+    connect(stopAct, SIGNAL(triggered()), runControl, SLOT(on_buttonStop()));
 
     closeWindowsAct = new QAction(tr("&Close windows"), this);
 	closeWindowsAct->setShortcut(QKeySequence(tr("Ctrl+W")));

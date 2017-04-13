@@ -6,5 +6,5 @@
 Thumbs.db
 
 # cmake build directories
-/build
-/cmake-build*
+build/
+cmake-build*/
