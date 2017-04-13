@@ -62,15 +62,6 @@ GraphWidget::GraphWidget(QWidget *parent)
     //setInteractive(false);
     this->mapToScene( this->viewport()->geometry() );
 
-    // react to selections from framework
-// TODO
-//    connect(GUIEventDispatcher::instance(), SIGNAL (selectNodesInGraphView(const std::vector<std::string>&,uipf::gui::GraphViewSelectionType,bool)),
-//    		this, SLOT (on_selectNodesInGraphView(const std::vector<std::string>&,uipf::gui::GraphViewSelectionType,bool)),Qt::DirectConnection);
-
-    // react to clear selections from framework
-// TODO
-//    connect(GUIEventDispatcher::instance(), SIGNAL (clearSelectionInGraphView()),
-//    		this, SLOT (on_clearSelectionInGraphView()),Qt::DirectConnection);
 }
 
 void GraphWidget::clearSelectionInGraphView()

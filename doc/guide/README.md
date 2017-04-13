@@ -89,7 +89,7 @@ This step computes the Epipolar Geometry between two images, which adds a new vi
  The next step to add is the Bundler SfM step from `sfm` category, which will estimate the 3D geometry. You need to specify a `workdir` parameter in which files for bundler are generated.
  The input data will be the `imageGraph` from the `matcher` step.
  
- Do the same for the `pmvs`
+ Do the same for the `pmvs` and select the input for it as  the `imageGraph` returned by the Bundler step.
  
  
  
