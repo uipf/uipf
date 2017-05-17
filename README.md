@@ -11,7 +11,7 @@ Installation
 
 Precompiled binaries are available for debian and ubuntu:
 
-- https://gitlab.cebe.cc/master/uipf/pipelines
+- https://github.com/uipf/uipf/releases
 
 1. Download the zip file with the packages for your system.
 2. unzip them into an empty directory.
