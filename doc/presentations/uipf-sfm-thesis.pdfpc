@@ -1,0 +1,118 @@
+[file]
+uipf-sfm-thesis.pdf
+[notes]
+### 2
+ - who knows what Structure from Motion is?
+ - who is working (or has been working) on research in this area? 
+
+ Goal of Image-based 3D reconstruction is to obtain 3D structure of scenne from Images. 
+
+ - Point cloud
+ - or, Mesh 
+
+ In short: SfM is part of 3D reconstruction and means to determine 3D structure from a moving camera, i.e. multiple images to 3D model. 
+
+ Today I am going to present a tool for making work with SfM easier. 
+### 3
+ 1. which Problem did I solve 
+
+ 2. Brief explanation of 3D reconstr. process, analised before impl. the framework 
+
+ 3. Framework design and implementation 
+
+ 4. Show how to create SfM processing chains with it 
+
+ 
+### 4
+ TODO timingis 
+### 5
+ As said, we have images, want to obtain 3D structure of scene. 
+
+ not as simple as with laser scanners, but a great amount of different algorihtms. 
+
+ If you want to use SfM, for a specific use case,
+ - either adjust
+ - or replace some parts with other to fit specific problem. 
+### 6
+ Many tool for Sfm Exist as open or closed source software, but: 
+
+ - come as single program for whole chain
+ - hard to adjust/restructure and its hard to work with other peoples code
+ 
+
+ bad = not the fault of the author, they did a great job in implementing their specific solution well, but its bad when you want to improve something or adjust a chain to a different problem space. 
+
+ Framework: 
+
+ - flexible: reuse existing code and allow combination in different contexts easily 
+
+ - not limited to small problems, but be efficient to allow large scale reconstr. problems. 
+
+ - viz options: for debugging and eval of intermed. and final results. 
+
+ 
+### 7
+ TODO timingis 
+### 8
+ 1. prep: normalize, resize, metadata 
+
+ 2. keypoint: find key points in images and compare to find images that see same part of the scene 
+
+ 3. matching: goaL: image graph, images = nodes, images that have matching point pairs are connected. 
+
+ 4. epipolar geometry: for each pair we can estimate the relative geometry between camera positions = eplipolar geometry. 
+
+ eg defines the relation between a point in 3D, its projection to image planes and the camera positions. 
+
+ given a set of points, estimate fundamental matrix 
+
+ this step is named geometry estimation. 
+
+ 5. triangulation of 3D points, one image + projection = line, 2nd image allows us to estimate position 
+
+ That was SfM 
+### 9
+ MVS = Multi View Stereo 
+
+ ... 
+
+ So far for the process. You see a pattern here, right? 
+
+ Processing step -> data, ... 
+
+ Framework is based on this. 
+### 10
+ TODO timingis 
+### 11
+ - all prcessing step algos are impl. as modules 
+
+ - data types provided by framwork with common interface 
+
+ 1. code reuse in different context, clean interface for all modules 
+
+ 2. no other i/o deps than input, output, params, -> self-contained, parallelizable 
+
+ 3. data types by framework allow control over data flow 
+
+ 4. we can now form a processing chain as dep graph 
+### 12
+ input of one module is read from outputs of the other. 
+### 13
+ 
+
+ impl: 
+
+ C/C++ Code
+ or external, Matlab, Python, etc...! 
+
+ 
+### 15
+ - container: impl. methods for getting + setting content. 
+
+ - interface for viz and ser = optional 
+
+ - custom types: ImageGraph, PointCloud, ... 
+### 19
+ TODO timingis 
+### 24
+itemize Framework for 3D reconstruction Achived the goal of flexible implementation Provides a basic processing chain that can be extended
