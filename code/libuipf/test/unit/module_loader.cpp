@@ -1,3 +1,4 @@
+#include "ModuleInterface.hpp"
 #include "ModuleLoader.hpp"
 
 // - TODO copy modules to different paths and make sure they get found
